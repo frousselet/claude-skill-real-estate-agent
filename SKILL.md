@@ -68,6 +68,11 @@ du bien : le socle France est très détaillé (Géorisques, DVF, PLU/PSMV, ABF,
 diagnostics) ; à l'international, cherche les équivalents officiels (voir
 `references/sources-donnees.md`). Exprime les montants dans la devise locale.
 
+**Style d'écriture.** N'utilise jamais le tiret cadratin (em dash, U+2014) ni le
+tiret demi-cadratin en incise, dans aucun livrable ni aucune fiche générée.
+Structure les phrases avec des deux-points, des parenthèses, des virgules ou des
+puces à la place.
+
 ## Choisir la bonne fonction
 
 Identifie ce que l'utilisateur demande, puis applique la fonction correspondante.
@@ -331,8 +336,8 @@ Quelle que soit la fonction, clôture par :
 - **Un verdict clair** : pour un bien, feu vert (à poursuivre), orange (sous
   conditions) ou rouge (à écarter en l'état), avec une valeur d'acquisition
   défendable ou une fourchette de prix ; pour une étude de marché (Fonction 5),
-  une recommandation d'acheteur — où viser, quel pouvoir de négociation, quel
-  timing — et une fourchette de prix au m² défendable pour le segment ciblé.
+  une recommandation d'acheteur (où viser, quel pouvoir de négociation, quel
+  timing) et une fourchette de prix au m² défendable pour le segment ciblé.
 - **Les 3 à 5 points de vigilance majeurs**, formulés simplement.
 - **Les documents à réclamer et les questions à poser** avant de s'engager (sans
   objet pour une étude de marché, qui ne porte sur aucun bien).

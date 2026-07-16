@@ -19,7 +19,14 @@ Dans la fiche PDF, le verdict s'affiche sur une **jauge dégradée vert → roug
 le curseur est positionné par la note (100/100 côté vert, 0/100 côté rouge), ou à
 défaut par le feu. Juste en dessous figurent les `points_forts` (puces vertes) et
 `points_faibles` (puces rouges), puis le paragraphe de synthèse (`verdict.resume`).
-Renseigner 3 à 5 points de chaque côté.
+Renseigner **au plus 4 points de chaque côté**, chacun formulé de façon concise
+pour tenir en **2 lignes maximum**. Le gabarit tronque au-delà (4 points, 2 lignes),
+donc l'essentiel doit venir en premier.
+
+Le paragraphe de synthèse (`verdict.resume`) commence par une **brève description
+du bien** (type, surface, nombre de pièces, étage, extérieur ou jardin, annexes,
+état général), puis enchaîne sur le message clé (emplacement, écart de prix, risques
+majeurs, recommandation). Compter environ 3 à 5 phrases, factuel et fluide.
 
 ---
 
@@ -110,7 +117,7 @@ prix). Deux modes :
   pièce, mètre-étalon tracé. À utiliser uniquement quand un plan à l'échelle
   existe : ne jamais inventer des cotes en mode reproduction.
 
-Chaque pièce est un rectangle positionné `(x, y, w, h)` — `x` vers la droite, `y`
+Chaque pièce est un rectangle positionné `(x, y, w, h)`, `x` vers la droite, `y`
 vers le bas. C'est le modèle qui calcule un agencement cohérent et non
 chevauchant ; le script se contente de dessiner. `type` colore la pièce (`jour`,
 `nuit`, `eau`, `service`, `circulation`, `exterieur`). `fenetres` place des
@@ -193,7 +200,7 @@ peut aussi produire une fiche centrée sur le marché en fournissant un JSON min
 ```
 
 Champ `tendance.direction` et `prix[].tendance` : valeurs `hausse`, `stable` ou
-`baisse` (le script affiche une pastille flèche + couleur — orange en hausse, vert
+`baisse` (le script affiche une pastille flèche + couleur : orange en hausse, vert
 en baisse, gris stable, du point de vue de l'acheteur) ; une valeur libre inconnue
 est affichée telle quelle en neutre. Tous les autres champs sont du texte libre ;
 `locatif` peut être omis (usage résidence principale). Renseigner honnêtement les
@@ -246,7 +253,7 @@ dater et citer le millésime des données (DVF, période).
    de négociation, en trois à cinq lignes.
 2. **Périmètre et profil de la localité** : échelle retenue, population et
    démographie, emploi et attractivité, desserte et projets structurants, profil
-   socio-économique — les moteurs de fond de la valeur.
+   socio-économique, les moteurs de fond de la valeur.
 3. **Prix réels par typologie et secteur** : tableau des prix au m² signés
    (médiane et fourchette), volumes de ventes, confrontés aux estimations des
    portails (citées pour mémoire). Source DVF en priorité.
@@ -258,7 +265,7 @@ dater et citer le millésime des données (DVF, période).
 6. **Micro-marchés et segmentation** : écarts internes, sous-secteurs cotés,
    typologies sur- ou sous-cotées, segments à privilégier ou à éviter.
 7. **Risques de marché** : dépendance mono-employeur, suroffre neuve, géorisques
-   à l'échelle communale, part de passoires énergétiques, saisonnalité — ce qui
+   à l'échelle communale, part de passoires énergétiques, saisonnalité, ce qui
    pèse sur la revente.
 8. **Conclusion chiffrée** : fourchette de prix au m² défendable pour le segment
    ciblé, recommandation de timing et de négociation, suite proposée (recherche
