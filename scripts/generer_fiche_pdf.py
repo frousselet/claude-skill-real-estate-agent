@@ -14,6 +14,7 @@ wkhtmltopdf. Le script détecte automatiquement le moteur disponible.
 """
 
 import argparse
+import html as _html
 import json
 import os
 import re
@@ -76,12 +77,211 @@ def normalize_energy(bien):
     return bien
 
 
+TENDANCE = {
+    "hausse": ("▲ Hausse", "mkt-up"),
+    "up": ("▲ Hausse", "mkt-up"),
+    "baisse": ("▼ Baisse", "mkt-down"),
+    "down": ("▼ Baisse", "mkt-down"),
+    "stable": ("▬ Stable", "mkt-flat"),
+    "flat": ("▬ Stable", "mkt-flat"),
+}
+
+
+def trend_of(val):
+    """Normalise une direction de tendance en (libellé + flèche, classe couleur).
+    Une valeur libre inconnue est affichée telle quelle, en neutre."""
+    key = str(val or "").strip().lower()
+    if key in TENDANCE:
+        return TENDANCE[key]
+    if not key:
+        return "", "mkt-flat"
+    return val, "mkt-flat"
+
+
+def process_marche(data):
+    """Normalise le bloc étude de marché s'il est présent (Fonction 5).
+    Absent, la fiche reste une fiche bien classique."""
+    marche = data.get("marche")
+    if not marche:
+        data["marche"] = None
+        return data
+
+    marche.setdefault("perimetre", "")
+    marche.setdefault("date_donnees", "")
+    marche.setdefault("profil", {})
+    marche.setdefault("locatif", None)
+    marche.setdefault("segments_privilegier", [])
+    marche.setdefault("segments_eviter", [])
+    marche.setdefault("risques_marche", [])
+    marche.setdefault("conclusion", {})
+
+    tendance = marche.setdefault("tendance", {})
+    if isinstance(tendance, dict):
+        label, cls = trend_of(tendance.get("direction"))
+        tendance["badge"], tendance["cls"] = label, cls
+
+    prix = marche.get("prix", []) or []
+    for row in prix:
+        for k in ("secteur", "typologie", "prix_m2_median", "fourchette",
+                  "volume", "estimation_portail"):
+            row.setdefault(k, "")
+        row["tendance_badge"], row["tendance_cls"] = trend_of(row.get("tendance"))
+    marche["prix"] = prix
+
+    data["marche"] = marche
+    return data
+
+
 def clamp(x, lo=1, hi=5):
     try:
         x = int(round(float(x)))
     except (TypeError, ValueError):
         return lo
     return max(lo, min(hi, x))
+
+
+# ---------------------------------------------------------------------------
+# Plan du bien (schéma d'agencement estimatif, ou reproduction cotée d'un plan)
+# ---------------------------------------------------------------------------
+
+ROOM_FILL = {
+    "jour":        "#fdf3e3",  # séjour, salon, salle à manger
+    "nuit":        "#eaf0fb",  # chambres, bureau
+    "eau":         "#e6f4f4",  # salle de bains, WC, cuisine ouverte sur eau
+    "service":     "#eef0f2",  # cuisine, cellier, buanderie, rangements
+    "circulation": "#f4f4f2",  # entrée, couloir, dégagement
+    "exterieur":   "#eaf6ea",  # balcon, terrasse, loggia, jardin
+    "":            "#f4f4f2",
+}
+ROOM_STROKE = "#3a3a3a"
+WINDOW_COLOR = "#2f7ec4"
+NORD_DIR = {"haut": (0, -1), "bas": (0, 1), "gauche": (-1, 0), "droite": (1, 0)}
+
+
+def _num(v, default=0.0):
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return default
+
+
+def _sx(s):
+    return _html.escape(str(s), quote=True)
+
+
+def build_plan_svg(plan):
+    """Construit un SVG inline du plan à partir de pièces rectangulaires
+    positionnées (x, y, w, h) sur une grille. En mode 'reproduction', les
+    coordonnées sont en mètres et un mètre-étalon est tracé ; en mode
+    'estimation', la grille est relative et le rendu est explicitement non métré.
+    Le SVG est autonome (aucune dépendance externe)."""
+    rooms = []
+    for p in plan.get("pieces") or []:
+        w, h = _num(p.get("w")), _num(p.get("h"))
+        if w <= 0 or h <= 0:
+            continue
+        rooms.append({
+            "x": _num(p.get("x")), "y": _num(p.get("y")), "w": w, "h": h,
+            "nom": p.get("nom", ""), "surface": p.get("surface", ""),
+            "fenetres": [str(f).strip().upper()[:1] for f in (p.get("fenetres") or [])],
+            "type": (p.get("type") or "").lower(),
+        })
+    if not rooms:
+        return ""
+    max_x = max(r["x"] + r["w"] for r in rooms)
+    max_y = max(r["y"] + r["h"] for r in rooms)
+    if max_x <= 0 or max_y <= 0:
+        return ""
+
+    PAD, TARGET_W, MAX_H = 14.0, 344.0, 300.0
+    scale = (TARGET_W - 2 * PAD) / max_x
+    if max_y * scale + 2 * PAD > MAX_H:
+        scale = (MAX_H - 2 * PAD) / max_y
+    W = max_x * scale + 2 * PAD
+    H = max_y * scale + 2 * PAD
+    repro = plan.get("mode") == "reproduction"
+
+    out = [
+        '<svg viewBox="0 0 {:.0f} {:.0f}" width="100%" style="max-width:{:.0f}px" '
+        'xmlns="http://www.w3.org/2000/svg" font-family="DejaVu Sans, Arial, sans-serif">'
+        .format(W, H, W)
+    ]
+    for r in rooms:
+        X, Y = PAD + r["x"] * scale, PAD + r["y"] * scale
+        RW, RH = r["w"] * scale, r["h"] * scale
+        fill = ROOM_FILL.get(r["type"], ROOM_FILL[""])
+        out.append('<rect x="{:.1f}" y="{:.1f}" width="{:.1f}" height="{:.1f}" '
+                   'fill="{}" stroke="{}" stroke-width="1.4"/>'
+                   .format(X, Y, RW, RH, fill, ROOM_STROKE))
+        # Fenêtres : segment épais bleu, centré sur 55 % de l'arête
+        for edge in r["fenetres"]:
+            if edge in ("N", "S"):
+                y = Y if edge == "N" else Y + RH
+                x1, x2 = X + RW * 0.22, X + RW * 0.78
+                out.append('<line x1="{:.1f}" y1="{:.1f}" x2="{:.1f}" y2="{:.1f}" '
+                           'stroke="{}" stroke-width="3"/>'.format(x1, y, x2, y, WINDOW_COLOR))
+            elif edge in ("E", "O"):
+                x = X + RW if edge == "E" else X
+                y1, y2 = Y + RH * 0.22, Y + RH * 0.78
+                out.append('<line x1="{:.1f}" y1="{:.1f}" x2="{:.1f}" y2="{:.1f}" '
+                           'stroke="{}" stroke-width="3"/>'.format(x, y1, x, y2, WINDOW_COLOR))
+        # Étiquettes
+        cx, cy = X + RW / 2, Y + RH / 2
+        if RW > 34 and RH > 18:
+            two = RH > 30
+            name_y = cy - 4 if two else cy + 3
+            out.append('<text x="{:.1f}" y="{:.1f}" text-anchor="middle" '
+                       'font-size="8.2" font-weight="bold" fill="#242424">{}</text>'
+                       .format(cx, name_y, _sx(r["nom"])))
+            if two:
+                sub = "{:.1f} × {:.1f} m".format(r["w"], r["h"]) if repro else (
+                    "~" + _sx(r["surface"]) if r["surface"] else "")
+                if sub:
+                    out.append('<text x="{:.1f}" y="{:.1f}" text-anchor="middle" '
+                               'font-size="7" fill="#777">{}</text>'
+                               .format(cx, cy + 7, sub))
+    # Mètre-étalon en mode reproduction
+    if repro:
+        bx, by = PAD, H - 4
+        out.append('<line x1="{:.1f}" y1="{:.1f}" x2="{:.1f}" y2="{:.1f}" '
+                   'stroke="#555" stroke-width="1.2"/>'.format(bx, by, bx + scale, by))
+        out.append('<text x="{:.1f}" y="{:.1f}" font-size="7" fill="#555">1 m</text>'
+                   .format(bx + scale + 4, by + 2))
+    # Boussole (Nord)
+    dx, dy = NORD_DIR.get(str(plan.get("nord", "haut")).lower(), (0, -1))
+    ncx, ncy, L = W - 16, 18, 11
+    tx, ty = ncx + dx * L, ncy + dy * L
+    px, py = -dy, dx  # perpendiculaire pour la pointe de flèche
+    out.append('<line x1="{:.1f}" y1="{:.1f}" x2="{:.1f}" y2="{:.1f}" stroke="#333" '
+               'stroke-width="1.3"/>'.format(ncx - dx * L, ncy - dy * L, tx, ty))
+    out.append('<polygon points="{:.1f},{:.1f} {:.1f},{:.1f} {:.1f},{:.1f}" fill="#333"/>'
+               .format(tx, ty, tx - dx * 5 + px * 3, ty - dy * 5 + py * 3,
+                       tx - dx * 5 - px * 3, ty - dy * 5 - py * 3))
+    out.append('<text x="{:.1f}" y="{:.1f}" text-anchor="middle" font-size="7.5" '
+               'font-weight="bold" fill="#333">N</text>'.format(tx + dx * 5, ty + dy * 6 + 2))
+    out.append('</svg>')
+    return "".join(out)
+
+
+def process_plan(data):
+    """Prépare le plan du bien si présent (schéma estimatif ou reproduction cotée)."""
+    plan = data.get("plan")
+    if not plan:
+        data["plan"] = None
+        return data
+    plan.setdefault("mode", "estimation")
+    plan.setdefault("source", "")
+    plan.setdefault("legende", [])
+    if plan.get("mode") == "reproduction":
+        plan.setdefault("note", "Plan reproduit d'un document fourni. Cotes reportées "
+                                "du plan source, à vérifier sur place ; non contractuel.")
+    else:
+        plan.setdefault("note", "Schéma d'agencement estimatif d'après l'annonce, les photos "
+                                "et les documents disponibles. Non métré, non contractuel : "
+                                "surfaces et proportions approximatives.")
+    plan["svg"] = build_plan_svg(plan)
+    data["plan"] = plan if plan["svg"] else None
+    return data
 
 
 def process(data):
@@ -115,6 +315,19 @@ def process(data):
     verdict.setdefault("note_sur_100", None)
     verdict.setdefault("resume", "")
 
+    # Position du curseur sur la jauge dégradée vert (0 %) → rouge (100 %).
+    # Pilotée par la note si elle existe (100/100 = vert, 0/100 = rouge),
+    # sinon par le feu. Bornée pour que l'étiquette ne déborde pas.
+    note = verdict.get("note_sur_100")
+    if isinstance(note, (int, float)):
+        pos = 100.0 - max(0.0, min(100.0, float(note)))
+    else:
+        pos = {"vert": 12.0, "orange": 50.0, "rouge": 86.0}.get(feu, 50.0)
+    verdict["pos"] = round(max(5.0, min(95.0, pos)), 1)
+
+    data.setdefault("points_forts", [])
+    data.setdefault("points_faibles", [])
+
     # Risques : criticité, tri, classe couleur
     risques = data.get("risques", []) or []
     for r in risques:
@@ -135,6 +348,9 @@ def process(data):
         else:
             data["risque_global"] = "Faible"
     data["risque_global_cls"] = cls_from_label(data["risque_global"])
+
+    process_plan(data)
+    process_marche(data)
 
     return data
 

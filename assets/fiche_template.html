@@ -36,10 +36,38 @@
     color: #2b2b2b; border-bottom: 2px solid #ececec; padding-bottom: 4px;
     margin: 20px 0 10px 0; page-break-after: avoid;
   }
+  /* Title with a right-aligned badge: keep both vertically centered on one line */
+  .section-title-split { display: table; width: 100%; }
+  .section-title-split .st-text { display: table-cell; vertical-align: middle; }
+  .section-title-split .st-aside { display: table-cell; vertical-align: middle; text-align: right; white-space: nowrap; }
   .resume {
     background: #fbfbfb; border-left: 4px solid {{ verdict.feu_color }};
     padding: 11px 14px; font-size: 10.5px; margin-bottom: 4px;
   }
+
+  /* Verdict gradient gauge */
+  .verdict-wrap { margin: 4px 0 16px; }
+  .vb-track {
+    position: relative; height: 12px; border-radius: 7px;
+    background: linear-gradient(to right, #1a7f37 0%, #6fbf3f 24%, #f2c744 50%, #e8912f 72%, #c0362c 100%);
+  }
+  .vb-marker { position: absolute; top: -20px; transform: translateX(-50%); text-align: center; }
+  .vb-flag {
+    display: inline-block; white-space: nowrap; font-size: 9px; font-weight: bold;
+    color: #1c1c1c; background: #fff; border: 1.5px solid #1c1c1c; border-radius: 10px;
+    padding: 2px 9px; line-height: 1.3;
+  }
+  .vb-needle { width: 3px; height: 22px; background: #1c1c1c; margin: 1px auto 0; border-radius: 2px; box-shadow: 0 0 0 2px #fff; }
+  .vb-scale { display: table; width: 100%; margin-top: 6px; font-size: 8.5px; color: #7a7a7a; text-transform: uppercase; letter-spacing: .5px; }
+  .vb-scale span { display: table-cell; }
+  .vb-scale .mid { text-align: center; }
+  .vb-scale .end { text-align: right; }
+
+  /* Pros / cons bullets */
+  ul.pf, ul.pw { list-style: none; margin: 4px 0 0 0; padding-left: 2px; }
+  ul.pf li, ul.pw li { position: relative; padding-left: 16px; margin-bottom: 6px; }
+  ul.pf li::before { content: "+"; position: absolute; left: 0; color: #1a7f37; font-weight: bold; }
+  ul.pw li::before { content: "–"; position: absolute; left: 0; color: #c0362c; font-weight: bold; }
   .cols { display: table; width: 100%; border-spacing: 0; }
   .col { display: table-cell; vertical-align: top; }
   .col-gap { width: 20px; }
@@ -109,6 +137,29 @@
   ul.tight li { margin-bottom: 6px; }
   .neg-arg { font-style: italic; color: #333; margin-top: 8px; line-height: 1.5; }
 
+  /* Floor plan */
+  .plan-box { border: 1px solid #e4e8ec; border-radius: 6px; padding: 8px; background: #fff; text-align: center; page-break-inside: avoid; }
+  .plan-legend { font-size: 8.5px; color: #555; margin-top: 6px; line-height: 1.9; }
+  .plan-legend span { display: inline-block; margin-right: 10px; white-space: nowrap; }
+  .plan-legend .sw { display: inline-block; width: 10px; height: 10px; border: 1px solid #bbb; border-radius: 2px; vertical-align: -1px; margin-right: 3px; }
+  .plan-legend .wl { display: inline-block; width: 12px; height: 0; border-top: 3px solid #2f7ec4; vertical-align: 3px; margin-right: 3px; }
+
+  /* Market study */
+  .market { page-break-before: always; }
+  .market .lead { font-size: 9.5px; color: #7a7a7a; margin: 2px 0 12px; }
+  table.mkt { width: 100%; border-collapse: collapse; }
+  table.mkt th, table.mkt td { padding: 6px 7px; text-align: left; border-bottom: 1px solid #ededed; vertical-align: top; }
+  table.mkt tr { page-break-inside: avoid; }
+  table.mkt th { background: #f2f3f5; font-size: 8.5px; text-transform: uppercase; letter-spacing: .4px; color: #555; }
+  table.mkt td.num { white-space: nowrap; }
+  .trend { display: inline-block; padding: 2px 8px; border-radius: 10px; font-weight: bold; font-size: 9px; white-space: nowrap; }
+  .mkt-up   { background: #ffe6cc; color: #b5560d; }
+  .mkt-flat { background: #eef0f2; color: #555; }
+  .mkt-down { background: #e6f4ea; color: #1a7f37; }
+  .concl { background: #f7f8fa; border: 1px solid #e4e8ec; border-radius: 6px; padding: 12px 14px; }
+  .concl .price-strong { background: #fff6e5; }
+  .concl .price-strong .val { color: {{ verdict.feu_color }}; font-size: 14px; }
+
   /* Footer */
   .footer { margin-top: 20px; border-top: 1px solid #e2e2e2; padding-top: 8px; font-size: 8px; color: #888; }
   .footer .src { margin-bottom: 3px; }
@@ -124,13 +175,38 @@
         <div class="subtitle">{{ bien.type }}{% if bien.secteur %} &middot; {{ bien.secteur }}{% endif %}{% if bien.surface_m2 %} &middot; {{ bien.surface_m2 }} m²{% endif %}</div>
       </div>
       <div class="header-right">
-        <div class="pill-label">Verdict</div>
-        <div class="pill">{{ verdict.feu_label }}</div>
-        {% if verdict.note_sur_100 is not none %}<div class="note">Note indicative : {{ verdict.note_sur_100 }}/100</div>{% endif %}
         <div class="note">{{ meta.date }}</div>
       </div>
     </div>
   </div>
+
+  <div class="verdict-wrap">
+    <div class="vb-track">
+      <div class="vb-marker" style="left: {{ verdict.pos }}%">
+        <div class="vb-flag">{{ verdict.feu_label }}{% if verdict.note_sur_100 is not none %} · {{ verdict.note_sur_100 }}/100{% endif %}</div>
+        <div class="vb-needle"></div>
+      </div>
+    </div>
+    <div class="vb-scale">
+      <span>À poursuivre</span>
+      <span class="mid">Sous conditions</span>
+      <span class="end">À écarter</span>
+    </div>
+  </div>
+
+  {% if points_forts or points_faibles %}
+  <div class="cols" style="margin-bottom:8px">
+    <div class="col" style="width:48%">
+      <div class="section-title" style="margin-top:4px">Points forts</div>
+      <ul class="pf">{% for p in points_forts %}<li>{{ p }}</li>{% endfor %}</ul>
+    </div>
+    <div class="col col-gap"></div>
+    <div class="col" style="width:48%">
+      <div class="section-title" style="margin-top:4px">Points faibles</div>
+      <ul class="pw">{% for p in points_faibles %}<li>{{ p }}</li>{% endfor %}</ul>
+    </div>
+  </div>
+  {% endif %}
 
   {% if verdict.resume %}
   <div class="resume">{{ verdict.resume }}</div>
@@ -169,6 +245,29 @@
     </div>
   </div>
 
+  {% if plan %}
+  <div class="section-title">Plan du bien — {% if plan.mode == 'reproduction' %}reproduit, cotes réelles{% else %}schéma d'agencement estimatif{% endif %}</div>
+  <div class="cols">
+    <div class="col" style="width:61%">
+      <div class="plan-box">{{ plan.svg|safe }}</div>
+    </div>
+    <div class="col col-gap"></div>
+    <div class="col" style="width:36%">
+      {% if plan.source %}<div class="pill-label">Source</div><div style="font-size:9.5px; margin-bottom:8px">{{ plan.source }}</div>{% endif %}
+      {% if plan.legende %}<ul class="tight" style="font-size:9.5px">{% for l in plan.legende %}<li>{{ l }}</li>{% endfor %}</ul>{% endif %}
+      <div class="plan-legend">
+        <span><span class="sw" style="background:#fdf3e3"></span>Jour</span>
+        <span><span class="sw" style="background:#eaf0fb"></span>Nuit</span>
+        <span><span class="sw" style="background:#e6f4f4"></span>Eau</span>
+        <span><span class="sw" style="background:#eef0f2"></span>Service</span>
+        <span><span class="sw" style="background:#f4f4f2"></span>Circulation</span>
+        <span><span class="wl"></span>Fenêtre</span>
+      </div>
+    </div>
+  </div>
+  <div class="note" style="margin-top:6px">{{ plan.note }}</div>
+  {% endif %}
+
   {% set en_dpe = (bien.dpe or '')|upper %}
   {% set en_ges = (bien.ges or '')|upper %}
   <div class="section-title">Étiquette énergie (DPE)</div>
@@ -198,9 +297,9 @@
   </div>
   {% if en_dpe in ['E','F','G'] %}<div class="note">Logement en passoire thermique ({{ en_dpe }}) : restriction de location (G interdit à la location en 2025, F en 2028, E en 2034) et coût de rénovation énergétique à provisionner.</div>{% endif %}
 
-  <div class="section-title">
-    Étude de risques (vraisemblance × impact)
-    {% if risque_global %}<span style="float:right"><span class="riskglobal {{ risque_global_cls }}">Risque global : {{ risque_global }}</span></span>{% endif %}
+  <div class="section-title{% if risque_global %} section-title-split{% endif %}">
+    <span class="st-text">Étude de risques (vraisemblance × impact)</span>
+    {% if risque_global %}<span class="st-aside"><span class="riskglobal {{ risque_global_cls }}">Risque global : {{ risque_global }}</span></span>{% endif %}
   </div>
   <table class="risk">
     <thead>
@@ -239,6 +338,118 @@
       {% if negociation.argument_cle %}<div class="neg-arg">« {{ negociation.argument_cle }} »</div>{% endif %}
     </div>
   </div>
+
+  {% if marche %}
+  <div class="market">
+    <div class="section-title{% if marche.tendance and marche.tendance.badge %} section-title-split{% endif %}">
+      <span class="st-text">Étude de marché{% if marche.perimetre %} — {{ marche.perimetre }}{% endif %}</span>
+      {% if marche.tendance and marche.tendance.badge %}<span class="st-aside"><span class="trend {{ marche.tendance.cls }}">Tendance : {{ marche.tendance.badge }}</span></span>{% endif %}
+    </div>
+    {% if marche.date_donnees %}<div class="lead">Données de référence : {{ marche.date_donnees }}</div>{% endif %}
+
+    <div class="cols">
+      <div class="col" style="width:48%">
+        <div class="section-title">Profil de la localité</div>
+        <table class="kv">
+          {% if marche.profil.population %}<tr><td class="k">Population</td><td class="v">{{ marche.profil.population }}</td></tr>{% endif %}
+          {% if marche.profil.demographie %}<tr><td class="k">Démographie</td><td class="v">{{ marche.profil.demographie }}</td></tr>{% endif %}
+          {% if marche.profil.emploi %}<tr><td class="k">Emploi / activité</td><td class="v">{{ marche.profil.emploi }}</td></tr>{% endif %}
+          {% if marche.profil.attractivite %}<tr><td class="k">Attractivité</td><td class="v">{{ marche.profil.attractivite }}</td></tr>{% endif %}
+          {% if marche.profil.desserte %}<tr><td class="k">Desserte</td><td class="v">{{ marche.profil.desserte }}</td></tr>{% endif %}
+          {% if marche.profil.socio %}<tr><td class="k">Profil socio-éco</td><td class="v">{{ marche.profil.socio }}</td></tr>{% endif %}
+        </table>
+      </div>
+      <div class="col col-gap"></div>
+      <div class="col" style="width:48%">
+        <div class="section-title">Tendance et liquidité</div>
+        <table class="kv">
+          {% if marche.tendance.evolution_3_ans %}<tr><td class="k">Évolution 3 ans</td><td class="v">{{ marche.tendance.evolution_3_ans }}</td></tr>{% endif %}
+          {% if marche.tendance.evolution_5_ans %}<tr><td class="k">Évolution 5 ans</td><td class="v">{{ marche.tendance.evolution_5_ans }}</td></tr>{% endif %}
+          {% if marche.tendance.evolution_10_ans %}<tr><td class="k">Évolution 10 ans</td><td class="v">{{ marche.tendance.evolution_10_ans }}</td></tr>{% endif %}
+          {% if marche.tendance.volume_transactions %}<tr><td class="k">Volume de ventes</td><td class="v">{{ marche.tendance.volume_transactions }}</td></tr>{% endif %}
+          {% if marche.tendance.delai_vente %}<tr><td class="k">Délai de vente moyen</td><td class="v">{{ marche.tendance.delai_vente }}</td></tr>{% endif %}
+          {% if marche.tendance.dynamique %}<tr><td class="k">Dynamique récente</td><td class="v">{{ marche.tendance.dynamique }}</td></tr>{% endif %}
+        </table>
+      </div>
+    </div>
+
+    {% if marche.prix %}
+    <div class="section-title">Prix réels par typologie et secteur</div>
+    <table class="mkt">
+      <thead>
+        <tr><th>Secteur</th><th>Typologie</th><th class="num">Prix/m² médian réel</th><th class="num">Fourchette réelle</th><th class="num">Volume</th><th class="num">Est. portail</th><th>Tendance</th></tr>
+      </thead>
+      <tbody>
+        {% for row in marche.prix %}
+        <tr>
+          <td><b>{{ row.secteur }}</b></td>
+          <td>{{ row.typologie }}</td>
+          <td class="num">{{ row.prix_m2_median or 'nc' }}</td>
+          <td class="num">{{ row.fourchette or 'nc' }}</td>
+          <td class="num">{{ row.volume or 'nc' }}</td>
+          <td class="num">{{ row.estimation_portail or 'nc' }}</td>
+          <td>{% if row.tendance_badge %}<span class="trend {{ row.tendance_cls }}">{{ row.tendance_badge }}</span>{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="note" style="margin-top:6px">Prix signés (DVF) en priorité. Les estimations de portails, citées pour mémoire, sont généralement 10 à 25 % au-dessus des prix réellement signés.</div>
+    {% endif %}
+
+    <div class="cols" style="margin-top:8px">
+      <div class="col" style="width:48%">
+        <div class="section-title">Marché locatif</div>
+        {% if marche.locatif %}
+        <table class="kv">
+          {% if marche.locatif.loyer_m2 %}<tr><td class="k">Loyer de marché</td><td class="v">{{ marche.locatif.loyer_m2 }}</td></tr>{% endif %}
+          {% if marche.locatif.rendement_brut %}<tr><td class="k">Rendement brut</td><td class="v">{{ marche.locatif.rendement_brut }}</td></tr>{% endif %}
+          {% if marche.locatif.tension %}<tr><td class="k">Tension locative</td><td class="v">{{ marche.locatif.tension }}</td></tr>{% endif %}
+          {% if marche.locatif.encadrement %}<tr><td class="k">Encadrement des loyers</td><td class="v">{{ marche.locatif.encadrement }}</td></tr>{% endif %}
+        </table>
+        <div class="note" style="margin-top:6px">Rendement brut indicatif : hors charges, vacance et fiscalité.</div>
+        {% else %}
+        <div class="note">Non étudié (usage résidence principale).</div>
+        {% endif %}
+      </div>
+      <div class="col col-gap"></div>
+      <div class="col" style="width:48%">
+        <div class="section-title">Risques de marché</div>
+        {% if marche.risques_marche %}
+        <ul class="tight">
+          {% for r in marche.risques_marche %}<li>{{ r }}</li>{% endfor %}
+        </ul>
+        {% else %}<div class="note">Aucun risque de marché majeur relevé.</div>{% endif %}
+      </div>
+    </div>
+
+    {% if marche.segments_privilegier or marche.segments_eviter %}
+    <div class="cols" style="margin-top:8px">
+      <div class="col" style="width:48%">
+        <div class="section-title">Segments à privilégier</div>
+        <ul class="tight">
+          {% for s in marche.segments_privilegier %}<li>{{ s }}</li>{% endfor %}
+        </ul>
+      </div>
+      <div class="col col-gap"></div>
+      <div class="col" style="width:48%">
+        <div class="section-title">Segments à éviter</div>
+        <ul class="tight">
+          {% for s in marche.segments_eviter %}<li>{{ s }}</li>{% endfor %}
+        </ul>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if marche.conclusion.fourchette_m2_defendable or marche.conclusion.recommandation or marche.conclusion.pouvoir_negociation %}
+    <div class="section-title">Conclusion pour l'acheteur</div>
+    <div class="concl">
+      {% if marche.conclusion.fourchette_m2_defendable %}<div class="price-line price-strong"><div class="lab">Fourchette de prix/m² défendable (segment ciblé)</div><div class="val">{{ marche.conclusion.fourchette_m2_defendable }}</div></div>{% endif %}
+      {% if marche.conclusion.pouvoir_negociation %}<div class="price-line" style="border-bottom:0"><div class="lab">Pouvoir de négociation de l'acheteur</div><div class="val" style="font-size:11.5px">{{ marche.conclusion.pouvoir_negociation }}</div></div>{% endif %}
+      {% if marche.conclusion.recommandation %}<div class="neg-arg" style="margin-top:6px">{{ marche.conclusion.recommandation }}</div>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
 
   <div class="footer">
     {% if sources %}<div class="src"><b>Sources :</b> {{ sources|join(' · ') }} · établie le {{ meta.date }}</div>{% endif %}

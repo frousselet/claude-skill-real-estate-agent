@@ -25,6 +25,18 @@ sources officielles et les prix réels, dater chaque donnée, et recouper.
   citer pour mémoire, jamais comme référence de valeur.
 - **Notaires de France, indices INSEE** : tendances de marché, évolutions.
 
+### Marché à l'échelle d'une localité (étude de marché, Fonction 5)
+- **DVF** (voir ci-dessus) : agréger les mutations par commune, quartier et
+  typologie pour des prix au m² médians et des volumes réels. La base de référence.
+- **INSEE** (insee.fr, statistiques locales / dossier complet commune) :
+  population, démographie, emploi, revenus, composition du parc de logements,
+  part de résidences principales / secondaires / vacantes.
+- **Observatoires locaux des loyers (OLL) et encadrement des loyers** : loyers de
+  référence au m², zones tendues, plafonds là où l'encadrement s'applique (Paris,
+  Lille, Lyon, etc.).
+- **Notaires (bases BIEN / PERVAL), MeilleursAgents, SeLoger** : tendances et
+  indices d'évolution ; modélisations à recouper avec DVF, jamais seules.
+
 ### Annonces (recherche)
 SeLoger, Bien'ici, Leboncoin, PAP, Logic-Immo, Green-Acres, et les sites
 d'agences locales.

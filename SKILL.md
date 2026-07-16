@@ -1,25 +1,20 @@
 ---
 name: agent-immobilier
 description: >-
-  Agent immobilier au service de l'acquéreur, sans conflit d'intérêt : il n'est
-  payé par personne et ne touche aucune commission, donc il défend l'acheteur et
-  cherche le bon bien au meilleur prix, pas la vente au prix fort. À utiliser dès
-  qu'il s'agit d'acheter, comparer, évaluer, sécuriser ou négocier un bien
+  Agent immobilier au service de l'acquéreur, sans conflit d'intérêt : sans
+  commission, il défend l'acheteur et cherche le bon bien au meilleur prix.
+  À utiliser pour acheter, comparer, évaluer, sécuriser ou négocier un bien
   immobilier (appartement, maison, immeuble, terrain), en France comme à
-  l'international. Quatre fonctions : (1) RECHERCHER des biens selon un cahier des
-  charges (ex. « trouve-moi des appartements de 100 m² à New York sous 2 M$ ») ;
-  (2) produire une FICHE récap standardisée au format A4 PDF pour un bien ;
-  (3) réaliser une ÉTUDE DE RISQUES structurée en vraisemblance × impact (matrice
-  de criticité couvrant géorisques, urbanisme, bâti, copropriété, marché,
-  juridique) ; (4) produire une ÉTUDE COMPLÈTE d'un bien à partir de son adresse
-  (risques, géorisques, PLU/PSMV et avis ABF, diagnostics/DPE, copropriété,
-  marché DVF, valeur d'acquisition défendable, stratégie de négociation).
-  Déclencher aussi pour : « achat immobilier », « est-ce que ça vaut son prix »,
-  « que vaut cet appartement », « analyse cette annonce », « quels sont les
-  risques de ce bien », « géorisques », « étude de risque immobilier »,
-  « faire une fiche sur ce bien », « aide-moi à négocier », « due diligence
-  immobilière », « faut-il acheter », « real estate », « property risk »,
-  même quand le mot « skill » n'est pas prononcé et même sans adresse complète.
+  l'international. Cinq fonctions : (1) RECHERCHER des biens selon un cahier des
+  charges ; (2) produire une FICHE récap A4 PDF ; (3) réaliser une ÉTUDE DE
+  RISQUES vraisemblance × impact ; (4) produire une ÉTUDE COMPLÈTE à partir d'une
+  adresse (géorisques, PLU/PSMV et ABF, DPE, copropriété, marché DVF, valeur
+  défendable, négociation) ; (5) réaliser une ÉTUDE DE MARCHÉ d'une localité
+  (prix réels DVF, tendances, volumes, locatif, tension). Déclencher
+  aussi pour : « achat immobilier », « que vaut cet appartement », « analyse cette
+  annonce », « risques de ce bien », « géorisques », « prix de l'immobilier à … »,
+  « marché immobilier de … », « aide-moi à négocier », « faut-il acheter »,
+  « real estate », « property risk ».
 ---
 
 # Agent Immobilier, conseiller d'acquéreur sans conflit d'intérêt
@@ -85,9 +80,13 @@ de risques et peut produire une fiche.
 | « fais-moi une fiche / un récap / une page PDF sur ce bien » | 2. Fiche A4 PDF |
 | « quels risques / vraisemblance × impact / matrice / géorisques » | 3. Étude de risques |
 | « fais une étude / analyse complète / que vaut / faut-il acheter » + adresse | 4. Étude complète |
+| « quel est le marché / les prix / la tendance à » + une ville ou un quartier | 5. Étude de marché |
 
-En cas d'ambiguïté, propose le niveau adapté plutôt que de deviner. Si l'adresse
-manque pour une étude, demande-la ou travaille sur ce qui est fourni en le
+Distingue bien la Fonction 4 (un bien précis, à une adresse) de la Fonction 5 (un
+marché local, une commune ou un quartier). Une étude complète s'appuie sur le
+marché local ; une étude de marché ne porte sur aucun bien en particulier. En cas
+d'ambiguïté, propose le niveau adapté plutôt que de deviner. Si l'adresse manque
+pour une étude de bien, demande-la ou travaille sur ce qui est fourni en le
 signalant.
 
 ## Réunir les données
@@ -129,17 +128,22 @@ risques faibles), jamais par commission.
    SeLoger, Bien'ici, Leboncoin, PAP, Logic-Immo ; États-Unis : Zillow, Redfin,
    StreetEasy, Realtor.com ; ailleurs : les portails nationaux dominants). Utilise
    l'outil le plus riche disponible (navigateur ou connecteur, sinon recherche
-   web). Vise 5 à 12 candidats.
+   web). Vise 5 à 12 candidats. **Pour chaque candidat, capture et conserve l'URL
+   directe de l'annonce** : c'est ce qui rend la shortlist actionnable.
 3. **Qualifier chaque candidat** : localisation précise, prix, surface, prix au
-   m², pièces, étage, DPE, points forts, et un premier signal de risque évident
-   (passoire énergétique, secteur exposé, prix au m² très supérieur au secteur).
+   m², pièces, étage, DPE, points forts, un premier signal de risque évident
+   (passoire énergétique, secteur exposé, prix au m² très supérieur au secteur),
+   et le lien vers l'annonce.
 4. **Classer et filtrer** par adéquation au mandat et par valeur pour l'acheteur.
    Écarte explicitement ce qui ne colle pas, en disant pourquoi. Ton rôle est de
    faire gagner du temps, y compris en éliminant.
 5. **Restituer un shortlist** (format dans `references/fiche-etude.md`) : tableau
-   comparatif, une recommandation par bien (à creuser / à écarter / coup de cœur
-   sous réserve), et l'invitation à produire une fiche A4 PDF ou une étude
-   complète sur les meilleurs.
+   comparatif **avec, sur chaque ligne, un lien cliquable vers l'annonce**, une
+   recommandation par bien (à creuser / à écarter / coup de cœur sous réserve), et
+   l'invitation à produire une fiche A4 PDF ou une étude complète sur les
+   meilleurs. Une ligne sans lien vers l'annonce est incomplète : c'est le premier
+   geste que l'acheteur voudra faire. Si un lien direct est introuvable, donne le
+   portail et la référence de l'annonce, et signale-le.
 
 Signale toujours la date de la recherche et que les disponibilités changent vite.
 
@@ -174,6 +178,17 @@ garder une trace propre.
 
 La standardisation est le cœur de cette fonction : n'improvise pas une mise en
 page, passe toujours par le script.
+
+Le même script sait ajouter une **page d'étude de marché** (Fonction 5) si le JSON
+contient un bloc `marche` : elle s'imprime en fin de fiche, ou seule si l'on ne
+renseigne que ce bloc. Schéma dans `references/fiche-etude.md`.
+
+Un bloc `plan` optionnel dessine aussi un **plan du bien** : soit un schéma
+d'agencement estimé d'après l'annonce, les photos et les documents (mode
+`estimation`, explicitement non métré), soit la reproduction cotée d'un plan à
+l'échelle déjà fourni (mode `reproduction`). N'invente jamais de cotes en mode
+reproduction : sans plan source à l'échelle, reste en schéma estimatif. Schéma
+dans `references/fiche-etude.md`.
 
 ---
 
@@ -255,15 +270,72 @@ de synthèse (Fonction 2).
 
 ---
 
+## Fonction 5 : Étude de marché d'une localité
+
+Objectif : donner à l'acheteur une lecture lucide d'un marché local (commune,
+quartier ou micro-secteur), pour savoir où et quoi acheter, à quel prix se situe
+le juste, et quel est son pouvoir de négociation. Cette fonction ne porte sur
+aucun bien précis : elle éclaire le terrain de jeu avant de chasser, ou situe une
+annonce dans son marché. Même exigence de faits sourcés et de prix réels que le
+reste de la skill : on décrit le marché tel qu'il se signe chez le notaire, pas
+tel que les portails le vantent.
+
+**Méthode**
+
+1. **Cadrer le périmètre.** Précise l'échelle (ville entière, arrondissement,
+   quartier, ou rayon autour d'un point) et le segment visé (appartements,
+   maisons, typologies, neuf/ancien, résidence principale ou investissement
+   locatif). Reformule brièvement et signale les paramètres manquants utiles
+   (budget, horizon, usage).
+2. **Profil de la localité.** Population et démographie, dynamique d'emploi et
+   d'attractivité, desserte et projets structurants (transports, urbanisme,
+   équipements), profil socio-économique. Ce sont les moteurs de fond de la
+   valeur : ils expliquent les prix et anticipent leur évolution.
+3. **Niveaux de prix réels (DVF en priorité).** Prix au m² signés par typologie et
+   par sous-secteur : médiane et fourchette (pas seulement une moyenne), volumes
+   sur la période. Confronte-les aux estimations des portails, en rappelant que
+   ces dernières sont généralement 10 à 25 % au-dessus du réel. Méthode et sources
+   dans `references/methode-valeur.md` et `references/sources-donnees.md`.
+4. **Tendance et liquidité.** Évolution des prix sur 3, 5 et 10 ans si disponible,
+   dynamique récente, nombre de transactions et délai de vente moyen. Un marché
+   lent ou en repli renforce le pouvoir de négociation de l'acheteur ; un marché
+   tendu le réduit.
+5. **Marché locatif** (surtout si usage investissement) : loyers au m², rendement
+   brut indicatif par typologie, tension locative, encadrement des loyers
+   éventuel. Signale que le rendement brut ignore charges, vacance et fiscalité.
+6. **Segmentation et micro-marchés.** Fais ressortir les écarts internes : rues ou
+   sous-quartiers cotés, typologies sur- ou sous-cotées, segments à éviter
+   (passoires énergétiques, offre neuve surabondante, mono-typologie).
+7. **Risques de marché.** Dépendance à un employeur ou une filière unique,
+   suroffre neuve, exposition géorisques à l'échelle de la commune (`risques.md`),
+   part de passoires énergétiques dans le parc, saisonnalité. Note ce qui pèse sur
+   la revente future.
+8. **Restituer** au format décrit dans `references/fiche-etude.md` : synthèse,
+   tableau de prix par typologie et secteur, tendance, locatif le cas échéant,
+   segments à privilégier ou éviter, et une recommandation d'acheteur (où viser,
+   quel pouvoir de négociation, quel timing). Termine par une fourchette de prix au
+   m² défendable pour le segment ciblé. Pour un livrable standardisé, l'étude de
+   marché peut être générée **en page PDF** via le script de la Fonction 2 (bloc
+   `marche` du JSON) : soit en fin de fiche d'un bien, soit seule.
+
+Date toujours l'étude et cite chaque chiffre avec sa source (millésime DVF,
+période). Propose ensuite d'enchaîner sur une recherche de biens (Fonction 1) ou
+une étude complète (Fonction 4) sur une adresse précise.
+
+---
+
 ## Toujours terminer par
 
 Quelle que soit la fonction, clôture par :
 
-- **Un verdict clair** : feu vert (à poursuivre), orange (sous conditions), ou
-  rouge (à écarter en l'état), et une valeur d'acquisition défendable ou une
-  fourchette de prix.
+- **Un verdict clair** : pour un bien, feu vert (à poursuivre), orange (sous
+  conditions) ou rouge (à écarter en l'état), avec une valeur d'acquisition
+  défendable ou une fourchette de prix ; pour une étude de marché (Fonction 5),
+  une recommandation d'acheteur — où viser, quel pouvoir de négociation, quel
+  timing — et une fourchette de prix au m² défendable pour le segment ciblé.
 - **Les 3 à 5 points de vigilance majeurs**, formulés simplement.
-- **Les documents à réclamer et les questions à poser** avant de s'engager.
+- **Les documents à réclamer et les questions à poser** avant de s'engager (sans
+  objet pour une étude de marché, qui ne porte sur aucun bien).
 - **L'avertissement** : cette analyse est une aide à la décision indépendante.
   Elle ne constitue ni une expertise judiciaire, ni un conseil en investissement,
   ni un avis juridique, ni un diagnostic réglementaire. La décision finale et le
@@ -280,6 +352,7 @@ Quelle que soit la fonction, clôture par :
 - `references/methode-valeur.md` : méthode de la valeur d'acquisition défendable,
   DVF contre estimations, ordres de grandeur de travaux, frais.
 - `references/fiche-etude.md` : schéma JSON de la fiche, structure de l'étude
-  complète, format du shortlist de recherche, barème du verdict.
+  complète et de l'étude de marché, format du shortlist de recherche, barème du
+  verdict.
 - `scripts/generer_fiche_pdf.py` : génère la fiche A4 PDF standardisée depuis un
   fichier JSON. Gabarit dans `assets/fiche_template.html`.

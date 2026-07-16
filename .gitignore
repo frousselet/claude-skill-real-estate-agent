@@ -1,0 +1,6 @@
+# Skill package
+agent-immobilier.zip
+*.zip
+
+# macOS
+.DS_Store
