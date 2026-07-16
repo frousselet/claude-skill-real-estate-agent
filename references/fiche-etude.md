@@ -1,5 +1,12 @@
 # Formats de restitution : fiche, étude, shortlist
 
+> **Le gabarit fait foi, à la lettre.** Pour la fiche A4 PDF, tu remplis uniquement
+> le JSON décrit ici, puis tu lances `scripts/generer_fiche_pdf.py`. La forme
+> (police et sa taille, graisses, couleurs, interlignes, espacements, marges, sauts
+> de page, ordre des sections) est fixée par `assets/fiche_template.html` et le
+> script ; tu n'y touches jamais pour un bien donné. Si un texte est trop long, tu
+> le raccourcis, tu ne modifies ni le CSS ni les polices.
+
 ## Barème du verdict (feu tricolore)
 
 Le verdict synthétise l'intérêt du bien pour l'acheteur, en croisant le prix (par
@@ -19,14 +26,16 @@ Dans la fiche PDF, le verdict s'affiche sur une **jauge dégradée vert → roug
 le curseur est positionné par la note (100/100 côté vert, 0/100 côté rouge), ou à
 défaut par le feu. Juste en dessous figurent les `points_forts` (puces vertes) et
 `points_faibles` (puces rouges), puis le paragraphe de synthèse (`verdict.resume`).
-Renseigner **au plus 4 points de chaque côté**, chacun formulé de façon concise
-pour tenir en **2 lignes maximum**. Le gabarit tronque au-delà (4 points, 2 lignes),
-donc l'essentiel doit venir en premier.
+Renseigner **au plus 4 points de chaque côté**, chacun **110 caractères maximum**
+(2 lignes). Le gabarit tronque au-delà (4 points, 2 lignes avec « … »), donc
+l'essentiel doit venir en premier.
 
 Le paragraphe de synthèse (`verdict.resume`) commence par une **brève description
 du bien** (type, surface, nombre de pièces, étage, extérieur ou jardin, annexes,
 état général), puis enchaîne sur le message clé (emplacement, écart de prix, risques
-majeurs, recommandation). Compter environ 3 à 5 phrases, factuel et fluide.
+majeurs, recommandation). **Au plus 4 phrases, ~400 caractères** : le gabarit
+tronque à 4 lignes pour garantir que toute la page 1 (jusqu'au DPE) tient sur une
+seule page. Faire court et dense.
 
 ---
 
@@ -88,16 +97,87 @@ couleurs.
     "leviers": ["Classe G", "Travaux incompressibles", "Prix affiché au-dessus du marché réel"],
     "argument_cle": "Payer le prix affiché reviendrait à acheter une valeur rénovée que le bien n'a pas encore, puis à financer les travaux une seconde fois."
   },
-  "sources": ["Géorisques", "DVF (DGFiP / Etalab)", "Annonce", "DPE"],
+  "sources": [
+    {"nom": "Annonce (SeLoger)", "url": "https://www.seloger.com/annonces/...", "detail": "Annonce consultée le 16/07/2026"},
+    {"nom": "Géorisques", "url": "https://www.georisques.gouv.fr/", "detail": "État des risques à l'adresse"},
+    {"nom": "DVF (DGFiP / Etalab)", "url": "https://app.dvf.etalab.gouv.fr/", "detail": "Transactions signées, avril 2026"}
+  ],
   "avertissement": "Analyse indépendante d'aide à la décision. Ni expertise judiciaire, ni conseil en investissement, ni avis juridique."
 }
 ```
+
+Champs `bien` (identité) : garder chaque valeur **courte, 70 caractères maximum**
+(elle s'affiche sur 2 lignes au plus, le gabarit tronque avec « … » au-delà).
+Placer l'essentiel en tête (ex. « Sans PPT ni DTG, règl. 1965 » plutôt qu'une
+longue phrase) ; le détail complet va dans la section copropriété ou l'étude, pas
+dans la grille d'identité.
 
 Champs DPE : renseigner `dpe` et `ges` par la seule lettre de classe (A à G), et
 `dpe_kwh` / `ges_kgco2` par la valeur chiffrée. Le script reste tolérant (il sait
 extraire la lettre et le nombre d'une chaîne comme « D (188 kWh/m²/an) »), mais la
 saisie propre est préférable. La bande correspondante est surlignée sur l'étiquette
 graphique.
+
+**Analyse : coût de revient, score, historique DVF.** Trois champs optionnels
+ajoutent une page « Coût de revient et score du bien » après l'étude de risques :
+
+- `cout_revient` : `{prix_achat, frais, travaux, aleas, vat, note?}` (nombres €).
+  Le script trace une **cascade** prix + frais + travaux + aléas = coût de revient
+  total, comparée à la valeur après travaux (`vat`). C'est « ne pas payer deux
+  fois » rendu visuel.
+- `radar` : liste de `{axe, note}` (note de 0 à 10) sur 3 à 8 axes (emplacement,
+  état, prix, risques, copropriété, énergie…). Trace une toile d'araignée.
+- `dvf_historique` : liste de `{date, prix, detail}` = ventes passées du bien ou de
+  l'immeuble (DVF), rendues en tableau. N'y mettre que des **mutations réelles**.
+
+**Sources et appels de note.** `sources` est une liste d'objets
+`{nom, url, detail}` (une chaîne seule reste acceptée). Règles :
+
+- **La première source est toujours l'annonce elle-même** (nom du portail + lien
+  direct), suivie des sources officielles (Géorisques, DVF, PLU/ABF, DPE, etc.).
+- **Ne jamais répéter une source** : le script déduplique par nom et numérote
+  automatiquement (1, 2, 3…). Une source apparaît une seule fois.
+- Renseigner l'`url` **exacte** dès que la source est en ligne : le lien doit
+  pointer **directement sur la ressource citée** (la page précise de l'annonce, le
+  rapport Géorisques de l'adresse, la recherche DVF du secteur, le DPE concerné),
+  **jamais la simple page d'accueil du domaine**. Elle devient un lien cliquable
+  dans la section « Sources et références » (générée sur sa propre page).
+
+Pour **citer** une source dans le texte, écrire l'appel de note `[n]` (n = numéro
+de la source dans la liste) juste après la donnée concernée ; le gabarit le rend en
+exposant bleu. Les appels `[n]` sont convertis dans : synthèse, points forts et
+faibles, référence marché (prix), commentaires de l'étude de risques, points de
+vigilance, leviers et argument de négociation, prix et risques de l'étude de marché.
+Exemple : `"Aléa fort argiles[2] ; fissures à vérifier"` avec la source 2 =
+Géorisques.
+
+**Aide à la décision (questions au vendeur).** Le champ `aide_decision` génère une
+section « à remplir » sur sa propre page : l'acheteur y répond directement sur le
+PDF (une ligne pointillée suit chaque question). C'est une liste de groupes
+thématiques :
+
+```json
+"aide_decision": [
+  {"theme": "Copropriété", "questions": [
+    "Montant réel des charges annuelles et ce qu'elles couvrent ?",
+    "Travaux votés ou à prévoir (PPT, ravalement, toiture) et quote-part ?",
+    "Fonds de travaux disponible et procédures en cours ?"
+  ]},
+  {"theme": "Bâti et travaux", "questions": [
+    "Nature et date des derniers travaux ; factures et garanties ?",
+    "Diagnostics complets fournis (DPE, amiante, plomb, élec, gaz) ?"
+  ]}
+]
+```
+
+Adapter les questions au bien et aux risques identifiés (reprendre les points de
+vigilance sous forme de questions). Thèmes utiles : copropriété, bâti et travaux,
+diagnostics et énergie, environnement et géorisques, urbanisme, juridique et vente,
+charges et fiscalité. Les appels de note `[n]` y sont aussi rendus en exposant.
+
+**Page de notes.** Une dernière page « Notes » remplie de lignes pointillées est
+ajoutée automatiquement (`notes_page`, activé par défaut ; mettre à `false` pour la
+retirer).
 
 Recommandations : lister les risques les plus critiques d'abord (le script les
 retrie par criticité), viser 4 à 8 risques sur la fiche pour rester lisible (le
@@ -148,6 +228,33 @@ affiche alors `L × l m`) ; `surface` sert surtout au mode estimation. Placer le
 entièrement optionnel : absent, la fiche n'a pas de plan. Toujours rappeler, dans
 le message ou la légende, qu'un schéma estimé n'est pas un relevé.
 
+### Bloc `environnement` optionnel : commerces et équipements alentours
+
+Ajouter une clé `environnement` insère, **sous le plan du bien**, la section
+« Commerces et équipements alentours » : les lieux sont **regroupés par type**
+(Transports, Commerces, Écoles, Santé, Parcs et loisirs), chaque groupe avec une
+**icône** de couleur, listant les lieux (nom + distance). Entièrement autonome,
+**aucune carte ni réseau**.
+
+```json
+{
+  "environnement": {
+    "pois": [
+      {"nom": "Gare de Bourges", "categorie": "transport", "distance": "400 m"},
+      {"nom": "Carrefour City", "categorie": "commerce", "distance": "150 m"},
+      {"nom": "École Jean-Jaurès", "categorie": "ecole", "distance": "200 m"},
+      {"nom": "Pharmacie du Centre", "categorie": "sante", "distance": "180 m"}
+    ]
+  }
+}
+```
+
+Chaque lieu a une `categorie` (`transport`, `commerce`, `ecole`, `sante`, `parc` ;
+sinon rangé dans « Autres »), un `nom` qui doit être le **nom exact du lieu**
+(« Carrefour City », « Gare de Bourges »), jamais une catégorie générique, et une
+`distance` (à pied de préférence). Viser une **dizaine de lieux** parmi les plus
+utiles. Ne renseigner que des lieux **réels et vérifiés**.
+
 ### Bloc `marche` optionnel : étude de marché dans le PDF (Fonction 5)
 
 Ajouter une clé `marche` au JSON déclenche une **page d'étude de marché** en fin
@@ -179,7 +286,14 @@ peut aussi produire une fiche centrée sur le marché en fournissant un JSON min
       "socio": "Ménages aisés, 62 % de propriétaires"
     },
     "prix": [
-      {"secteur": "Centre-ville", "typologie": "Appartement à rénover", "prix_m2_median": "5 900 €/m²", "fourchette": "5 000 – 6 800 €/m²", "volume": "≈ 60/an", "estimation_portail": "7 200 €/m²", "tendance": "baisse"}
+      {"secteur": "Centre-ville", "typologie": "Appartement à rénover", "prix_m2_median": "5 900 €/m²", "fourchette": "5 000 à 6 800 €/m²", "volume": "≈ 60/an", "estimation_portail": "7 200 €/m²", "tendance": "baisse"}
+    ],
+    "evolution": [
+      {"annee": 2020, "prix_m2": 6800}, {"annee": 2022, "prix_m2": 7000}, {"annee": 2024, "prix_m2": 6600}
+    ],
+    "boxplot": [
+      {"label": "Ancien rénové", "min": 6000, "q1": 6800, "median": 7400, "q3": 8000, "max": 8600, "portail": 8300},
+      {"label": "Ancien à rénover", "min": 4600, "q1": 5300, "median": 5900, "q3": 6500, "max": 7000, "bien": 8200}
     ],
     "locatif": {
       "loyer_m2": "21 à 25 €/m²",
@@ -191,7 +305,20 @@ peut aussi produire une fiche centrée sur le marché en fournissant un JSON min
     "segments_eviter": ["Ancien affiché au prix du rénové"],
     "risques_marche": ["Écart marqué prix affichés / prix signés"],
     "conclusion": {
+      "posture": "plutot_acheteur",
+      "defendable_m2_min": 5000, "defendable_m2_max": 6000,
       "fourchette_m2_defendable": "5 000 à 6 000 €/m² pour un 2-3 pièces à rénover",
+      "kpis": [
+        {"label": "Délai de vente", "valeur": "≈ 95 j"},
+        {"label": "Évolution 3 ans", "valeur": "-3 %"},
+        {"label": "Tension", "valeur": "Forte"},
+        {"label": "Écart portail/réel", "valeur": "+18 %"}
+      ],
+      "plan_action": [
+        "Viser l'ancien à rénover en secteur coté, sous 6 000 €/m²",
+        "Demander une décote de 25 à 35 % sur le prix affiché",
+        "Sécuriser DPE, copropriété et plancher sur porche avant l'offre"
+      ],
       "pouvoir_negociation": "Modéré à fort sur l'ancien à rénover",
       "recommandation": "Viser l'ancien à rénover sous 6 000 €/m² et faire jouer le DPE."
     }
@@ -206,6 +333,37 @@ est affichée telle quelle en neutre. Tous les autres champs sont du texte libre
 `locatif` peut être omis (usage résidence principale). Renseigner honnêtement les
 inconnus plutôt que d'inventer. Prix DVF réels d'abord, estimations de portails en
 colonne « Est. portail » pour mémoire seulement.
+
+**Graphiques (SVG générés).** Deux champs optionnels produisent des graphiques dans
+l'étude de marché :
+
+- `evolution` : liste de `{annee, prix_m2}` (nombres) pour une **courbe** du prix
+  médian au m² dans le temps.
+- `boxplot` : liste de `{label, min, q1, median, q3, max, portail?, bien?}` (nombres
+  €/m²) pour des **boîtes à moustache** par secteur ou typologie. `portail` place un
+  losange (estimation portail), `bien` un trait rouge (prix au m² du bien étudié)
+  sur la distribution.
+
+Les quartiles doivent être des **statistiques DVF réelles** (Q1, médiane, Q3, min,
+max), jamais inventées. Si on ne dispose pas des quartiles, **omettre le boxplot**
+(ou ne fournir que la courbe) plutôt que de fabriquer une distribution.
+
+**Conclusion enrichie.** Le bloc `conclusion` accepte, en plus des champs texte
+(`fourchette_m2_defendable`, `pouvoir_negociation`, `recommandation`) :
+
+- `posture` : posture du marché, mot-clé (`acheteur`, `plutot_acheteur`,
+  `equilibre`, `plutot_vendeur`, `vendeur`) ou nombre 0 (acheteur) à 100 (vendeur).
+  Affiche un curseur favorable acheteur → vendeur avec un libellé.
+- `defendable_m2_min` / `defendable_m2_max` (nombres €/m²) : le script les multiplie
+  par la surface du bien (`bien.surface_m2`) pour afficher un **prix total défendable
+  pour ce bien précis**, comparé au prix affiché avec l'écart en %.
+- `kpis` : liste de `{label, valeur}` (2 à 4 tuiles), tableau de bord du marché
+  (délai de vente, évolution, tension, écart portail/réel…).
+- `plan_action` : liste de 2 à 4 actions concrètes (segment à viser, décote à
+  demander, points à sécuriser avant l'offre).
+
+Les appels de note `[n]` fonctionnent dans le libellé de posture, le plan d'action,
+le pouvoir de négociation et la recommandation.
 
 ---
 

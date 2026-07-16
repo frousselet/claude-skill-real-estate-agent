@@ -2,5 +2,8 @@
 agent-immobilier.zip
 *.zip
 
+# PDF générés (artefacts ; peuvent contenir une adresse réelle)
+*.pdf
+
 # macOS
 .DS_Store

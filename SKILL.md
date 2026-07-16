@@ -181,8 +181,29 @@ garder une trace propre.
    cible de prix. Ne réécris pas le contenu de la fiche dans le message : elle se
    suffit.
 
-La standardisation est le cœur de cette fonction : n'improvise pas une mise en
-page, passe toujours par le script.
+**Le gabarit fait foi, à la lettre.** La mise en page du PDF est intégralement
+définie par `assets/fiche_template.html` et le script : **police et taille de
+police, graisses, couleurs, interlignes, espacements, marges, sauts de page,
+largeurs de colonnes, structure et ordre des sections**. Tu n'y touches jamais
+pour une fiche donnée. Ton unique rôle est de **remplir le JSON de données** et de
+**lancer le script** ; la forme, elle, ne se négocie pas.
+
+En particulier, pour chaque fiche produite :
+
+- **N'improvise aucune mise en page** et ne réécris pas le contenu de la fiche à la
+  main dans ta réponse : le PDF se suffit.
+- **Ne modifie pas** le gabarit HTML, le CSS, les polices, les tailles, les marges
+  ni le script pour adapter un bien particulier. Si le contenu est trop long, tu
+  le raccourcis (le gabarit tronque déjà proprement), tu ne changes pas la forme.
+- **Passe toujours par le script**, jamais par une mise en forme manuelle ou un
+  autre outil de PDF pour la fiche A4.
+- **Génère toujours le PDF à 100 % (aucun zoom, aucune mise à l'échelle)** : le
+  script s'en charge (rendu à l'échelle 1). Ne contourne jamais ce réglage.
+
+Faire évoluer le gabarit (nouvelle rubrique, changement de charte) est une décision
+délibérée qui modifie la skill pour toutes les fiches, jamais un ajustement au cas
+par cas sur une fiche isolée. La standardisation est le cœur de cette fonction :
+c'est elle qui rend les fiches comparables entre elles.
 
 Le même script sait ajouter une **page d'étude de marché** (Fonction 5) si le JSON
 contient un bloc `marche` : elle s'imprime en fin de fiche, ou seule si l'on ne

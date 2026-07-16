@@ -16,6 +16,7 @@ wkhtmltopdf. Le script détecte automatiquement le moteur disponible.
 import argparse
 import html as _html
 import json
+import math
 import os
 import re
 import shutil
@@ -26,11 +27,22 @@ import tempfile
 
 try:
     from jinja2 import Environment, FileSystemLoader, select_autoescape
+    from markupsafe import Markup, escape
 except ImportError:
     sys.exit("jinja2 est requis : pip install jinja2 --break-system-packages")
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_TEMPLATE = os.path.join(SCRIPT_DIR, "..", "assets", "fiche_template.html")
+
+_REF_RE = re.compile(r"\[(\d{1,2})\]")
+
+
+def sup_filter(value):
+    """Convertit les appels de note « [n] » d'un texte en exposant HTML
+    « <sup>n</sup> », le reste du texte étant échappé normalement."""
+    s = str(escape(str(value if value is not None else "")))
+    s = _REF_RE.sub(r'<sup class="ref">\1</sup>', s)
+    return Markup(s)
 
 FEU = {
     "vert":   {"label": "À poursuivre", "color": "#1a7f37"},
@@ -98,6 +110,221 @@ def trend_of(val):
     return val, "mkt-flat"
 
 
+def _fmt_eur(v):
+    """7400 -> '7 400' (séparateur de milliers, espace)."""
+    return f"{int(round(v)):,}".replace(",", " ")
+
+
+def _optnum(d, key):
+    try:
+        return float(d[key])
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+def build_line_svg(points):
+    """Courbe d'évolution : prix médian €/m² par année. `points` = liste de
+    {annee, prix_m2}. SVG autonome, sans dépendance."""
+    pts = []
+    for p in points or []:
+        try:
+            pts.append((int(p.get("annee")), float(p.get("prix_m2"))))
+        except (TypeError, ValueError):
+            continue
+    pts = sorted(set(pts))
+    if len(pts) < 2:
+        return ""
+    xs = [a for a, _ in pts]
+    ys = [y for _, y in pts]
+    xmin, xmax = min(xs), max(xs)
+    span = (max(ys) - min(ys)) or max(ys) or 1.0
+    ylo, yhi = min(ys) - span * 0.15, max(ys) + span * 0.15
+    W, H = 470.0, 190.0
+    ML, MR, MT, MB = 54.0, 12.0, 12.0, 24.0
+    pw, ph = W - ML - MR, H - MT - MB
+    fx = lambda a: ML + (a - xmin) / (xmax - xmin) * pw
+    fy = lambda v: MT + (yhi - v) / (yhi - ylo) * ph
+    o = [f'<svg viewBox="0 0 {W:.0f} {H:.0f}" width="100%" style="max-width:{W:.0f}px" '
+         f'xmlns="http://www.w3.org/2000/svg" font-family="DejaVu Sans, Arial, sans-serif">']
+    for i in range(5):
+        v = ylo + (yhi - ylo) * i / 4
+        yy = fy(v)
+        o.append(f'<line x1="{ML:.1f}" y1="{yy:.1f}" x2="{W-MR:.1f}" y2="{yy:.1f}" stroke="#eee"/>')
+        o.append(f'<text x="{ML-6:.1f}" y="{yy+3:.1f}" text-anchor="end" font-size="8" fill="#888">{_fmt_eur(v)}</text>')
+    for a in xs:
+        o.append(f'<text x="{fx(a):.1f}" y="{H-7:.1f}" text-anchor="middle" font-size="8" fill="#888">{a}</text>')
+    d = "M " + " L ".join(f"{fx(a):.1f} {fy(y):.1f}" for a, y in pts)
+    o.append(f'<path d="{d}" fill="none" stroke="#2f7ec4" stroke-width="2"/>')
+    for a, y in pts:
+        o.append(f'<circle cx="{fx(a):.1f}" cy="{fy(y):.1f}" r="2.6" fill="#2f7ec4"/>')
+    o.append(f'<line x1="{ML:.1f}" y1="{MT:.1f}" x2="{ML:.1f}" y2="{H-MB:.1f}" stroke="#ccc"/>')
+    o.append(f'<line x1="{ML:.1f}" y1="{H-MB:.1f}" x2="{W-MR:.1f}" y2="{H-MB:.1f}" stroke="#ccc"/>')
+    o.append("</svg>")
+    return "".join(o)
+
+
+def build_boxplot_svg(boxes):
+    """Boîtes à moustache horizontales par secteur/typologie, à partir des
+    quartiles réels DVF. `boxes` = liste de {label, min, q1, median, q3, max,
+    portail?, bien?} (valeurs numériques en €/m²)."""
+    rows = []
+    for b in boxes or []:
+        try:
+            v = {k: float(b[k]) for k in ("min", "q1", "median", "q3", "max")}
+        except (KeyError, TypeError, ValueError):
+            continue
+        rows.append({"label": str(b.get("label", "")), **v,
+                     "portail": _optnum(b, "portail"), "bien": _optnum(b, "bien")})
+    if not rows:
+        return ""
+    allv = []
+    for r in rows:
+        allv += [r["min"], r["max"]]
+        allv += [r[k] for k in ("portail", "bien") if r[k] is not None]
+    lo, hi = min(allv), max(allv)
+    span = (hi - lo) or hi or 1.0
+    lo, hi = lo - span * 0.06, hi + span * 0.06
+    W, ML, MR = 470.0, 122.0, 14.0
+    rowh, top = 30.0, 8.0
+    H = top + rowh * len(rows) + 24.0
+    pw = W - ML - MR
+    fx = lambda v: ML + (v - lo) / (hi - lo) * pw
+    o = [f'<svg viewBox="0 0 {W:.0f} {H:.0f}" width="100%" style="max-width:{W:.0f}px" '
+         f'xmlns="http://www.w3.org/2000/svg" font-family="DejaVu Sans, Arial, sans-serif">']
+    for i in range(5):
+        v = lo + (hi - lo) * i / 4
+        xx = fx(v)
+        o.append(f'<line x1="{xx:.1f}" y1="{top:.1f}" x2="{xx:.1f}" y2="{top+rowh*len(rows):.1f}" stroke="#f0f0f0"/>')
+        o.append(f'<text x="{xx:.1f}" y="{H-8:.1f}" text-anchor="middle" font-size="8" fill="#888">{_fmt_eur(v)}</text>')
+    for idx, r in enumerate(rows):
+        cy = top + rowh * idx + rowh / 2
+        bh = 13.0
+        o.append(f'<text x="0" y="{cy+3:.1f}" font-size="8.5" fill="#333">{_sx(r["label"][:26])}</text>')
+        xmn, xq1, xmed, xq3, xmx = (fx(r["min"]), fx(r["q1"]), fx(r["median"]), fx(r["q3"]), fx(r["max"]))
+        o.append(f'<line x1="{xmn:.1f}" y1="{cy:.1f}" x2="{xmx:.1f}" y2="{cy:.1f}" stroke="#8a8a8a"/>')
+        o.append(f'<line x1="{xmn:.1f}" y1="{cy-5:.1f}" x2="{xmn:.1f}" y2="{cy+5:.1f}" stroke="#8a8a8a"/>')
+        o.append(f'<line x1="{xmx:.1f}" y1="{cy-5:.1f}" x2="{xmx:.1f}" y2="{cy+5:.1f}" stroke="#8a8a8a"/>')
+        o.append(f'<rect x="{xq1:.1f}" y="{cy-bh/2:.1f}" width="{max(1.0, xq3-xq1):.1f}" height="{bh:.1f}" fill="#eaf0fb" stroke="#5b6b7a"/>')
+        o.append(f'<line x1="{xmed:.1f}" y1="{cy-bh/2:.1f}" x2="{xmed:.1f}" y2="{cy+bh/2:.1f}" stroke="#1c1c1c" stroke-width="1.8"/>')
+        if r["portail"] is not None:
+            px = fx(r["portail"])
+            o.append(f'<polygon points="{px:.1f},{cy-6:.1f} {px+5:.1f},{cy:.1f} {px:.1f},{cy+6:.1f} {px-5:.1f},{cy:.1f}" fill="none" stroke="#b5560d" stroke-width="1.3"/>')
+        if r["bien"] is not None:
+            bx = fx(r["bien"])
+            o.append(f'<line x1="{bx:.1f}" y1="{cy-8:.1f}" x2="{bx:.1f}" y2="{cy+8:.1f}" stroke="#c0362c" stroke-width="1.7"/>')
+    o.append("</svg>")
+    return "".join(o)
+
+
+def build_waterfall_svg(cr, accent="#c0362c"):
+    """Cascade du coût de revient : prix + frais + travaux + aléas = coût total,
+    comparé à la valeur après travaux (VAT). `cr` = {prix_achat, frais, travaux,
+    aleas, vat} (nombres €). Barres horizontales."""
+    try:
+        prix = float(cr["prix_achat"])
+    except (KeyError, TypeError, ValueError):
+        return ""
+
+    def g(k):
+        try:
+            return float(cr[k])
+        except (KeyError, TypeError, ValueError):
+            return 0.0
+
+    frais, trav, alea = g("frais"), g("travaux"), g("aleas")
+    total = prix + frais + trav + alea
+    vat = None
+    if cr.get("vat") not in (None, ""):
+        try:
+            vat = float(cr["vat"])
+        except (TypeError, ValueError):
+            vat = None
+
+    rows = [("Prix d'achat", 0.0, prix, "#5b6b7a")]
+    if frais:
+        rows.append(("+ Frais de notaire", prix, prix + frais, "#8aa0b5"))
+    if trav:
+        rows.append(("+ Travaux", prix + frais, prix + frais + trav, "#d9822b"))
+    if alea:
+        rows.append(("+ Aléas", prix + frais + trav, total, "#c9a13f"))
+    rows.append(("= Coût de revient", 0.0, total, accent))
+    if vat is not None:
+        rows.append(("Valeur après travaux", 0.0, vat, "#1a7f37"))
+
+    hi = (max(total, vat or 0.0) or 1.0) * 1.12
+    W, ML, MR = 470.0, 132.0, 62.0
+    rowh, top = 25.0, 8.0
+    H = top + rowh * len(rows) + 4
+    pw = W - ML - MR
+    fx = lambda v: ML + v / hi * pw
+    o = [f'<svg viewBox="0 0 {W:.0f} {H:.0f}" width="100%" style="max-width:{W:.0f}px" '
+         f'xmlns="http://www.w3.org/2000/svg" font-family="DejaVu Sans, Arial, sans-serif">']
+    for i, (label, a, b, color) in enumerate(rows):
+        cy = top + rowh * i + rowh / 2
+        x1, x2 = fx(a), fx(b)
+        o.append(f'<text x="0" y="{cy+3:.1f}" font-size="8.3" fill="#333">{_sx(label)}</text>')
+        o.append(f'<rect x="{x1:.1f}" y="{cy-6:.1f}" width="{max(1.0, x2-x1):.1f}" height="12" fill="{color}"/>')
+        o.append(f'<text x="{x2+4:.1f}" y="{cy+3:.1f}" font-size="8" fill="#333">{_fmt_eur(b - a if a > 0 else b)} €</text>')
+    o.append("</svg>")
+    return "".join(o)
+
+
+def build_radar_svg(axes):
+    """Radar (toile d'araignée) notant le bien sur des axes 0 à 10. `axes` =
+    liste de {axe, note}."""
+    pts = []
+    for a in axes or []:
+        try:
+            pts.append((str(a.get("axe", "")), max(0.0, min(10.0, float(a.get("note"))))))
+        except (TypeError, ValueError):
+            continue
+    n = len(pts)
+    if n < 3:
+        return ""
+    W = H = 250.0
+    cx, cy, R, maxv = W / 2, H / 2 + 2, 80.0, 10.0
+
+    def pt(i, r):
+        ang = -math.pi / 2 + 2 * math.pi * i / n
+        return (cx + r * math.cos(ang), cy + r * math.sin(ang))
+
+    o = [f'<svg viewBox="0 0 {W:.0f} {H:.0f}" width="100%" style="max-width:{W:.0f}px" '
+         f'xmlns="http://www.w3.org/2000/svg" font-family="DejaVu Sans, Arial, sans-serif">']
+    for ring in range(1, 5):
+        poly = " ".join(f"{x:.1f},{y:.1f}" for x, y in (pt(i, R * ring / 4) for i in range(n)))
+        o.append(f'<polygon points="{poly}" fill="none" stroke="#e6e6e6" stroke-width="0.8"/>')
+    for i, (axe, _val) in enumerate(pts):
+        x, y = pt(i, R)
+        o.append(f'<line x1="{cx:.1f}" y1="{cy:.1f}" x2="{x:.1f}" y2="{y:.1f}" stroke="#dcdcdc" stroke-width="0.8"/>')
+        lx, ly = pt(i, R + 12)
+        anchor = "middle" if abs(lx - cx) < 5 else ("end" if lx < cx else "start")
+        o.append(f'<text x="{lx:.1f}" y="{ly+2:.1f}" text-anchor="{anchor}" font-size="7.5" fill="#555">{_sx(axe)}</text>')
+    vpoly = " ".join(f"{x:.1f},{y:.1f}" for x, y in (pt(i, R * pts[i][1] / maxv) for i in range(n)))
+    o.append(f'<polygon points="{vpoly}" fill="#2f7ec4" fill-opacity="0.22" stroke="#2f7ec4" stroke-width="1.6"/>')
+    for i in range(n):
+        x, y = pt(i, R * pts[i][1] / maxv)
+        o.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="2" fill="#2f7ec4"/>')
+    o.append("</svg>")
+    return "".join(o)
+
+
+def process_analyse(data):
+    """Prépare les visuels d'analyse : cascade du coût de revient, radar de score,
+    et normalisation de l'historique DVF du bien."""
+    cr = data.get("cout_revient") or {}
+    data["cout_revient"] = cr
+    accent = (data.get("verdict") or {}).get("feu_color", "#c0362c")
+    data["cout_revient_svg"] = build_waterfall_svg(cr, accent)
+    data["radar_svg"] = build_radar_svg(data.get("radar") or [])
+    dvf = data.get("dvf_historique") or []
+    for m in dvf:
+        m.setdefault("date", "")
+        m.setdefault("prix", "")
+        m.setdefault("detail", "")
+    data["dvf_historique"] = dvf
+    return data
+
+
 def process_marche(data):
     """Normalise le bloc étude de marché s'il est présent (Fonction 5).
     Absent, la fiche reste une fiche bien classique."""
@@ -128,7 +355,97 @@ def process_marche(data):
         row["tendance_badge"], row["tendance_cls"] = trend_of(row.get("tendance"))
     marche["prix"] = prix
 
+    marche["evolution_svg"] = build_line_svg(marche.get("evolution"))
+    marche["boxplot_svg"] = build_boxplot_svg(marche.get("boxplot"))
+
     data["marche"] = marche
+    return data
+
+
+def process_sources(data):
+    """Normalise et numérote les sources, en dédupliquant. Chaque source peut
+    être une chaîne (nom seul) ou un objet {nom, url, detail}. Les doublons
+    (même nom) sont retirés en conservant le premier. La numérotation obtenue
+    sert d'appels de note « [n] » dans le texte."""
+    raw = data.get("sources", []) or []
+    seen, out = set(), []
+    for s in raw:
+        if isinstance(s, dict):
+            nom = str(s.get("nom", "")).strip()
+            url = str(s.get("url", "")).strip()
+            detail = str(s.get("detail", "")).strip()
+        else:
+            nom, url, detail = str(s).strip(), "", ""
+        if not nom:
+            continue
+        key = nom.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append({"n": len(out) + 1, "nom": nom, "url": url, "detail": detail})
+    data["sources"] = out
+    return data
+
+
+POSTURE = {
+    "acheteur":        (12.0, "Marché très favorable à l'acheteur"),
+    "plutot_acheteur": (30.0, "Marché plutôt favorable à l'acheteur"),
+    "equilibre":       (50.0, "Marché équilibré"),
+    "plutot_vendeur":  (70.0, "Marché plutôt favorable au vendeur"),
+    "vendeur":         (88.0, "Marché favorable au vendeur"),
+}
+
+
+def _parse_amount(s):
+    """Extrait un montant entier d'une chaîne (« 350 000 € » -> 350000)."""
+    digits = re.sub(r"[^\d]", "", str(s or ""))
+    return int(digits) if digits else None
+
+
+def process_conclusion(data):
+    """Enrichit la conclusion de l'étude de marché : posture de marché (curseur),
+    traduction de la fourchette €/m² défendable en prix total pour le bien,
+    indicateurs (KPIs) et plan d'action."""
+    marche = data.get("marche")
+    if not marche:
+        return data
+    c = marche.setdefault("conclusion", {})
+    c.setdefault("kpis", [])
+    c.setdefault("plan_action", [])
+
+    # Posture de marché : mot-clé ou nombre 0 (acheteur) à 100 (vendeur)
+    p = c.get("posture")
+    if isinstance(p, (int, float)):
+        c["posture_pos"] = round(max(4.0, min(96.0, float(p))), 1)
+        c["posture_label"] = c.get("posture_label", "")
+    else:
+        pos, deflabel = POSTURE.get(str(p or "").strip().lower(), (None, ""))
+        c["posture_pos"] = pos
+        c["posture_label"] = c.get("posture_label") or deflabel
+
+    # Prix total défendable pour ce bien = fourchette €/m² × surface
+    c["bien_total"] = None
+    try:
+        mn = float(c["defendable_m2_min"])
+        mx = float(c["defendable_m2_max"])
+        surf = float(data.get("bien", {}).get("surface_m2"))
+    except (KeyError, TypeError, ValueError):
+        mn = mx = surf = None
+    if mn and mx and surf:
+        tmin = round(mn * surf / 1000) * 1000
+        tmax = round(mx * surf / 1000) * 1000
+        bt = {
+            "total_fmt": f"{_fmt_eur(tmin)} à {_fmt_eur(tmax)} €",
+            "m2_fmt": f"{_fmt_eur(mn)} à {_fmt_eur(mx)} €/m²",
+            "surface": surf,
+        }
+        affiche = _parse_amount(data.get("prix", {}).get("affiche"))
+        if affiche:
+            bt["affiche_fmt"] = f"{_fmt_eur(affiche)} €"
+            hi = round((tmax - affiche) / affiche * 100)
+            lo = round((tmin - affiche) / affiche * 100)
+            bt["ecart_fmt"] = f"{hi:+d} % à {lo:+d} %" if hi != lo else f"{hi:+d} %"
+        marche["conclusion"]["bien_total"] = bt
     return data
 
 
@@ -284,6 +601,62 @@ def process_plan(data):
     return data
 
 
+# Catégories de commerces/équipements : synonymes -> clé normalisée
+ENV_KEY = {
+    "commerce": "commerce", "commerces": "commerce", "alimentation": "commerce",
+    "ecole": "ecole", "education": "ecole", "creche": "ecole",
+    "transport": "transport", "transports": "transport", "gare": "transport",
+    "sante": "sante", "medecin": "sante", "pharmacie": "sante", "hopital": "sante",
+    "parc": "parc", "loisir": "parc", "loisirs": "parc", "vert": "parc",
+}
+# Ordre d'affichage : (clé, libellé, couleur)
+ENV_META = [
+    ("transport", "Transports", "#6b4fbb"),
+    ("commerce", "Commerces", "#d9822b"),
+    ("ecole", "Écoles", "#2f7ec4"),
+    ("sante", "Santé", "#c0362c"),
+    ("parc", "Parcs et loisirs", "#1a7f37"),
+    ("autre", "Autres", "#888888"),
+]
+_ENV_ICONS = {
+    "transport": '<rect x="3" y="2.5" width="10" height="8.5" rx="2" fill="{c}"/><rect x="4.6" y="4.3" width="2.6" height="2.4" fill="#fff"/><rect x="8.8" y="4.3" width="2.6" height="2.4" fill="#fff"/><circle cx="5.6" cy="12.4" r="1.2" fill="{c}"/><circle cx="10.4" cy="12.4" r="1.2" fill="{c}"/>',
+    "commerce": '<path d="M4 5.2h8l-.7 8a1 1 0 0 1-1 .9H5.7a1 1 0 0 1-1-.9l-.7-8z" fill="{c}"/><path d="M6 5.6V4.4a2 2 0 0 1 4 0v1.2" fill="none" stroke="{c}" stroke-width="1.2"/>',
+    "ecole": '<path d="M8 3l6 2.4-6 2.4-6-2.4L8 3z" fill="{c}"/><path d="M4.5 6.6v2.8c0 1 1.6 1.9 3.5 1.9s3.5-.9 3.5-1.9V6.6" fill="none" stroke="{c}" stroke-width="1.2"/>',
+    "sante": '<rect x="3" y="3" width="10" height="10" rx="2.5" fill="{c}"/><rect x="7" y="5" width="2" height="6" fill="#fff"/><rect x="5" y="7" width="6" height="2" fill="#fff"/>',
+    "parc": '<circle cx="8" cy="6" r="4" fill="{c}"/><rect x="7.2" y="9" width="1.6" height="4.5" rx="0.4" fill="{c}"/>',
+    "autre": '<path d="M8 2a4 4 0 0 0-4 4c0 3 4 8 4 8s4-5 4-8a4 4 0 0 0-4-4z" fill="{c}"/><circle cx="8" cy="6" r="1.5" fill="#fff"/>',
+}
+
+
+def _env_icon(key, color):
+    body = _ENV_ICONS.get(key, _ENV_ICONS["autre"]).replace("{c}", color)
+    return ('<svg viewBox="0 0 16 16" width="13" height="13" '
+            'style="vertical-align:-2px" xmlns="http://www.w3.org/2000/svg">' + body + "</svg>")
+
+
+def process_environnement(data):
+    """Regroupe les commerces et équipements alentours par type (transports,
+    commerces, écoles, santé, parcs) avec une icône par catégorie. Rendu 100 %
+    autonome (aucune carte, aucun réseau)."""
+    env = data.get("environnement")
+    if not env:
+        data["environnement"] = None
+        return data
+    pois = env.get("pois", []) or []
+    for p in pois:
+        p.setdefault("nom", "")
+        p.setdefault("distance", "")
+    groups = []
+    for key, label, color in ENV_META:
+        members = [p for p in pois
+                   if ENV_KEY.get(str(p.get("categorie", "")).strip().lower(), "autre") == key]
+        if members:
+            groups.append({"label": label, "icon": _env_icon(key, color), "pois": members})
+    env["groups"] = groups
+    data["environnement"] = env if groups else None
+    return data
+
+
 def process(data):
     """Complète et normalise les données avant rendu."""
     data.setdefault("meta", {})
@@ -298,6 +671,8 @@ def process(data):
     data.setdefault("negociation", {})
     data.setdefault("vigilance", [])
     data.setdefault("sources", [])
+    data.setdefault("aide_decision", [])
+    data.setdefault("notes_page", True)
     data.setdefault(
         "avertissement",
         "Analyse indépendante d'aide à la décision. Ni expertise judiciaire, "
@@ -350,7 +725,11 @@ def process(data):
     data["risque_global_cls"] = cls_from_label(data["risque_global"])
 
     process_plan(data)
+    process_environnement(data)
+    process_analyse(data)
     process_marche(data)
+    process_conclusion(data)
+    process_sources(data)
 
     return data
 
@@ -361,6 +740,7 @@ def render_html(data, template_path):
         loader=FileSystemLoader(os.path.dirname(template_path)),
         autoescape=select_autoescape(["html"]),
     )
+    env.filters["sup"] = sup_filter
     template = env.get_template(os.path.basename(template_path))
     return template.render(**data)
 
@@ -392,7 +772,8 @@ def html_to_pdf(html_path, pdf_path):
             chromium, "--headless=new", "--no-sandbox", "--disable-gpu",
             "--disable-dev-shm-usage", "--hide-scrollbars",
             "--run-all-compositor-stages-before-draw",
-            "--virtual-time-budget=8000",
+            "--force-device-scale-factor=1",  # rendu à 100 %, jamais de zoom
+            "--virtual-time-budget=15000",
         ]
         variants = [
             base + ["--no-pdf-header-footer", f"--print-to-pdf={pdf_path}", f"file://{html_path}"],
@@ -412,6 +793,7 @@ def html_to_pdf(html_path, pdf_path):
     wk = shutil.which("wkhtmltopdf")
     if wk:
         cmd = [wk, "--enable-local-file-access", "--page-size", "A4",
+               "--zoom", "1.0",
                "--margin-top", "10mm", "--margin-bottom", "10mm",
                "--margin-left", "11mm", "--margin-right", "11mm",
                "--quiet", html_path, pdf_path]

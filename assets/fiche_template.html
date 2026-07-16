@@ -42,6 +42,7 @@
   .resume {
     background: #fbfbfb; border: 1px solid #ececec; border-radius: 6px;
     padding: 11px 14px; font-size: 10.5px; margin-bottom: 4px;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
   }
 
   /* Verdict gradient gauge */
@@ -94,10 +95,10 @@
   /* Prix et valeur : trois valeurs claires */
   .price-hero { border: 1px solid #e4e8ec; border-radius: 8px; overflow: hidden; page-break-inside: avoid; }
   .ph-row { display: table; width: 100%; table-layout: fixed; background: #f7f8fa; }
-  .ph-cell { display: table-cell; width: 33.33%; vertical-align: middle; padding: 11px 14px; border-left: 1px solid #e7eaee; }
+  .ph-cell { display: table-cell; width: 33.33%; vertical-align: middle; padding: 11px 11px; border-left: 1px solid #e7eaee; }
   .ph-cell.first { border-left: 0; }
   .ph-cell .lab { font-size: 8.5px; color: #7a7a7a; text-transform: uppercase; letter-spacing: .4px; }
-  .ph-cell .num { font-size: 19px; font-weight: bold; margin-top: 3px; line-height: 1.05; white-space: nowrap; }
+  .ph-cell .num { font-size: 16.5px; font-weight: bold; margin-top: 3px; line-height: 1.05; white-space: nowrap; }
   .ph-cell .sub { font-size: 8.5px; color: #7a7a7a; margin-top: 3px; }
   .ph-target { background: #fff6e5; }
   .ph-target .num { color: {{ verdict.feu_color }}; }
@@ -105,10 +106,14 @@
   .ph-foot span { margin-right: 20px; white-space: nowrap; }
   .ph-foot .l { color: #7a7a7a; text-transform: uppercase; font-size: 8px; letter-spacing: .3px; margin-right: 4px; }
 
-  /* Identité : deux colonnes compactes */
+  /* Identité : deux colonnes compactes, valeurs sur 2 lignes maximum */
   .id-cols { display: table; width: 100%; page-break-inside: avoid; }
   .id-cols .idc { display: table-cell; width: 48%; vertical-align: top; }
   .id-cols .gap { width: 4%; }
+  .id-cols table.kv { table-layout: fixed; }
+  .id-cols table.kv td.v .cl2 {
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
 
   /* DPE label */
   .dpe-wrap { display: table; width: 100%; page-break-inside: avoid; }
@@ -132,6 +137,14 @@
   .band-e { background: #fbba00; }
   .band-f { background: #ef7d00; }
   .band-g { background: #e30613; }
+  /* GES : dégradé de bleu (échelle officielle) */
+  .gesband-a { background: #cdddf0; }
+  .gesband-b { background: #a9c3e0; }
+  .gesband-c { background: #7f9fca; }
+  .gesband-d { background: #5e79ac; }
+  .gesband-e { background: #47588a; }
+  .gesband-f { background: #343f6b; }
+  .gesband-g { background: #24294b; }
   .dpe-band.active { outline: 2px solid #111; outline-offset: 1px; }
   .dpe-marker {
     position: absolute; right: 0; top: -1px; height: 24px;
@@ -165,8 +178,21 @@
   .plan-legend .sw { display: inline-block; width: 10px; height: 10px; border: 1px solid #bbb; border-radius: 2px; vertical-align: -1px; margin-right: 3px; }
   .plan-legend .wl { display: inline-block; width: 12px; height: 0; border-top: 3px solid #2f7ec4; vertical-align: 3px; margin-right: 3px; }
 
+  /* Commerces et équipements alentours (listes par type) */
+  .env-cats { font-size: 0; margin-top: 4px; }
+  .env-cat { display: inline-block; width: 33%; vertical-align: top; margin-bottom: 10px; padding-right: 10px; page-break-inside: avoid; }
+  .env-cat-h { font-weight: bold; font-size: 9.5px; text-transform: uppercase; letter-spacing: .3px; color: #2b2b2b; margin-bottom: 4px; border-bottom: 1px solid #ececec; padding-bottom: 3px; }
+  .env-cat-list { list-style: none; margin: 0; padding: 0; }
+  .env-cat-list li { font-size: 10px; margin-bottom: 3px; }
+  .env-cat-list .env-dist { color: #7a7a7a; font-size: 8.5px; }
+
   /* Market study */
   .market { page-break-before: always; }
+  .chart-box { border: 1px solid #e4e8ec; border-radius: 6px; padding: 8px 10px; background: #fff; page-break-inside: avoid; margin-top: 4px; text-align: center; }
+  .chart-box.eqh { height: 244px; display: flex; align-items: center; justify-content: center; }
+  .chart-box.eqh svg { max-height: 226px; }
+  .chart-legend { font-size: 8.5px; color: #666; margin-top: 5px; }
+  .chart-legend b { color: #333; font-weight: bold; }
   .market .lead { font-size: 9.5px; color: #7a7a7a; margin: 2px 0 12px; }
   table.mkt { width: 100%; border-collapse: collapse; }
   table.mkt th, table.mkt td { padding: 6px 7px; text-align: left; border-bottom: 1px solid #ededed; vertical-align: top; }
@@ -180,6 +206,55 @@
   .concl { background: #f7f8fa; border: 1px solid #e4e8ec; border-radius: 6px; padding: 12px 14px; page-break-inside: avoid; }
   .concl .price-strong { background: #fff6e5; }
   .concl .price-strong .val { color: {{ verdict.feu_color }}; font-size: 14px; }
+  /* A. Posture de marché */
+  .posture { margin: 0 0 12px; }
+  .pt-track { position: relative; height: 8px; border-radius: 5px;
+    background: linear-gradient(to right, #1a7f37, #e3b93f 50%, #c0362c); }
+  .pt-marker { position: absolute; top: -4px; width: 3px; height: 16px; background: #1c1c1c; border-radius: 2px; box-shadow: 0 0 0 2px #fff; transform: translateX(-50%); }
+  .pt-scale { display: table; width: 100%; margin-top: 5px; font-size: 8px; color: #7a7a7a; text-transform: uppercase; letter-spacing: .3px; }
+  .pt-scale span { display: table-cell; }
+  .pt-scale .mid { text-align: center; }
+  .pt-scale .end { text-align: right; }
+  .pt-label { font-size: 10.5px; font-weight: bold; color: #2b2b2b; margin-top: 6px; }
+  /* B. Comparaison prix affiché / défendable pour le bien */
+  .ct-compare { display: table; width: 100%; background: #fff; border: 1px solid #e4e8ec; border-radius: 6px; margin: 4px 0 10px; }
+  .ctc-cell { display: table-cell; width: 44%; vertical-align: middle; padding: 9px 12px; }
+  .ctc-arrow { display: table-cell; width: 12%; text-align: center; vertical-align: middle; font-size: 18px; color: #b3b3b3; }
+  .ct-compare .lab { font-size: 8px; text-transform: uppercase; color: #7a7a7a; letter-spacing: .3px; }
+  .ct-compare .num { font-size: 15px; font-weight: bold; margin-top: 2px; line-height: 1.1; }
+  .ct-compare .sub { font-size: 8px; color: #7a7a7a; margin-top: 3px; }
+  .ct-target { background: #fff6e5; }
+  .ct-target .num { color: {{ verdict.feu_color }}; }
+  /* D. Tableau de bord (KPIs) */
+  .kpi-row { display: table; width: 100%; border-spacing: 6px 0; margin: 2px -6px 8px; }
+  .kpi { display: table-cell; background: #eef1f5; border-radius: 5px; padding: 7px 6px; text-align: center; }
+  .kpi .kv { font-size: 11.5px; font-weight: bold; color: #1c1c1c; }
+  .kpi .kl { font-size: 7px; color: #7a7a7a; text-transform: uppercase; letter-spacing: .3px; margin-top: 2px; }
+  /* C. Plan d'action */
+  .ct-sub { font-size: 8.5px; text-transform: uppercase; letter-spacing: .4px; color: #7a7a7a; font-weight: bold; margin: 8px 0 3px; }
+  ul.plan { list-style: none; margin: 0; padding-left: 2px; }
+  ul.plan li { position: relative; padding-left: 16px; margin-bottom: 5px; font-size: 10px; }
+  ul.plan li::before { content: "\2192"; position: absolute; left: 0; color: {{ verdict.feu_color }}; font-weight: bold; }
+
+  /* Références en exposant */
+  sup.ref { color: #2f7ec4; font-weight: bold; font-size: 0.68em; padding: 0 1px; }
+
+  /* Sources et références */
+  ol.sources { margin: 6px 0 0 0; padding-left: 22px; font-size: 10px; color: #333; }
+  ol.sources li { margin-bottom: 9px; padding-left: 4px; page-break-inside: avoid; }
+  ol.sources .s-nom { font-weight: bold; }
+  ol.sources .s-detail { color: #555; }
+  ol.sources .s-url { color: #2f7ec4; font-size: 9px; word-break: break-all; }
+
+  /* Aide à la décision (formulaire à remplir) */
+  .ad-intro { font-size: 9.5px; color: #7a7a7a; margin: 2px 0 10px; }
+  .ad-theme { font-weight: bold; font-size: 10px; text-transform: uppercase; letter-spacing: .4px; color: #2b2b2b;
+    border-bottom: 1px solid #ececec; padding-bottom: 3px; margin: 14px 0 4px; page-break-after: avoid; }
+  .ad-q { font-size: 10px; color: #1c1c1c; margin-top: 9px; page-break-inside: avoid; }
+  .fill-line { border-bottom: 1px dotted #b3b3b3; height: 17px; margin-top: 3px; }
+
+  /* Page de notes (pointillés) */
+  .notes-line { border-bottom: 1px dotted #bcbcbc; height: 30px; }
 
   /* Footer */
   .footer { margin-top: 20px; border-top: 1px solid #e2e2e2; padding-top: 8px; font-size: 8px; color: #888; }
@@ -202,7 +277,7 @@
   </div>
 
   {% if verdict.resume %}
-  <div class="resume">{{ verdict.resume }}</div>
+  <div class="resume">{{ verdict.resume | sup }}</div>
   {% endif %}
 
   <div class="verdict-wrap">
@@ -223,12 +298,12 @@
   <div class="cols" style="margin-bottom:8px">
     <div class="col" style="width:48%">
       <div class="section-title" style="margin-top:4px">Points forts</div>
-      <ul class="pf">{% for p in points_forts[:4] %}<li>{{ p }}</li>{% endfor %}</ul>
+      <ul class="pf">{% for p in points_forts[:4] %}<li>{{ p | sup }}</li>{% endfor %}</ul>
     </div>
     <div class="col col-gap"></div>
     <div class="col" style="width:48%">
       <div class="section-title" style="margin-top:4px">Points faibles</div>
-      <ul class="pw">{% for p in points_faibles[:4] %}<li>{{ p }}</li>{% endfor %}</ul>
+      <ul class="pw">{% for p in points_faibles[:4] %}<li>{{ p | sup }}</li>{% endfor %}</ul>
     </div>
   </div>
   {% endif %}
@@ -253,7 +328,7 @@
     </div>
     {% if prix.reference_marche or prix.decote %}
     <div class="ph-foot">
-      {% if prix.reference_marche %}<span><span class="l">Réf. marché réel (DVF)</span>{{ prix.reference_marche }}</span>{% endif %}
+      {% if prix.reference_marche %}<span><span class="l">Réf. marché réel (DVF)</span>{{ prix.reference_marche | sup }}</span>{% endif %}
       {% if prix.decote %}<span><span class="l">Décote visée</span>{{ prix.decote }}</span>{% endif %}
     </div>
     {% endif %}
@@ -262,20 +337,20 @@
   <div class="id-cols" style="margin-top:16px">
     <div class="idc">
       <table class="kv">
-        {% if bien.type %}<tr><td class="k">Type</td><td class="v">{{ bien.type }}</td></tr>{% endif %}
-        {% if bien.surface_m2 %}<tr><td class="k">Surface</td><td class="v">{{ bien.surface_m2 }} m²</td></tr>{% endif %}
-        {% if bien.pieces %}<tr><td class="k">Pièces</td><td class="v">{{ bien.pieces }}</td></tr>{% endif %}
-        {% if bien.etage %}<tr><td class="k">Étage</td><td class="v">{{ bien.etage }}</td></tr>{% endif %}
-        {% if bien.annee %}<tr><td class="k">Époque</td><td class="v">{{ bien.annee }}</td></tr>{% endif %}
+        {% if bien.type %}<tr><td class="k">Type</td><td class="v"><span class="cl2">{{ bien.type }}</span></td></tr>{% endif %}
+        {% if bien.surface_m2 %}<tr><td class="k">Surface</td><td class="v"><span class="cl2">{{ bien.surface_m2 }} m²</span></td></tr>{% endif %}
+        {% if bien.pieces %}<tr><td class="k">Pièces</td><td class="v"><span class="cl2">{{ bien.pieces }}</span></td></tr>{% endif %}
+        {% if bien.etage %}<tr><td class="k">Étage</td><td class="v"><span class="cl2">{{ bien.etage }}</span></td></tr>{% endif %}
+        {% if bien.annee %}<tr><td class="k">Époque</td><td class="v"><span class="cl2">{{ bien.annee }}</span></td></tr>{% endif %}
       </table>
     </div>
     <div class="idc gap"></div>
     <div class="idc">
       <table class="kv">
-        {% if bien.charges %}<tr><td class="k">Charges</td><td class="v">{{ bien.charges }}</td></tr>{% endif %}
-        {% if bien.taxe_fonciere %}<tr><td class="k">Taxe foncière</td><td class="v">{{ bien.taxe_fonciere }}</td></tr>{% endif %}
-        {% if bien.copropriete %}<tr><td class="k">Copropriété</td><td class="v">{{ bien.copropriete }}</td></tr>{% endif %}
-        {% if bien.annexes %}<tr><td class="k">Annexes</td><td class="v">{{ bien.annexes }}</td></tr>{% endif %}
+        {% if bien.charges %}<tr><td class="k">Charges</td><td class="v"><span class="cl2">{{ bien.charges }}</span></td></tr>{% endif %}
+        {% if bien.taxe_fonciere %}<tr><td class="k">Taxe foncière</td><td class="v"><span class="cl2">{{ bien.taxe_fonciere }}</span></td></tr>{% endif %}
+        {% if bien.copropriete %}<tr><td class="k">Copropriété</td><td class="v"><span class="cl2">{{ bien.copropriete }}</span></td></tr>{% endif %}
+        {% if bien.annexes %}<tr><td class="k">Annexes</td><td class="v"><span class="cl2">{{ bien.annexes }}</span></td></tr>{% endif %}
       </table>
     </div>
   </div>
@@ -296,9 +371,9 @@
     </div>
     <div class="dpe-scale">
       <div class="dpe-head">Émission de CO₂ (GES) <span class="unit">(kg CO₂/m²/an)</span></div>
-      {% for L, rng, w, dark in [('A','≤ 6',58,false),('B','7 à 11',65,false),('C','12 à 30',72,true),('D','31 à 50',79,true),('E','51 à 70',86,false),('F','71 à 100',93,false),('G','≥ 101',100,false)] %}
+      {% for L, rng, w, dark in [('A','≤ 6',58,true),('B','7 à 11',65,true),('C','12 à 30',72,true),('D','31 à 50',79,false),('E','51 à 70',86,false),('F','71 à 100',93,false),('G','≥ 101',100,false)] %}
       <div class="dpe-row">
-        <div class="dpe-band band-{{ L|lower }}{% if dark %} txt-dark{% endif %}{% if L == en_ges %} active{% endif %}" style="width: {{ w }}%">
+        <div class="dpe-band gesband-{{ L|lower }}{% if dark %} txt-dark{% endif %}{% if L == en_ges %} active{% endif %}" style="width: {{ w }}%">
           <span class="range">{{ rng }}</span><span class="letter">{{ L }}</span>
         </div>
         {% if L == en_ges %}<div class="dpe-marker"><span class="big">{{ L }}</span>{% if bien.ges_kgco2 %}{{ bien.ges_kgco2 }} kg CO₂/m²/an{% else %}n.c.{% endif %}</div>{% endif %}
@@ -331,6 +406,20 @@
   <div class="note" style="margin-top:6px">{{ plan.note }}</div>
   {% endif %}
 
+  {% if environnement %}
+  <div class="section-title">Commerces et équipements alentours</div>
+  <div class="env-cats">
+    {% for g in environnement.groups %}
+    <div class="env-cat">
+      <div class="env-cat-h">{{ g.icon | safe }} {{ g.label }}</div>
+      <ul class="env-cat-list">
+        {% for p in g.pois %}<li>{{ p.nom | sup }}{% if p.distance %} <span class="env-dist">{{ p.distance }}</span>{% endif %}</li>{% endfor %}
+      </ul>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
   <div class="section-title{% if risque_global %} section-title-split{% endif %}" style="page-break-before: always">
     <span class="st-text">Étude de risques (vraisemblance × impact)</span>
     {% if risque_global %}<span class="st-aside"><span class="riskglobal {{ risque_global_cls }}">Risque global : {{ risque_global }}</span></span>{% endif %}
@@ -347,7 +436,7 @@
         <td class="n">{{ r.v }}</td>
         <td class="n">{{ r.i }}</td>
         <td class="n"><span class="chip {{ r.cls }}">{{ r.crit }}</span></td>
-        <td>{{ r.commentaire }}</td>
+        <td>{{ r.commentaire | sup }}</td>
       </tr>
       {% endfor %}
     </tbody>
@@ -358,7 +447,7 @@
     <div class="col" style="width:48%">
       <div class="section-title">Points de vigilance</div>
       <ul class="tight">
-        {% for v in vigilance %}<li>{{ v }}</li>{% endfor %}
+        {% for v in vigilance %}<li>{{ v | sup }}</li>{% endfor %}
       </ul>
     </div>
     <div class="col col-gap"></div>
@@ -366,12 +455,44 @@
       <div class="section-title">Négociation</div>
       {% if negociation.leviers %}
       <ul class="tight">
-        {% for l in negociation.leviers %}<li>{{ l }}</li>{% endfor %}
+        {% for l in negociation.leviers %}<li>{{ l | sup }}</li>{% endfor %}
       </ul>
       {% endif %}
-      {% if negociation.argument_cle %}<div class="neg-arg">« {{ negociation.argument_cle }} »</div>{% endif %}
+      {% if negociation.argument_cle %}<div class="neg-arg">« {{ negociation.argument_cle | sup }} »</div>{% endif %}
     </div>
   </div>
+
+  {% if cout_revient_svg or radar_svg or dvf_historique %}
+  <div class="section-title" style="page-break-before: always">Coût de revient et score du bien</div>
+  <div class="cols">
+    <div class="col" style="width:56%">
+      {% if cout_revient_svg %}
+      <div class="ct-sub">Coût de revient vs valeur après travaux</div>
+      <div class="chart-box eqh">{{ cout_revient_svg | safe }}</div>
+      {% endif %}
+    </div>
+    <div class="col col-gap"></div>
+    <div class="col" style="width:40%">
+      {% if radar_svg %}
+      <div class="ct-sub">Score du bien</div>
+      <div class="chart-box eqh">{{ radar_svg | safe }}</div>
+      {% endif %}
+    </div>
+  </div>
+  {% if cout_revient.note %}<div class="note" style="margin-top:5px">{{ cout_revient.note | sup }}</div>
+  {% else %}<div class="chart-legend" style="margin-top:5px">{% if cout_revient_svg %}Coût de revient : achat + frais + travaux + aléas, comparé à la valeur une fois rénové.{% endif %}{% if radar_svg %} Score : note sur 10 par critère.{% endif %}</div>{% endif %}
+
+  {% if dvf_historique %}
+  <div class="section-title">Historique DVF du bien</div>
+  <table class="mkt">
+    <thead><tr><th>Date</th><th class="num">Prix</th><th>Détail</th></tr></thead>
+    <tbody>
+      {% for m in dvf_historique %}<tr><td><b>{{ m.date }}</b></td><td class="num">{{ m.prix }}</td><td>{{ m.detail | sup }}</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  <div class="note" style="margin-top:6px">Mutations passées du bien ou de l'immeuble issues de DVF (ventes signées).</div>
+  {% endif %}
+  {% endif %}
 
   {% if marche %}
   <div class="market">
@@ -407,6 +528,12 @@
       </div>
     </div>
 
+    {% if marche.evolution_svg %}
+    <div class="section-title">Évolution du prix médian (€/m²)</div>
+    <div class="chart-box">{{ marche.evolution_svg | safe }}</div>
+    <div class="chart-legend">Prix médian au m² des ventes signées (DVF), par année.</div>
+    {% endif %}
+
     {% if marche.prix %}
     <div class="section-title">Prix réels par typologie et secteur</div>
     <table class="mkt">
@@ -418,7 +545,7 @@
         <tr>
           <td><b>{{ row.secteur }}</b></td>
           <td>{{ row.typologie }}</td>
-          <td class="num">{{ row.prix_m2_median or 'nc' }}</td>
+          <td class="num">{{ row.prix_m2_median | sup if row.prix_m2_median else 'nc' }}</td>
           <td class="num">{{ row.fourchette or 'nc' }}</td>
           <td class="num">{{ row.volume or 'nc' }}</td>
           <td class="num">{{ row.estimation_portail or 'nc' }}</td>
@@ -428,6 +555,12 @@
       </tbody>
     </table>
     <div class="note" style="margin-top:6px">Prix signés (DVF) en priorité. Les estimations de portails, citées pour mémoire, sont généralement 10 à 25 % au-dessus des prix réellement signés.</div>
+    {% endif %}
+
+    {% if marche.boxplot_svg %}
+    <div class="section-title">Distribution des prix par secteur (DVF)</div>
+    <div class="chart-box">{{ marche.boxplot_svg | safe }}</div>
+    <div class="chart-legend">Lecture : trait vertical = médiane, boîte = quartiles Q1 à Q3, moustaches = min et max des ventes signées. <b>◇</b> estimation portail ; <b>trait rouge</b> = prix du bien étudié (si renseigné).</div>
     {% endif %}
 
     <div class="cols" style="margin-top:8px">
@@ -450,7 +583,7 @@
         <div class="section-title">Risques de marché</div>
         {% if marche.risques_marche %}
         <ul class="tight">
-          {% for r in marche.risques_marche %}<li>{{ r }}</li>{% endfor %}
+          {% for r in marche.risques_marche %}<li>{{ r | sup }}</li>{% endfor %}
         </ul>
         {% else %}<div class="note">Aucun risque de marché majeur relevé.</div>{% endif %}
       </div>
@@ -474,22 +607,79 @@
     </div>
     {% endif %}
 
-    {% if marche.conclusion.fourchette_m2_defendable or marche.conclusion.recommandation or marche.conclusion.pouvoir_negociation %}
+    {% set c = marche.conclusion %}
+    {% if c.fourchette_m2_defendable or c.recommandation or c.pouvoir_negociation or c.posture_pos is not none or c.bien_total %}
     <div class="section-title">Conclusion pour l'acheteur</div>
     <div class="concl">
-      {% if marche.conclusion.fourchette_m2_defendable %}<div class="price-line price-strong"><div class="lab">Fourchette de prix/m² défendable (segment ciblé)</div><div class="val">{{ marche.conclusion.fourchette_m2_defendable }}</div></div>{% endif %}
-      {% if marche.conclusion.pouvoir_negociation %}<div class="price-line" style="border-bottom:0"><div class="lab">Pouvoir de négociation de l'acheteur</div><div class="val" style="font-size:11.5px">{{ marche.conclusion.pouvoir_negociation }}</div></div>{% endif %}
-      {% if marche.conclusion.recommandation %}<div class="neg-arg" style="margin-top:6px">{{ marche.conclusion.recommandation }}</div>{% endif %}
+
+      {% if c.posture_pos is not none %}
+      <div class="posture">
+        <div class="pt-track"><div class="pt-marker" style="left:{{ c.posture_pos }}%"></div></div>
+        <div class="pt-scale"><span>Favorable acheteur</span><span class="mid">Équilibré</span><span class="end">Favorable vendeur</span></div>
+        {% if c.posture_label %}<div class="pt-label">{{ c.posture_label | sup }}</div>{% endif %}
+      </div>
+      {% endif %}
+
+      {% if c.bien_total %}
+      <div class="ct-compare">
+        <div class="ctc-cell"><div class="lab">Prix affiché</div><div class="num">{{ c.bien_total.affiche_fmt or (prix.affiche or 'nc') }}</div></div>
+        <div class="ctc-arrow">&rarr;</div>
+        <div class="ctc-cell ct-target"><div class="lab">Valeur défendable pour ce bien</div><div class="num">{{ c.bien_total.total_fmt }}</div><div class="sub">{{ c.bien_total.m2_fmt }} × {{ c.bien_total.surface }} m²{% if c.bien_total.ecart_fmt %} · écart {{ c.bien_total.ecart_fmt }} / affiché{% endif %}</div></div>
+      </div>
+      {% elif c.fourchette_m2_defendable %}
+      <div class="price-line price-strong"><div class="lab">Fourchette de prix/m² défendable (segment ciblé)</div><div class="val">{{ c.fourchette_m2_defendable }}</div></div>
+      {% endif %}
+
+      {% if c.kpis %}
+      <div class="kpi-row">
+        {% for k in c.kpis[:4] %}<div class="kpi"><div class="kv">{{ k.valeur }}</div><div class="kl">{{ k.label }}</div></div>{% endfor %}
+      </div>
+      {% endif %}
+
+      {% if c.plan_action %}
+      <div class="ct-sub">Plan d'action</div>
+      <ul class="plan">{% for a in c.plan_action[:4] %}<li>{{ a | sup }}</li>{% endfor %}</ul>
+      {% endif %}
+
+      {% if c.pouvoir_negociation %}<div class="price-line" style="border-bottom:0; margin-top:6px"><div class="lab">Pouvoir de négociation de l'acheteur</div><div class="val" style="font-size:11.5px">{{ c.pouvoir_negociation | sup }}</div></div>{% endif %}
+      {% if c.recommandation %}<div class="neg-arg" style="margin-top:6px">{{ c.recommandation | sup }}</div>{% endif %}
     </div>
     {% endif %}
   </div>
   {% endif %}
 
+  {% if sources %}
+  <div class="section-title" style="page-break-before: always">Sources et références</div>
+  <ol class="sources">
+    {% for s in sources %}
+    <li><span class="s-nom">{{ s.nom }}</span>{% if s.detail %} <span class="s-detail">: {{ s.detail }}</span>{% endif %}{% if s.url %}<br><a class="s-url" href="{{ s.url }}">{{ s.url }}</a>{% endif %}</li>
+    {% endfor %}
+  </ol>
+  <div class="note" style="margin-top:8px">Les appels de note en exposant dans la fiche renvoient à ces sources numérotées.</div>
+  {% endif %}
+
   <div class="footer">
-    {% if sources %}<div class="src"><b>Sources :</b> {{ sources|join(' · ') }} · établie le {{ meta.date }}</div>{% endif %}
+    <div class="src">Fiche établie le {{ meta.date }}.</div>
     <div>{{ avertissement }}</div>
     <div style="margin-top:3px">{{ meta.auteur }}</div>
   </div>
+
+  {% if aide_decision %}
+  <div class="section-title" style="page-break-before: always">Aide à la décision : questions au vendeur</div>
+  <div class="ad-intro">À remplir lors des visites et des échanges avec le vendeur, l'agence ou le syndic. Les réponses complètent l'analyse et sécurisent la décision.</div>
+  {% for grp in aide_decision %}
+  <div class="ad-theme">{{ grp.theme }}</div>
+  {% for q in grp.questions %}
+  <div class="ad-q">{{ q | sup }}</div>
+  <div class="fill-line"></div>
+  {% endfor %}
+  {% endfor %}
+  {% endif %}
+
+  {% if notes_page %}
+  <div class="section-title" style="page-break-before: always">Notes</div>
+  {% for i in range(31) %}<div class="notes-line"></div>{% endfor %}
+  {% endif %}
 
 </body>
 </html>
