@@ -1,0 +1,58 @@
+{
+  "skill_name": "agent-immobilier",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Produis-moi une étude complète pour une maison de 95 m² à Bordeaux (33800, quartier Nansouty), affichée à 560 000 €. Je veux les risques (géorisques inclus), l'urbanisme, le marché et une valeur d'acquisition défendable.",
+      "expected_output": "Étude structurée : bien, étude de risques vraisemblance × impact, géorisques, urbanisme, marché DVF vs estimations, valeur d'acquisition défendable chiffrée, négociation, avertissement. Posture d'acquéreur.",
+      "files": [],
+      "expectations": [
+        "Le livrable couvre les géorisques du secteur (dont le retrait-gonflement des argiles, marqué à Bordeaux) avec des sources",
+        "Une étude de risques note chaque risque en vraisemblance (1-5) et impact (1-5) avec une criticité",
+        "Le marché est apprécié via les prix réels (DVF) en distinguant les estimations de portails",
+        "Une valeur d'acquisition défendable chiffrée (fourchette) est fournie",
+        "L'étude suit une structure à plusieurs sections (bien, risques, urbanisme, marché, valeur, négociation)",
+        "Le livrable se termine par un avertissement (analyse non réglementée)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Fais-moi une fiche récap A4 PDF pour ce bien à partir de cette annonce : evals/files/annonce_nantes.md",
+      "expected_output": "Un PDF A4 généré par scripts/generer_fiche_pdf.py, avec identité du bien, étiquette DPE graphique, tableau de risques V×I, prix et valeur d'acquisition défendable, négociation.",
+      "files": ["evals/files/annonce_nantes.md"],
+      "expectations": [
+        "Un fichier PDF est généré au moyen du script generer_fiche_pdf.py de la skill",
+        "Le PDF reprend correctement les données de l'annonce (prix 425 000 €, 92 m², DPE D)",
+        "Le PDF contient l'étiquette DPE sous forme graphique",
+        "Le PDF contient un tableau de risques avec une criticité",
+        "Le PDF affiche une valeur d'acquisition défendable et/ou une cible de négociation"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Fais l'étude de risques (vraisemblance × impact) d'un appartement en rez-de-chaussée, 55 m², au 8 quai de Rive-Neuve, 13007 Marseille, affiché à 320 000 €.",
+      "expected_output": "Matrice de risques : chaque risque noté V et I (1-5), criticité V×I, tri par criticité, plusieurs familles couvertes, actions de maîtrise, avertissement.",
+      "files": [],
+      "expectations": [
+        "Chaque risque est noté en vraisemblance (1-5) et en impact (1-5)",
+        "Une criticité V×I est calculée et les risques sont hiérarchisés",
+        "Plusieurs familles de risques sont couvertes (naturel, technologique, urbanisme, bâti, marché, etc.)",
+        "Des actions de maîtrise (vérification, diagnostic, provision, négociation) sont proposées",
+        "Le livrable se termine par un avertissement"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Trouve-moi des appartements d'au moins 100 m² à Manhattan (New York) sous 2 millions de dollars, plutôt calmes, pour y habiter.",
+      "expected_output": "Mandat de recherche reformulé, shortlist de candidats avec prix, surface, prix au pied carré, avis par bien, respect des critères (≥100 m², <2 M$), posture d'acheteur, mention de la volatilité des annonces.",
+      "files": [],
+      "expectations": [
+        "Un mandat de recherche est reformulé (critères durs et souhaits)",
+        "Une liste de candidats est présentée avec prix, surface et prix au pied carré (ou au m²)",
+        "Chaque candidat reçoit un avis (à creuser / à écarter) au service de l'acheteur",
+        "Les critères sont respectés (surface ≥ 100 m² soit ~1075 sqft, budget < 2 M$)",
+        "La date de recherche et la volatilité des annonces sont signalées"
+      ]
+    }
+  ]
+}

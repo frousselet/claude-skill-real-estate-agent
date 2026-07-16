@@ -1,0 +1,65 @@
+{
+  "meta": {
+    "date": "16 juillet 2026",
+    "auteur": "Agent Immobilier, conseiller d'acquéreur sans conflit d'intérêt"
+  },
+  "bien": {
+    "adresse": "15 rue Sainte-Adélaïde, 78000 Versailles",
+    "secteur": "Quartier Notre-Dame (secteur sauvegardé)",
+    "type": "Appartement 2 pièces",
+    "surface_m2": 42.7,
+    "pieces": 2,
+    "etage": "1er (sur porche)",
+    "annee": "XVIIIe, avant 1949",
+    "dpe": "G",
+    "dpe_kwh": 468,
+    "ges": "G",
+    "ges_kgco2": 106,
+    "charges": "non communiqué",
+    "taxe_fonciere": "non communiqué",
+    "copropriete": "Plusieurs bâtiments, sans PPT ni DTG",
+    "annexes": "Cave voûtée (humide)"
+  },
+  "prix": {
+    "affiche": "350 000 €",
+    "prix_m2_affiche": "~8 200 €/m²",
+    "reference_marche": "7 000 à 8 000 €/m² (DVF secteur)",
+    "valeur_defendable": "180 000 € (plafond 190 000 €)",
+    "cible_negociation": "≤ 190 000 € hors frais",
+    "decote": "≈ 46 % / prix affiché"
+  },
+  "verdict": {
+    "feu": "rouge",
+    "note_sur_100": 42,
+    "resume": "Emplacement rare et recherché, mais le prix affiché correspond à un bien déjà rénové appliqué à un logement classé G à rénover intégralement. L'écart d'environ 160 000 à 170 000 € avec la valeur défendable recouvre le budget travaux, les aléas du bâti ancien et les incertitudes de copropriété."
+  },
+  "risque_global": "Élevé",
+  "risques": [
+    {"libelle": "DPE G (passoire énergétique)", "famille": "Bâti", "v": 5, "i": 4, "commentaire": "Rénovation énergétique lourde ; interdiction de louer les G en 2025"},
+    {"libelle": "Survalorisation vs marché réel", "famille": "Marché", "v": 5, "i": 4, "commentaire": "Prix affiché au niveau du rénové pour un bien à rénover intégralement"},
+    {"libelle": "Retrait-gonflement des argiles", "famille": "Naturel", "v": 4, "i": 4, "commentaire": "Aléa fort 3/3, plusieurs sécheresses CATNAT ; fissures et fondations à vérifier"},
+    {"libelle": "Secteur sauvegardé / avis ABF", "famille": "Urbanisme", "v": 5, "i": 3, "commentaire": "Matériaux imposés, délais et surcoûts de travaux"},
+    {"libelle": "Copropriété sans PPT ni DTG", "famille": "Copropriété", "v": 4, "i": 3, "commentaire": "Toiture, cour, jardin à reprendre ; travaux collectifs probables non chiffrés"},
+    {"libelle": "Plomb (CREP)", "famille": "Bâti", "v": 4, "i": 3, "commentaire": "Bâti avant 1949 ; précautions de dépose et surcoût"},
+    {"libelle": "Plancher sur porche", "famille": "Bâti", "v": 4, "i": 3, "commentaire": "Isolation complexe, poste technique inhabituel"},
+    {"libelle": "Remontée de nappe", "famille": "Naturel", "v": 3, "i": 2, "commentaire": "Cave humide, infiltrations possibles"}
+  ],
+  "vigilance": [
+    "Argiles en aléa fort : faire vérifier fissures et fondations par un bureau d'études du bâti ancien",
+    "DPE G : chiffrer la sortie de passoire avant toute offre",
+    "Copropriété sans PPT ni DTG : réclamer PV d'AG (3 ans), carnet d'entretien, fonds de travaux",
+    "Prix affiché aligné sur du rénové : négociation indispensable",
+    "Plomb et plancher sur porche : prévoir des provisions de travaux spécifiques"
+  ],
+  "negociation": {
+    "leviers": [
+      "Classe G et rénovation intégrale à prévoir",
+      "Prix affiché au-dessus des prix réels DVF du secteur",
+      "Travaux et aléas techniques incompressibles",
+      "Copropriété ancienne sans visibilité sur les travaux"
+    ],
+    "argument_cle": "Payer 350 000 € reviendrait à acheter une valeur rénovée que le bien n'a pas encore, puis à financer les travaux une seconde fois."
+  },
+  "sources": ["Géorisques", "DVF (DGFiP / Etalab)", "DDT / DPE avril 2026", "PSMV Versailles", "Étude de valeur vénale 30/06/2026"],
+  "avertissement": "Analyse indépendante d'aide à la décision. Ni expertise judiciaire, ni conseil en investissement, ni avis juridique. La décision et le prix relèvent de l'acquéreur."
+}
