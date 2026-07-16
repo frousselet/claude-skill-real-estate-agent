@@ -13,9 +13,8 @@
 
   /* Header */
   .header {
-    border-top: 7px solid {{ verdict.feu_color }};
     border-bottom: 1px solid #e2e2e2;
-    padding: 12px 0 12px 0; margin-bottom: 16px;
+    padding: 0 0 12px 0; margin-bottom: 16px;
   }
   .header-top { display: table; width: 100%; }
   .header-left { display: table-cell; vertical-align: top; padding-right: 14px; }
@@ -34,7 +33,7 @@
   .section-title {
     font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: .6px;
     color: #2b2b2b; border-bottom: 2px solid #ececec; padding-bottom: 4px;
-    margin: 20px 0 10px 0; page-break-after: avoid;
+    margin: 15px 0 9px 0; page-break-after: avoid;
   }
   /* Title with a right-aligned badge: keep both vertically centered on one line */
   .section-title-split { display: table; width: 100%; }
@@ -89,15 +88,34 @@
   .price-2 { display: table; width: 100%; }
   .price-2 .c { display: table-cell; width: 50%; }
 
+  /* Prix et valeur — trois valeurs claires */
+  .price-hero { border: 1px solid #e4e8ec; border-radius: 8px; overflow: hidden; page-break-inside: avoid; }
+  .ph-row { display: table; width: 100%; table-layout: fixed; background: #f7f8fa; }
+  .ph-cell { display: table-cell; width: 33.33%; vertical-align: middle; padding: 11px 14px; border-left: 1px solid #e7eaee; }
+  .ph-cell.first { border-left: 0; }
+  .ph-cell .lab { font-size: 8.5px; color: #7a7a7a; text-transform: uppercase; letter-spacing: .4px; }
+  .ph-cell .num { font-size: 19px; font-weight: bold; margin-top: 3px; line-height: 1.05; white-space: nowrap; }
+  .ph-cell .sub { font-size: 8.5px; color: #7a7a7a; margin-top: 3px; }
+  .ph-target { background: #fff6e5; }
+  .ph-target .num { color: {{ verdict.feu_color }}; }
+  .ph-foot { border-top: 1px solid #e4e8ec; padding: 7px 14px; font-size: 9.5px; color: #333; }
+  .ph-foot span { margin-right: 20px; white-space: nowrap; }
+  .ph-foot .l { color: #7a7a7a; text-transform: uppercase; font-size: 8px; letter-spacing: .3px; margin-right: 4px; }
+
+  /* Identité — deux colonnes compactes */
+  .id-cols { display: table; width: 100%; page-break-inside: avoid; }
+  .id-cols .idc { display: table-cell; width: 48%; vertical-align: top; }
+  .id-cols .gap { width: 4%; }
+
   /* DPE label */
   .dpe-wrap { display: table; width: 100%; page-break-inside: avoid; }
   .dpe-scale { display: table-cell; width: 50%; vertical-align: top; }
   .dpe-scale.left { padding-right: 16px; }
-  .dpe-head { font-size: 10px; font-weight: bold; color: #2b2b2b; margin-bottom: 8px; }
+  .dpe-head { font-size: 10px; font-weight: bold; color: #2b2b2b; margin-bottom: 6px; }
   .dpe-head .unit { font-weight: normal; color: #7a7a7a; font-size: 9px; }
-  .dpe-row { position: relative; height: 26px; margin-bottom: 5px; }
+  .dpe-row { position: relative; height: 20px; margin-bottom: 3px; }
   .dpe-band {
-    height: 26px; color: #fff; display: flex; align-items: center; justify-content: space-between;
+    height: 20px; color: #fff; display: flex; align-items: center; justify-content: space-between;
     padding: 0 12px 0 10px; font-size: 9.5px;
     clip-path: polygon(0 0, calc(100% - 11px) 0, 100% 50%, calc(100% - 11px) 100%, 0 100%);
   }
@@ -113,7 +131,7 @@
   .band-g { background: #e30613; }
   .dpe-band.active { outline: 2px solid #111; outline-offset: 1px; }
   .dpe-marker {
-    position: absolute; right: 0; top: -2px; height: 30px;
+    position: absolute; right: 0; top: -1px; height: 24px;
     background: #1a1a1a; color: #fff; border-radius: 4px; padding: 0 9px;
     display: flex; align-items: center; font-size: 9px; font-weight: bold; white-space: nowrap;
   }
@@ -156,7 +174,7 @@
   .mkt-up   { background: #ffe6cc; color: #b5560d; }
   .mkt-flat { background: #eef0f2; color: #555; }
   .mkt-down { background: #e6f4ea; color: #1a7f37; }
-  .concl { background: #f7f8fa; border: 1px solid #e4e8ec; border-radius: 6px; padding: 12px 14px; }
+  .concl { background: #f7f8fa; border: 1px solid #e4e8ec; border-radius: 6px; padding: 12px 14px; page-break-inside: avoid; }
   .concl .price-strong { background: #fff6e5; }
   .concl .price-strong .val { color: {{ verdict.feu_color }}; font-size: 14px; }
 
@@ -212,61 +230,54 @@
   <div class="resume">{{ verdict.resume }}</div>
   {% endif %}
 
-  <div class="cols">
-    <div class="col" style="width:47%">
-      <div class="section-title">Identité du bien</div>
+  <div class="section-title">Prix et valeur</div>
+  <div class="price-hero">
+    <div class="ph-row">
+      <div class="ph-cell first">
+        <div class="lab">Prix affiché</div>
+        <div class="num">{{ prix.affiche or 'nc' }}</div>
+        {% if prix.prix_m2_affiche %}<div class="sub">{{ prix.prix_m2_affiche }}</div>{% endif %}
+      </div>
+      <div class="ph-cell ph-target">
+        <div class="lab">Prix défendable</div>
+        <div class="num">{{ prix.valeur_defendable or 'nc' }}</div>
+        <div class="sub">valeur cible d'achat</div>
+      </div>
+      <div class="ph-cell">
+        <div class="lab">Prix max</div>
+        <div class="num">{{ prix.plafond or 'nc' }}</div>
+        <div class="sub">à ne pas dépasser</div>
+      </div>
+    </div>
+    {% if prix.reference_marche or prix.decote %}
+    <div class="ph-foot">
+      {% if prix.reference_marche %}<span><span class="l">Réf. marché réel (DVF)</span>{{ prix.reference_marche }}</span>{% endif %}
+      {% if prix.decote %}<span><span class="l">Décote visée</span>{{ prix.decote }}</span>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="section-title">Identité du bien</div>
+  <div class="id-cols">
+    <div class="idc">
       <table class="kv">
         {% if bien.type %}<tr><td class="k">Type</td><td class="v">{{ bien.type }}</td></tr>{% endif %}
         {% if bien.surface_m2 %}<tr><td class="k">Surface</td><td class="v">{{ bien.surface_m2 }} m²</td></tr>{% endif %}
         {% if bien.pieces %}<tr><td class="k">Pièces</td><td class="v">{{ bien.pieces }}</td></tr>{% endif %}
         {% if bien.etage %}<tr><td class="k">Étage</td><td class="v">{{ bien.etage }}</td></tr>{% endif %}
         {% if bien.annee %}<tr><td class="k">Époque</td><td class="v">{{ bien.annee }}</td></tr>{% endif %}
+      </table>
+    </div>
+    <div class="idc gap"></div>
+    <div class="idc">
+      <table class="kv">
         {% if bien.charges %}<tr><td class="k">Charges</td><td class="v">{{ bien.charges }}</td></tr>{% endif %}
         {% if bien.taxe_fonciere %}<tr><td class="k">Taxe foncière</td><td class="v">{{ bien.taxe_fonciere }}</td></tr>{% endif %}
         {% if bien.copropriete %}<tr><td class="k">Copropriété</td><td class="v">{{ bien.copropriete }}</td></tr>{% endif %}
         {% if bien.annexes %}<tr><td class="k">Annexes</td><td class="v">{{ bien.annexes }}</td></tr>{% endif %}
       </table>
     </div>
-    <div class="col col-gap"></div>
-    <div class="col" style="width:51%">
-      <div class="section-title">Prix et valeur</div>
-      <div class="price-box">
-        <div class="price-2">
-          <div class="c"><div class="price-line" style="border-bottom:0"><div class="lab">Prix affiché</div><div class="val">{{ prix.affiche or 'nc' }}</div></div></div>
-          <div class="c"><div class="price-line" style="border-bottom:0"><div class="lab">Prix / m² affiché</div><div class="val">{{ prix.prix_m2_affiche or 'nc' }}</div></div></div>
-        </div>
-        <div class="price-line"><div class="lab">Référence marché réel (prix signés)</div><div class="val" style="font-size:11.5px">{{ prix.reference_marche or 'nc' }}</div></div>
-        <div class="price-strong"><div class="lab">Valeur d'acquisition défendable</div><div class="val">{{ prix.valeur_defendable or 'nc' }}</div></div>
-        <div class="price-2">
-          <div class="c"><div class="price-line" style="border-bottom:0"><div class="lab">Cible de négociation</div><div class="val" style="font-size:11.5px">{{ prix.cible_negociation or 'nc' }}</div></div></div>
-          <div class="c"><div class="price-line" style="border-bottom:0"><div class="lab">Décote visée</div><div class="val" style="font-size:11.5px">{{ prix.decote or 'nc' }}</div></div></div>
-        </div>
-      </div>
-    </div>
   </div>
-
-  {% if plan %}
-  <div class="section-title">Plan du bien — {% if plan.mode == 'reproduction' %}reproduit, cotes réelles{% else %}schéma d'agencement estimatif{% endif %}</div>
-  <div class="cols">
-    <div class="col" style="width:61%">
-      <div class="plan-box">{{ plan.svg|safe }}</div>
-    </div>
-    <div class="col col-gap"></div>
-    <div class="col" style="width:36%">
-      {% if plan.source %}<div class="pill-label">Source</div><div style="font-size:9.5px; margin-bottom:8px">{{ plan.source }}</div>{% endif %}
-      {% if plan.legende %}<ul class="tight" style="font-size:9.5px">{% for l in plan.legende %}<li>{{ l }}</li>{% endfor %}</ul>{% endif %}
-      <div class="plan-legend">
-        <span><span class="sw" style="background:#fdf3e3"></span>Jour</span>
-        <span><span class="sw" style="background:#eaf0fb"></span>Nuit</span>
-        <span><span class="sw" style="background:#e6f4f4"></span>Eau</span>
-        <span><span class="sw" style="background:#eef0f2"></span>Service</span>
-        <span><span class="sw" style="background:#f4f4f2"></span>Circulation</span>
-        <span><span class="wl"></span>Fenêtre</span>
-      </div>
-    </div>
-  </div>
-  <div class="note" style="margin-top:6px">{{ plan.note }}</div>
-  {% endif %}
 
   {% set en_dpe = (bien.dpe or '')|upper %}
   {% set en_ges = (bien.ges or '')|upper %}
@@ -338,6 +349,29 @@
       {% if negociation.argument_cle %}<div class="neg-arg">« {{ negociation.argument_cle }} »</div>{% endif %}
     </div>
   </div>
+
+  {% if plan %}
+  <div class="section-title" style="page-break-before: always">Plan du bien — {% if plan.mode == 'reproduction' %}reproduit, cotes réelles{% else %}schéma d'agencement estimatif{% endif %}</div>
+  <div class="cols">
+    <div class="col" style="width:61%">
+      <div class="plan-box">{{ plan.svg|safe }}</div>
+    </div>
+    <div class="col col-gap"></div>
+    <div class="col" style="width:36%">
+      {% if plan.source %}<div class="pill-label">Source</div><div style="font-size:9.5px; margin-bottom:8px">{{ plan.source }}</div>{% endif %}
+      {% if plan.legende %}<ul class="tight" style="font-size:9.5px">{% for l in plan.legende %}<li>{{ l }}</li>{% endfor %}</ul>{% endif %}
+      <div class="plan-legend">
+        <span><span class="sw" style="background:#fdf3e3"></span>Jour</span>
+        <span><span class="sw" style="background:#eaf0fb"></span>Nuit</span>
+        <span><span class="sw" style="background:#e6f4f4"></span>Eau</span>
+        <span><span class="sw" style="background:#eef0f2"></span>Service</span>
+        <span><span class="sw" style="background:#f4f4f2"></span>Circulation</span>
+        <span><span class="wl"></span>Fenêtre</span>
+      </div>
+    </div>
+  </div>
+  <div class="note" style="margin-top:6px">{{ plan.note }}</div>
+  {% endif %}
 
   {% if marche %}
   <div class="market">

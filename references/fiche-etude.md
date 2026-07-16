@@ -37,8 +37,8 @@ couleurs.
     "auteur": "Agent Immobilier, conseiller d'acquéreur sans conflit d'intérêt"
   },
   "bien": {
-    "adresse": "15 rue Sainte-Adélaïde, 78000 Versailles",
-    "secteur": "Quartier Notre-Dame",
+    "adresse": "12 rue des Lilas, 00000 Villexemple",
+    "secteur": "Centre-ville",
     "type": "Appartement 2 pièces",
     "surface_m2": 42.7,
     "pieces": 2,
@@ -152,7 +152,7 @@ peut aussi produire une fiche centrée sur le marché en fournissant un JSON min
 ```json
 {
   "marche": {
-    "perimetre": "Versailles (78000), quartier Notre-Dame et centre historique",
+    "perimetre": "Villexemple (00000), centre-ville",
     "date_donnees": "DVF millésime avril 2026 · INSEE 2023 · Observatoire des loyers 2025",
     "tendance": {
       "direction": "stable",
@@ -172,7 +172,7 @@ peut aussi produire une fiche centrée sur le marché en fournissant un JSON min
       "socio": "Ménages aisés, 62 % de propriétaires"
     },
     "prix": [
-      {"secteur": "Notre-Dame", "typologie": "Appartement à rénover", "prix_m2_median": "5 900 €/m²", "fourchette": "5 000 – 6 800 €/m²", "volume": "≈ 60/an", "estimation_portail": "7 200 €/m²", "tendance": "baisse"}
+      {"secteur": "Centre-ville", "typologie": "Appartement à rénover", "prix_m2_median": "5 900 €/m²", "fourchette": "5 000 – 6 800 €/m²", "volume": "≈ 60/an", "estimation_portail": "7 200 €/m²", "tendance": "baisse"}
     ],
     "locatif": {
       "loyer_m2": "21 à 25 €/m²",
