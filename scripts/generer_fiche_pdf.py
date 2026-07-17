@@ -325,6 +325,134 @@ def process_analyse(data):
     return data
 
 
+def build_cible_svg(rings):
+    """Cible chiffrée : anneaux concentriques par distance autour du bien (★ au
+    centre), du plus proche au plus lointain. `rings` = liste (proche -> loin) de
+    {label, prix_m2, volume}. Une légende à droite donne médiane et volume."""
+    rr = [r for r in (rings or []) if isinstance(r, dict)]
+    n = len(rr)
+    if n < 1:
+        return ""
+    W, H = 380.0, 232.0
+    cx, cy, Rmax = 104.0, H / 2, 94.0
+    palette = ["#5b83b8", "#89a9d0", "#b3c8e2", "#d7e2f0", "#eaf0f7"]
+    o = [f'<svg viewBox="0 0 {W:.0f} {H:.0f}" width="100%" style="max-width:{W:.0f}px" '
+         f'xmlns="http://www.w3.org/2000/svg" font-family="DejaVu Sans, Arial, sans-serif">']
+    for i in range(n - 1, -1, -1):
+        R = Rmax * (i + 1) / n
+        col = palette[min(i, len(palette) - 1)]
+        o.append(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{R:.1f}" fill="{col}" stroke="#ffffff" stroke-width="1.2"/>')
+    o.append(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="6.5" fill="#c0362c" stroke="#fff" stroke-width="1.5"/>')
+    o.append(f'<text x="{cx:.1f}" y="{cy+2.9:.1f}" text-anchor="middle" font-size="8" fill="#fff">★</text>')
+    lx = 224.0
+    ly0 = cy - (n * 22) / 2 + 12
+    for i, r in enumerate(rr):
+        yy = ly0 + i * 22
+        col = palette[min(i, len(palette) - 1)]
+        o.append(f'<rect x="{lx:.1f}" y="{yy-8:.1f}" width="9" height="9" rx="2" fill="{col}"/>')
+        o.append(f'<text x="{lx+14:.1f}" y="{yy:.1f}" font-size="8.5" font-weight="bold" fill="#333">{_sx(r.get("label",""))}</text>')
+        line2 = _sx(str(r.get("prix_m2", "")))
+        if r.get("volume"):
+            line2 += "  ·  " + _sx(str(r.get("volume")))
+        o.append(f'<text x="{lx+14:.1f}" y="{yy+11:.1f}" font-size="8.5" fill="#555">{line2}</text>')
+    o.append("</svg>")
+    return "".join(o)
+
+
+def build_scatter_svg(sc):
+    """Nuage de points DVF : chaque vente = un point (x, €/m²), avec le bien mis
+    en évidence. `sc` = {x_label, points:[{x, y}], bien:{x, y}}."""
+    if not isinstance(sc, dict):
+        return ""
+    pts = []
+    for p in sc.get("points", []) or []:
+        try:
+            pts.append((float(p["x"]), float(p["y"])))
+        except (KeyError, TypeError, ValueError):
+            continue
+    if len(pts) < 3:
+        return ""
+    bien = None
+    b = sc.get("bien")
+    if isinstance(b, dict):
+        try:
+            bien = (float(b["x"]), float(b["y"]))
+        except (KeyError, TypeError, ValueError):
+            bien = None
+    allx = [p[0] for p in pts] + ([bien[0]] if bien else [])
+    ally = [p[1] for p in pts] + ([bien[1]] if bien else [])
+    xmin, xmax = min(allx), max(allx)
+    ymin, ymax = min(ally), max(ally)
+    xs = (xmax - xmin) or 1.0
+    ysp = (ymax - ymin) or (ymax or 1.0)
+    xlo, xhi = xmin - xs * 0.08, xmax + xs * 0.08
+    ylo, yhi = ymin - ysp * 0.10, ymax + ysp * 0.10
+    W, H = 470.0, 210.0
+    ML, MR, MT, MB = 56.0, 12.0, 10.0, 30.0
+    pw, ph = W - ML - MR, H - MT - MB
+    fx = lambda v: ML + (v - xlo) / (xhi - xlo) * pw
+    fy = lambda v: MT + (yhi - v) / (yhi - ylo) * ph
+    o = [f'<svg viewBox="0 0 {W:.0f} {H:.0f}" width="100%" style="max-width:{W:.0f}px" '
+         f'xmlns="http://www.w3.org/2000/svg" font-family="DejaVu Sans, Arial, sans-serif">']
+    for i in range(5):
+        v = ylo + (yhi - ylo) * i / 4
+        yy = fy(v)
+        o.append(f'<line x1="{ML:.1f}" y1="{yy:.1f}" x2="{W-MR:.1f}" y2="{yy:.1f}" stroke="#eee"/>')
+        o.append(f'<text x="{ML-6:.1f}" y="{yy+3:.1f}" text-anchor="end" font-size="8" fill="#888">{_fmt_eur(v)}</text>')
+    for x, y in pts:
+        o.append(f'<circle cx="{fx(x):.1f}" cy="{fy(y):.1f}" r="2.6" fill="#8aa0b5" fill-opacity="0.85"/>')
+    if bien:
+        bx, by = fx(bien[0]), fy(bien[1])
+        o.append(f'<circle cx="{bx:.1f}" cy="{by:.1f}" r="5" fill="#c0362c" stroke="#fff" stroke-width="1.4"/>')
+        o.append(f'<text x="{bx+7:.1f}" y="{by-5:.1f}" font-size="8" font-weight="bold" fill="#c0362c">le bien</text>')
+    o.append(f'<line x1="{ML:.1f}" y1="{MT:.1f}" x2="{ML:.1f}" y2="{H-MB:.1f}" stroke="#ccc"/>')
+    o.append(f'<line x1="{ML:.1f}" y1="{H-MB:.1f}" x2="{W-MR:.1f}" y2="{H-MB:.1f}" stroke="#ccc"/>')
+    o.append(f'<text x="{ML+pw/2:.1f}" y="{H-6:.1f}" text-anchor="middle" font-size="8" fill="#888">{_sx(sc.get("x_label","Surface (m²)"))}</text>')
+    o.append(f'<text x="10" y="{MT+8:.1f}" font-size="8" fill="#888">€/m²</text>')
+    o.append("</svg>")
+    return "".join(o)
+
+
+def build_histogramme_svg(bins):
+    """Histogramme des ventes par tranche de €/m². `bins` = liste ordonnée de
+    {tranche, ventes, bien?} ; la tranche du bien (bien=true) est surlignée."""
+    bb = []
+    for b in bins or []:
+        if not isinstance(b, dict):
+            continue
+        try:
+            bb.append((str(b.get("tranche", "")), int(round(float(b.get("ventes", 0)))), bool(b.get("bien"))))
+        except (TypeError, ValueError):
+            continue
+    if len(bb) < 2:
+        return ""
+    vmax = max(v for _, v, _ in bb) or 1
+    W, H = 470.0, 172.0
+    ML, MR, MT, MB = 34.0, 10.0, 10.0, 30.0
+    pw, ph = W - ML - MR, H - MT - MB
+    n = len(bb)
+    slot = pw / n
+    bw = slot * 0.66
+    o = [f'<svg viewBox="0 0 {W:.0f} {H:.0f}" width="100%" style="max-width:{W:.0f}px" '
+         f'xmlns="http://www.w3.org/2000/svg" font-family="DejaVu Sans, Arial, sans-serif">']
+    for i in range(4):
+        v = vmax * i / 3
+        yy = MT + ph - (v / vmax) * ph
+        o.append(f'<line x1="{ML:.1f}" y1="{yy:.1f}" x2="{W-MR:.1f}" y2="{yy:.1f}" stroke="#eee"/>')
+        o.append(f'<text x="{ML-4:.1f}" y="{yy+3:.1f}" text-anchor="end" font-size="7.5" fill="#888">{int(round(v))}</text>')
+    for i, (tr, v, is_bien) in enumerate(bb):
+        x = ML + slot * i + (slot - bw) / 2
+        h = (v / vmax) * ph
+        y = MT + ph - h
+        col = "#c0362c" if is_bien else "#8aa0b5"
+        o.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{bw:.1f}" height="{max(0.5,h):.1f}" fill="{col}"/>')
+        o.append(f'<text x="{x+bw/2:.1f}" y="{y-3:.1f}" text-anchor="middle" font-size="7.5" fill="#555">{v}</text>')
+        o.append(f'<text x="{x+bw/2:.1f}" y="{H-8:.1f}" text-anchor="middle" font-size="7" fill="#888">{_sx(tr)}</text>')
+    o.append(f'<line x1="{ML:.1f}" y1="{H-MB:.1f}" x2="{W-MR:.1f}" y2="{H-MB:.1f}" stroke="#ccc"/>')
+    o.append("</svg>")
+    return "".join(o)
+
+
 def process_marche(data):
     """Normalise le bloc étude de marché s'il est présent (Fonction 5).
     Absent, la fiche reste une fiche bien classique."""
@@ -357,6 +485,15 @@ def process_marche(data):
 
     marche["evolution_svg"] = build_line_svg(marche.get("evolution"))
     marche["boxplot_svg"] = build_boxplot_svg(marche.get("boxplot"))
+    marche["cible_svg"] = build_cible_svg(marche.get("cible"))
+    marche["scatter_svg"] = build_scatter_svg(marche.get("scatter"))
+    marche["histogramme_svg"] = build_histogramme_svg(marche.get("histogramme"))
+
+    comps = marche.get("comparables") or []
+    for c in comps:
+        for k in ("secteur", "surface", "prix", "prix_m2", "date", "distance"):
+            c.setdefault(k, "")
+    marche["comparables"] = comps
 
     data["marche"] = marche
     return data

@@ -348,6 +348,23 @@ Les quartiles doivent être des **statistiques DVF réelles** (Q1, médiane, Q3,
 max), jamais inventées. Si on ne dispose pas des quartiles, **omettre le boxplot**
 (ou ne fournir que la courbe) plutôt que de fabriquer une distribution.
 
+**Approfondir les DVF.** Quatre champs optionnels ajoutent une section « comparables
+et distribution » à l'étude de marché :
+
+- `comparables` : liste de `{secteur, surface, prix, prix_m2, date, distance}` = 4 à
+  6 **ventes DVF réelles** retenues comme comparables. Rendu en tableau. C'est la
+  base qui fonde la valeur défendable ; n'y mettre que des mutations vérifiées.
+- `cible` : liste (du plus proche au plus lointain) de `{label, prix_m2, volume}`
+  par anneau de distance (ex. `0-250 m`, `250-500 m`, `500-1000 m`). Trace une cible
+  concentrique, le bien au centre. Chaque anneau doit être chiffré (médiane + volume).
+- `scatter` : `{x_label, points: [{x, y}], bien: {x, y}}` (y = €/m², x = surface ou
+  année). Nuage de points des ventes, le bien mis en évidence.
+- `histogramme` : liste de `{tranche, ventes, bien?}` = répartition des ventes par
+  tranche de €/m² ; mettre `"bien": true` sur la tranche du bien étudié (surlignée).
+
+Toutes ces données viennent de **ventes DVF réelles** ; ne jamais fabriquer de
+points, d'anneaux ou de comparables fictifs. Omettre un champ si la donnée manque.
+
 **Conclusion enrichie.** Le bloc `conclusion` accepte, en plus des champs texte
 (`fourchette_m2_defendable`, `pouvoir_negociation`, `recommandation`) :
 

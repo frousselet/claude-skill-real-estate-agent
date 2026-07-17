@@ -563,6 +563,46 @@
     <div class="chart-legend">Lecture : trait vertical = médiane, boîte = quartiles Q1 à Q3, moustaches = min et max des ventes signées. <b>◇</b> estimation portail ; <b>trait rouge</b> = prix du bien étudié (si renseigné).</div>
     {% endif %}
 
+    {% if marche.comparables %}
+    <div class="section-title" style="page-break-before: always">Comparables DVF (ventes de référence)</div>
+    <table class="mkt">
+      <thead>
+        <tr><th>Secteur</th><th class="num">Surface</th><th class="num">Prix</th><th class="num">Prix/m²</th><th class="num">Date</th><th>Distance</th></tr>
+      </thead>
+      <tbody>
+        {% for c in marche.comparables %}
+        <tr><td><b>{{ c.secteur }}</b></td><td class="num">{{ c.surface }}</td><td class="num">{{ c.prix }}</td><td class="num">{{ c.prix_m2 }}</td><td class="num">{{ c.date }}</td><td>{{ c.distance }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="note" style="margin-top:6px">Ventes réellement signées (DVF), sélectionnées comme comparables. Ce sont elles qui fondent la valeur défendable.</div>
+    {% endif %}
+
+    {% if marche.cible_svg or marche.scatter_svg %}
+    <div class="cols" style="margin-top:8px">
+      <div class="col" style="width:44%">
+        {% if marche.cible_svg %}
+        <div class="ct-sub">Prix médian par distance</div>
+        <div class="chart-box">{{ marche.cible_svg | safe }}</div>
+        {% endif %}
+      </div>
+      <div class="col col-gap"></div>
+      <div class="col" style="width:52%">
+        {% if marche.scatter_svg %}
+        <div class="ct-sub">Ventes DVF et position du bien</div>
+        <div class="chart-box">{{ marche.scatter_svg | safe }}</div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="chart-legend" style="margin-top:4px">Chaque point = une vente signée ; ★ rouge = le bien. Cible : médiane €/m² par anneau de distance autour du bien.</div>
+    {% endif %}
+
+    {% if marche.histogramme_svg %}
+    <div class="section-title">Répartition des ventes par prix/m² (DVF)</div>
+    <div class="chart-box">{{ marche.histogramme_svg | safe }}</div>
+    <div class="chart-legend">Nombre de ventes par tranche de €/m². <b>Barre rouge</b> = tranche du bien étudié.</div>
+    {% endif %}
+
     <div class="cols" style="margin-top:8px">
       <div class="col" style="width:48%">
         <div class="section-title">Marché locatif</div>
