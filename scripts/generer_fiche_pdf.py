@@ -110,6 +110,27 @@ def trend_of(val):
     return val, "mkt-flat"
 
 
+PANELS = {
+    "a": ("A", "panel-a"),
+    "b": ("B", "panel-b"),
+    "r": ("R", "panel-r"),
+    "d": ("D", "panel-d"),
+    "direct": ("D", "panel-d"),
+}
+
+
+def panel_of(val):
+    """Normalise un panel du protocole DVF en (lettre, classe couleur).
+    A = ≤ 250 m, B = 250 à 500 m, R = neuf tenu hors de l'ancien, D = comparable
+    direct (même adresse ou même immeuble). Vide si non renseigné."""
+    key = str(val or "").strip().lower()
+    if key in PANELS:
+        return PANELS[key]
+    if not key:
+        return "", ""
+    return str(val).strip()[:8], "panel-b"
+
+
 def _fmt_eur(v):
     """7400 -> '7 400' (séparateur de milliers, espace)."""
     return f"{int(round(v)):,}".replace(",", " ")
@@ -349,12 +370,22 @@ def build_cible_svg(rings):
     for i, r in enumerate(rr):
         yy = ly0 + i * 22
         col = palette[min(i, len(palette) - 1)]
-        o.append(f'<rect x="{lx:.1f}" y="{yy-8:.1f}" width="9" height="9" rx="2" fill="{col}"/>')
-        o.append(f'<text x="{lx+14:.1f}" y="{yy:.1f}" font-size="8.5" font-weight="bold" fill="#333">{_sx(r.get("label",""))}</text>')
+        letter = panel_of(r.get("panel"))[0]
+        if letter:
+            # Pastille de panel : la lettre A/B/R tient dans le carré de légende.
+            o.append(f'<rect x="{lx:.1f}" y="{yy-8.5:.1f}" width="12" height="10.5" rx="2.5" fill="{col}"/>')
+            ink = "#ffffff" if i < 2 else "#24405f"
+            o.append(f'<text x="{lx+6:.1f}" y="{yy-0.7:.1f}" text-anchor="middle" font-size="8" '
+                     f'font-weight="bold" fill="{ink}">{_sx(letter)}</text>')
+            tx = lx + 17
+        else:
+            o.append(f'<rect x="{lx:.1f}" y="{yy-8:.1f}" width="9" height="9" rx="2" fill="{col}"/>')
+            tx = lx + 14
+        o.append(f'<text x="{tx:.1f}" y="{yy:.1f}" font-size="8.5" font-weight="bold" fill="#333">{_sx(r.get("label",""))}</text>')
         line2 = _sx(str(r.get("prix_m2", "")))
         if r.get("volume"):
             line2 += "  ·  " + _sx(str(r.get("volume")))
-        o.append(f'<text x="{lx+14:.1f}" y="{yy+11:.1f}" font-size="8.5" fill="#555">{line2}</text>')
+        o.append(f'<text x="{tx:.1f}" y="{yy+11:.1f}" font-size="8.5" fill="#555">{line2}</text>')
     o.append("</svg>")
     return "".join(o)
 
@@ -490,10 +521,14 @@ def process_marche(data):
     marche["histogramme_svg"] = build_histogramme_svg(marche.get("histogramme"))
 
     comps = marche.get("comparables") or []
+    has_panels = False
     for c in comps:
         for k in ("secteur", "surface", "prix", "prix_m2", "date", "distance"):
             c.setdefault(k, "")
+        c["panel_label"], c["panel_cls"] = panel_of(c.get("panel"))
+        has_panels = has_panels or bool(c["panel_label"])
     marche["comparables"] = comps
+    marche["has_panels"] = has_panels
 
     data["marche"] = marche
     return data
@@ -889,6 +924,9 @@ def find_chromium():
     patterns = [
         "/opt/pw-browsers/chromium-*/chrome-linux/chrome",
         "/opt/pw-browsers/chromium_headless_shell-*/chrome-linux/headless_shell",
+        # macOS : navigateurs installés en .app, absents du PATH
+        "/Applications/Chromium.app/Contents/MacOS/Chromium",
+        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     ]
     for pat in patterns:
         hits = sorted(glob.glob(pat))

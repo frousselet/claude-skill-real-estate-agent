@@ -33,6 +33,46 @@ La VAT n'est pas le haut de fourchette du quartier : c'est ce que VAUDRAIT CE
 bien-là, une fois rénové, avec ses contraintes permanentes. Retenir une
 fourchette (basse, centrale, haute) plutôt qu'un point.
 
+### Choisir des comparables valides (règle de comparabilité)
+
+Un comparable mal choisi fausse toute l'évaluation. Ne retenir que des ventes DVF
+réellement comparables au bien, sur ces critères :
+
+En France, quand une adresse est connue, ces critères se déclinent en un
+protocole opératoire complet (période, panels par distance, double surface
+DVF/Carrez, seuils de Tukey, table des exclusions motivées) :
+`references/protocole-dvf.md`. Il fait référence dès qu'on bâtit une base de
+mutations ; les critères ci-dessous en sont la lecture qualitative.
+
+- **Même type de bien que celui étudié.** Comparer à des ventes du **même type** que
+  le bien : un appartement avec des appartements, une maison avec des maisons. Écarter
+  les biens d'un autre type et les cas hors marché résidentiel courant (local
+  commercial, château, terrain, parking, dépendance), dont le prix au m² n'a rien à
+  voir. En France, s'appuyer sur le type de local DVF.
+- **Surface et nombre de pièces proches.** On ne compare pas un 250 m² à un 50 m², ni
+  un studio à un 4 pièces. Viser une fourchette serrée (**±20 %** autour de la
+  surface du bien, règle du protocole DVF) et une typologie voisine (T2 avec T2/T3),
+  car le prix au m² décroît avec la surface. Élargir à ±30 % seulement si
+  l'effectif est trop faible, en signalant l'élargissement et les deux effectifs.
+- **Même segment neuf / ancien et état comparable.** Ne pas mélanger neuf et ancien,
+  ni un bien rénové et un bien à rénover : ce sont des marchés différents. Comparer à
+  état équivalent, ou ajuster explicitement l'écart (et ne pas compter deux fois).
+- **Emplacement et prestige.** Tenir compte des **adresses de prestige** : vue
+  dégagée ou sur monument, étage élevé avec ascenseur, immeuble de standing, rue
+  cotée. Ces atouts commandent une prime qui ne se transpose pas à un bien qui ne les
+  a pas (et inversement, une adresse dévalorisée décote). Ne pas aligner un bien
+  ordinaire sur une vente d'exception voisine.
+- **Ventes récentes.** Privilégier le millésime le plus récent ; réajuster les ventes
+  plus anciennes de l'évolution du marché depuis leur date.
+
+Quand aucun comparable n'est parfait, en retenir plusieurs et **ajuster** poste par
+poste (surface, étage, état, exposition), en explicitant chaque correction.
+
+**Ne jamais écarter une vente au seul motif que son prix au m² surprend.** Une
+mutation authentique très basse ou très haute reste dans la base brute ; les valeurs
+aberrantes s'identifient statistiquement (méthode de Tukey, voir
+`protocole-dvf.md`), pas à l'intuition, et toute exclusion est motivée par écrit.
+
 ## Étape 2 : les coûts à retrancher
 
 **Travaux de remise à niveau.** Estimer en ordres de grandeur, poste par poste ou

@@ -351,12 +351,25 @@ max), jamais inventées. Si on ne dispose pas des quartiles, **omettre le boxplo
 **Approfondir les DVF.** Quatre champs optionnels ajoutent une section « comparables
 et distribution » à l'étude de marché :
 
-- `comparables` : liste de `{secteur, surface, prix, prix_m2, date, distance}` = 4 à
-  6 **ventes DVF réelles** retenues comme comparables. Rendu en tableau. C'est la
+- `comparables` : liste de `{secteur, surface, prix, prix_m2, date, distance, panel?}`
+  = 4 à 6 **ventes DVF réelles** retenues comme comparables. Rendu en tableau. C'est la
   base qui fonde la valeur défendable ; n'y mettre que des mutations vérifiées.
+  **Respecter la règle de comparabilité** (voir `methode-valeur.md`) : même type que
+  le bien étudié (un appartement avec des appartements, une maison avec des maisons ;
+  écarter local commercial, château, terrain, parking, dépendance),
+  surface et nombre de pièces proches, même segment neuf/ancien et état équivalent,
+  et tenir compte du prestige de l'adresse (vue, étage, standing) qui ne se transpose
+  pas. La cible, le nuage de points et l'histogramme obéissent à la même règle.
+  Quand la base a été bâtie selon `protocole-dvf.md`, n'y mettre que des lignes
+  **conservées** (jamais une exclue), prises d'abord dans le panel Direct (même
+  adresse ou même immeuble) puis dans le panel A.
 - `cible` : liste (du plus proche au plus lointain) de `{label, prix_m2, volume}`
   par anneau de distance (ex. `0-250 m`, `250-500 m`, `500-1000 m`). Trace une cible
   concentrique, le bien au centre. Chaque anneau doit être chiffré (médiane + volume).
+  Les deux premiers anneaux correspondent aux panels A et B du protocole DVF ; le
+  neuf (panel R) **ne s'y met jamais**, car un anneau encode une distance et le
+  panel R n'en a pas : il se lit dans le tableau des prix et le boxplot.
+
 - `scatter` : `{x_label, points: [{x, y}], bien: {x, y}}` (y = €/m², x = surface ou
   année). Nuage de points des ventes, le bien mis en évidence.
 - `histogramme` : liste de `{tranche, ventes, bien?}` = répartition des ventes par
@@ -364,6 +377,16 @@ et distribution » à l'étude de marché :
 
 Toutes ces données viennent de **ventes DVF réelles** ; ne jamais fabriquer de
 points, d'anneaux ou de comparables fictifs. Omettre un champ si la donnée manque.
+
+**Légendes de panel (protocole DVF).** Les lignes de `comparables` et les anneaux de
+`cible` acceptent un champ `panel` : `"A"` (≤ 250 m), `"B"` (250 à 500 m), `"R"`
+(neuf tenu hors de l'ancien) ou `"direct"` / `"D"` (même adresse ou même immeuble).
+Le script en fait une pastille colorée : une colonne « Panel » apparaît dans le
+tableau des comparables dès qu'au moins une ligne est renseignée, et la lettre est
+portée par le carré de légende de la cible. Renseigner ce champ dès que la base a
+été bâtie selon `protocole-dvf.md` ; l'omettre laisse le rendu inchangé. Pour les
+panels dans le tableau `prix` et le `boxplot`, il suffit de nommer le secteur ou le
+label « Panel A (≤ 250 m) », « Panel R (neuf) », etc.
 
 **Conclusion enrichie.** Le bloc `conclusion` accepte, en plus des champs texte
 (`fourchette_m2_defendable`, `pouvoir_negociation`, `recommandation`) :
@@ -404,7 +427,12 @@ tout bien :
 7. **Copropriété** : santé financière, travaux votés et à venir, gouvernance,
    analyse des PV d'AG et du règlement.
 8. **Marché et valeur de référence** : transactions réelles DVF, comparables,
-   tendances, écart aux estimations en ligne.
+   tendances, écart aux estimations en ligne. Base bâtie selon `protocole-dvf.md`
+   et restituée dans son ordre : base brute complète (une ligne par mutation,
+   panel, prix/m² retenu, statut), tableau statistique par panel A / B / A+B / R
+   avec seuils de Tukey et double lecture avec et sans outliers, puis liste
+   séparée des mutations exclues avec motif. Le tableau de synthèse des
+   comparables retenus vient après, jamais à la place de la base.
 9. **Valeur d'acquisition défendable** : application de la méthode
    (`methode-valeur.md`), avec fourchettes et plafond.
 10. **Stratégie de négociation** : cible, décote, leviers, argumentaire.

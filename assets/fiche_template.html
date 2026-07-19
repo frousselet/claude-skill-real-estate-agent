@@ -1,3 +1,13 @@
+{% macro dvf_historique_table(rows) -%}
+<div class="section-title">Historique DVF du bien</div>
+<table class="mkt">
+  <thead><tr><th>Date</th><th class="num">Prix</th><th>Détail</th></tr></thead>
+  <tbody>
+    {% for m in rows %}<tr><td><b>{{ m.date }}</b></td><td class="num">{{ m.prix }}</td><td>{{ m.detail | sup }}</td></tr>{% endfor %}
+  </tbody>
+</table>
+<div class="note" style="margin-top:6px">Mutations passées du bien ou de l'immeuble issues de DVF (ventes signées).</div>
+{%- endmacro %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -34,6 +44,11 @@
     font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: .6px;
     color: #2b2b2b; border-bottom: 2px solid #ececec; padding-bottom: 4px;
     margin: 15px 0 9px 0; page-break-after: avoid;
+  }
+  /* Bandeau chapeau : regroupe les analyses DVF sous un seul intitulé */
+  .dvf-banner {
+    font-size: 12.5px; color: #24405f; border-bottom: 2px solid #5b83b8;
+    margin: 0 0 4px 0; padding-bottom: 5px;
   }
   /* Title with a right-aligned badge: keep both vertically centered on one line */
   .section-title-split { display: table; width: 100%; }
@@ -203,6 +218,13 @@
   .mkt-up   { background: #ffe6cc; color: #b5560d; }
   .mkt-flat { background: #eef0f2; color: #555; }
   .mkt-down { background: #e6f4ea; color: #1a7f37; }
+  /* Panels du protocole DVF : A ≤250 m, B 250-500 m, R neuf, D même adresse */
+  .panel { display: inline-block; min-width: 15px; padding: 2px 6px; border-radius: 4px;
+           font-weight: bold; font-size: 9px; text-align: center; white-space: nowrap; }
+  .panel-a { background: #5b83b8; color: #fff; }
+  .panel-b { background: #b3c8e2; color: #24405f; }
+  .panel-r { background: #efe2c6; color: #7a5b16; }
+  .panel-d { background: #c0362c; color: #fff; }
   .concl { background: #f7f8fa; border: 1px solid #e4e8ec; border-radius: 6px; padding: 12px 14px; page-break-inside: avoid; }
   .concl .price-strong { background: #fff6e5; }
   .concl .price-strong .val { color: {{ verdict.feu_color }}; font-size: 14px; }
@@ -462,7 +484,7 @@
     </div>
   </div>
 
-  {% if cout_revient_svg or radar_svg or dvf_historique %}
+  {% if cout_revient_svg or radar_svg %}
   <div class="section-title" style="page-break-before: always">Coût de revient et score du bien</div>
   <div class="cols">
     <div class="col" style="width:56%">
@@ -482,16 +504,11 @@
   {% if cout_revient.note %}<div class="note" style="margin-top:5px">{{ cout_revient.note | sup }}</div>
   {% else %}<div class="chart-legend" style="margin-top:5px">{% if cout_revient_svg %}Coût de revient : achat + frais + travaux + aléas, comparé à la valeur une fois rénové.{% endif %}{% if radar_svg %} Score : note sur 10 par critère.{% endif %}</div>{% endif %}
 
-  {% if dvf_historique %}
-  <div class="section-title">Historique DVF du bien</div>
-  <table class="mkt">
-    <thead><tr><th>Date</th><th class="num">Prix</th><th>Détail</th></tr></thead>
-    <tbody>
-      {% for m in dvf_historique %}<tr><td><b>{{ m.date }}</b></td><td class="num">{{ m.prix }}</td><td>{{ m.detail | sup }}</td></tr>{% endfor %}
-    </tbody>
-  </table>
-  <div class="note" style="margin-top:6px">Mutations passées du bien ou de l'immeuble issues de DVF (ventes signées).</div>
   {% endif %}
+
+  {# Sans bloc marché, l'historique DVF garde sa propre section. #}
+  {% if dvf_historique and not marche %}
+  {{ dvf_historique_table(dvf_historique) }}
   {% endif %}
 
   {% if marche %}
@@ -528,12 +545,6 @@
       </div>
     </div>
 
-    {% if marche.evolution_svg %}
-    <div class="section-title">Évolution du prix médian (€/m²)</div>
-    <div class="chart-box">{{ marche.evolution_svg | safe }}</div>
-    <div class="chart-legend">Prix médian au m² des ventes signées (DVF), par année.</div>
-    {% endif %}
-
     {% if marche.prix %}
     <div class="section-title">Prix réels par typologie et secteur</div>
     <table class="mkt">
@@ -557,25 +568,32 @@
     <div class="note" style="margin-top:6px">Prix signés (DVF) en priorité. Les estimations de portails, citées pour mémoire, sont généralement 10 à 25 % au-dessus des prix réellement signés.</div>
     {% endif %}
 
+    {# Analyses DVF regroupées : boîtes à moustache d'abord, puis comparables,
+       cible, répartition, historique du bien et courbe de tendance. #}
+    {% if marche.boxplot_svg or marche.comparables or marche.cible_svg or marche.scatter_svg
+          or marche.histogramme_svg or dvf_historique or marche.evolution_svg %}
+    <div class="section-title dvf-banner" style="page-break-before: always">Analyses DVF</div>
+    {% endif %}
+
     {% if marche.boxplot_svg %}
-    <div class="section-title">Distribution des prix par secteur (DVF)</div>
+    <div class="section-title">Distribution des prix par secteur (boîtes à moustache)</div>
     <div class="chart-box">{{ marche.boxplot_svg | safe }}</div>
     <div class="chart-legend">Lecture : trait vertical = médiane, boîte = quartiles Q1 à Q3, moustaches = min et max des ventes signées. <b>◇</b> estimation portail ; <b>trait rouge</b> = prix du bien étudié (si renseigné).</div>
     {% endif %}
 
     {% if marche.comparables %}
-    <div class="section-title" style="page-break-before: always">Comparables DVF (ventes de référence)</div>
+    <div class="section-title">Comparables DVF (ventes de référence)</div>
     <table class="mkt">
       <thead>
-        <tr><th>Secteur</th><th class="num">Surface</th><th class="num">Prix</th><th class="num">Prix/m²</th><th class="num">Date</th><th>Distance</th></tr>
+        <tr><th>Secteur</th><th class="num">Surface</th><th class="num">Prix</th><th class="num">Prix/m²</th><th class="num">Date</th><th>Distance</th>{% if marche.has_panels %}<th>Panel</th>{% endif %}</tr>
       </thead>
       <tbody>
         {% for c in marche.comparables %}
-        <tr><td><b>{{ c.secteur }}</b></td><td class="num">{{ c.surface }}</td><td class="num">{{ c.prix }}</td><td class="num">{{ c.prix_m2 }}</td><td class="num">{{ c.date }}</td><td>{{ c.distance }}</td></tr>
+        <tr><td><b>{{ c.secteur }}</b></td><td class="num">{{ c.surface }}</td><td class="num">{{ c.prix }}</td><td class="num">{{ c.prix_m2 }}</td><td class="num">{{ c.date }}</td><td>{{ c.distance }}</td>{% if marche.has_panels %}<td>{% if c.panel_label %}<span class="panel {{ c.panel_cls }}">{{ c.panel_label }}</span>{% endif %}</td>{% endif %}</tr>
         {% endfor %}
       </tbody>
     </table>
-    <div class="note" style="margin-top:6px">Ventes réellement signées (DVF), sélectionnées comme comparables. Ce sont elles qui fondent la valeur défendable.</div>
+    <div class="note" style="margin-top:6px">Ventes réellement signées (DVF), sélectionnées comme comparables. Ce sont elles qui fondent la valeur défendable.{% if marche.has_panels %} Panels : <b>A</b> ≤ 250 m · <b>B</b> 250 à 500 m · <b>R</b> neuf, tenu hors de l'ancien · <b>D</b> même adresse ou même immeuble.{% endif %}</div>
     {% endif %}
 
     {% if marche.cible_svg or marche.scatter_svg %}
@@ -594,13 +612,23 @@
         {% endif %}
       </div>
     </div>
-    <div class="chart-legend" style="margin-top:4px">Chaque point = une vente signée ; ★ rouge = le bien. Cible : médiane €/m² par anneau de distance autour du bien.</div>
+    <div class="chart-legend" style="margin-top:4px">Chaque point = une vente signée ; ★ rouge = le bien. Cible : médiane €/m² par anneau de distance autour du bien (panels <b>A</b> puis <b>B</b>). Le panel <b>R</b> (neuf) n'y figure pas : il n'a pas de distance et ne se compare pas à l'ancien.</div>
     {% endif %}
 
     {% if marche.histogramme_svg %}
     <div class="section-title">Répartition des ventes par prix/m² (DVF)</div>
     <div class="chart-box">{{ marche.histogramme_svg | safe }}</div>
     <div class="chart-legend">Nombre de ventes par tranche de €/m². <b>Barre rouge</b> = tranche du bien étudié.</div>
+    {% endif %}
+
+    {% if dvf_historique %}
+    {{ dvf_historique_table(dvf_historique) }}
+    {% endif %}
+
+    {% if marche.evolution_svg %}
+    <div class="section-title">Tendance DVF dans le temps (€/m² médian)</div>
+    <div class="chart-box">{{ marche.evolution_svg | safe }}</div>
+    <div class="chart-legend">Prix médian au m² des ventes signées (DVF) par année, sur 5 ans, aux mêmes critères que l'analyse : même type de bien, surface ±20 %, panels <b>A</b> et <b>B</b> réunis.</div>
     {% endif %}
 
     <div class="cols" style="margin-top:8px">

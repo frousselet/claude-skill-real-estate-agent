@@ -197,8 +197,30 @@ En particulier, pour chaque fiche produite :
   le raccourcis (le gabarit tronque déjà proprement), tu ne changes pas la forme.
 - **Passe toujours par le script**, jamais par une mise en forme manuelle ou un
   autre outil de PDF pour la fiche A4.
-- **Génère toujours le PDF à 100 % (aucun zoom, aucune mise à l'échelle)** : le
-  script s'en charge (rendu à l'échelle 1). Ne contourne jamais ce réglage.
+- **Génère toujours le PDF à 100 %, jamais de dézoom ni de mise à l'échelle.** Le
+  script impose déjà l'échelle 1 (`--force-device-scale-factor=1` pour Chromium,
+  `--zoom 1.0` pour wkhtmltopdf). Tu n'ajoutes, ne modifies ni ne contournes jamais
+  ce réglage : **interdits** un flag de zoom, un facteur d'échelle, un
+  `transform: scale()` ou `zoom:` en CSS, un `@page { size }` rétréci, un autre outil
+  de PDF « qui fait rentrer » la page en la miniaturisant. Un PDF dézoomé est un
+  livrable **non conforme**, même s'il paraît plus propre : il casse la
+  comparabilité entre fiches et la taille de police de référence.
+
+**Ça déborde ? On raccourcit, on ne dézoome pas.** La tentation, face à un bloc coupé
+ou à une page trop pleine, est de réduire l'échelle pour tout faire tenir. C'est
+interdit. Le débordement est toujours un problème de **quantité de contenu**, jamais
+d'échelle. Dans l'ordre :
+
+1. **Raccourcis les données du JSON** : résumé, points forts/faibles, valeurs
+   d'identité, intitulés, conclusion. Le gabarit tronque déjà proprement (line-clamp) ;
+   vise des libellés courts et des phrases denses.
+2. **Réduis le nombre d'items** d'une liste trop longue (POI, comparables, segments,
+   lignes DVF) plutôt que d'en écraser le rendu.
+3. **Laisse les sauts de page du gabarit** faire leur travail ; ne force pas un bloc
+   sur une page déjà pleine.
+
+Jamais toucher à la police, aux marges ni au zoom pour gagner de la place : ce sont
+des invariants du gabarit.
 
 Faire évoluer le gabarit (nouvelle rubrique, changement de charte) est une décision
 délibérée qui modifie la skill pour toutes les fiches, jamais un ajustement au cas
@@ -288,6 +310,16 @@ géorisques, l'urbanisme, les diagnostics, la copropriété, le marché et la va
 11. Documents à réclamer et questions à poser (vendeur, agence, syndic).
 12. Avertissement.
 
+**La section 8 se construit selon le protocole DVF, pas à la main.** Dès qu'une
+adresse est connue (confirmée ou supposée), bâtis la base de mutations en suivant
+`references/protocole-dvf.md` : période 2023 à 2025 (plus 2026 si publié), même
+type de bien que l'annonce, surface ±20 %, panels par distance (A ≤ 250 m,
+B 250 à 500 m, R pour le neuf tenu à part, Direct pour la même adresse ou le même
+immeuble), surfaces DVF/SRB et Carrez affichées toutes les deux, statistiques et
+seuils de Tukey par panel, et **table des mutations exclues avec motif**. Une
+mutation atypique ne se supprime jamais en silence : elle reste dans la base brute
+et les résultats se donnent avec et sans les outliers.
+
 **Format de sortie.** Par défaut, rédige l'étude en document structuré. Si
 l'utilisateur veut un livrable soigné, produis un PDF ou un document Word : dans
 ce cas, une fois le contenu prêt, lis le SKILL.md de la skill `pdf` ou `docx`
@@ -319,9 +351,14 @@ tel que les portails le vantent.
    valeur : ils expliquent les prix et anticipent leur évolution.
 3. **Niveaux de prix réels (DVF en priorité).** Prix au m² signés par typologie et
    par sous-secteur : médiane et fourchette (pas seulement une moyenne), volumes
-   sur la période. Confronte-les aux estimations des portails, en rappelant que
-   ces dernières sont généralement 10 à 25 % au-dessus du réel. Méthode et sources
-   dans `references/methode-valeur.md` et `references/sources-donnees.md`.
+   sur la période. Donne des **statistiques d'ordre** (min, Q1, médiane, Q3, max),
+   jamais une moyenne seule. Confronte-les aux estimations des portails, en
+   rappelant que ces dernières sont généralement 10 à 25 % au-dessus du réel.
+   Méthode et sources dans `references/methode-valeur.md` et
+   `references/sources-donnees.md`. Si l'étude est centrée sur un point précis
+   (une adresse, un micro-secteur), applique le protocole de
+   `references/protocole-dvf.md` : panels par distance, double surface DVF/Carrez,
+   Tukey, exclusions motivées.
 4. **Tendance et liquidité.** Évolution des prix sur 3, 5 et 10 ans si disponible,
    dynamique récente, nombre de transactions et délai de vente moyen. Un marché
    lent ou en repli renforce le pouvoir de négociation de l'acheteur ; un marché
@@ -377,6 +414,9 @@ Quelle que soit la fonction, clôture par :
   détaillé, États-Unis, générique international).
 - `references/methode-valeur.md` : méthode de la valeur d'acquisition défendable,
   DVF contre estimations, ordres de grandeur de travaux, frais.
+- `references/protocole-dvf.md` : protocole opératoire de construction de la base
+  DVF autour d'une adresse (période, typologie, surfaces DVF/Carrez, panels A/B/R
+  et comparables directs, statistiques et seuils de Tukey, exclusions motivées).
 - `references/fiche-etude.md` : schéma JSON de la fiche, structure de l'étude
   complète et de l'étude de marché, format du shortlist de recherche, barème du
   verdict.
