@@ -1,0 +1,51 @@
+name: Build & release skill zip
+
+# Déclenché par un tag de version vX.X.X (ex. v1.0.0) : reconstruit le paquet
+# distribuable de la skill et le publie dans une Release GitHub.
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write # nécessaire pour créer la Release et y attacher le zip
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build agent-immobilier.zip
+        run: |
+          set -euo pipefail
+          PKG=agent-immobilier
+          STAGE="$(mktemp -d)"
+          mkdir -p "$STAGE/$PKG/references" "$STAGE/$PKG/scripts" "$STAGE/$PKG/assets"
+          cp SKILL.md "$STAGE/$PKG/"
+          cp references/*.md "$STAGE/$PKG/references/"
+          cp scripts/*.py "$STAGE/$PKG/scripts/"
+          cp assets/fiche_template.html "$STAGE/$PKG/assets/"
+          ZIP="$GITHUB_WORKSPACE/${PKG}-${GITHUB_REF_NAME}.zip"
+          ( cd "$STAGE" && zip -r -X "$ZIP" "$PKG" )
+          echo "ZIP=$ZIP" >> "$GITHUB_ENV"
+          echo "Contenu du paquet :"
+          unzip -l "$ZIP"
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-immobilier-${{ github.ref_name }}
+          path: ${{ env.ZIP }}
+          if-no-files-found: error
+
+      - name: Create GitHub Release and attach zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create "$GITHUB_REF_NAME" "$ZIP" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes \
+          || gh release upload "$GITHUB_REF_NAME" "$ZIP" --clobber

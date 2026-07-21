@@ -115,6 +115,15 @@ Le paquet distribuable de la skill est `agent-immobilier.zip` (artefact non
 versionné) : un dossier `agent-immobilier/` contenant `SKILL.md`, `references/`,
 `scripts/` et `assets/fiche_template.html`.
 
+Pousser un tag de version `vX.X.X` (ex. `v1.0.0`) déclenche le workflow
+[`.github/workflows/release.yml`](.github/workflows/release.yml), qui reconstruit ce
+zip et le publie dans une Release GitHub :
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
 ## Principes directeurs
 
 1. **Primauté des faits** : chaque affirmation est sourcée ou présentée comme
