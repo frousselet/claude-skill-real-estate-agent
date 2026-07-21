@@ -1,5 +1,5 @@
-{% macro dvf_historique_table(rows) -%}
-<div class="section-title">Historique DVF du bien</div>
+{% macro dvf_historique_table(rows, heading='section-title') -%}
+<div class="{{ heading }}">Historique DVF du bien</div>
 <table class="mkt">
   <thead><tr><th>Date</th><th class="num">Prix</th><th>Détail</th></tr></thead>
   <tbody>
@@ -45,15 +45,19 @@
     color: #2b2b2b; border-bottom: 2px solid #ececec; padding-bottom: 4px;
     margin: 15px 0 9px 0; page-break-after: avoid;
   }
-  /* Bandeau chapeau : regroupe les analyses DVF sous un seul intitulé */
-  .dvf-banner {
-    font-size: 12.5px; color: #24405f; border-bottom: 2px solid #5b83b8;
-    margin: 0 0 4px 0; padding-bottom: 5px;
+  /* Rang 1 : grandes parties du document (le rang 2 est .section-title).
+     Règle de pagination : un titre de rang 1 commence toujours une nouvelle page ;
+     un titre de rang 2 n'introduit jamais de saut de page. */
+  .part-title {
+    font-size: 13px; font-weight: bold; letter-spacing: .2px; color: #24405f;
+    background: #eef2f7; border-left: 4px solid #5b83b8; border-radius: 3px;
+    padding: 8px 12px; margin: 0 0 12px 0;
+    page-break-before: always; page-break-after: avoid;
   }
-  /* Title with a right-aligned badge: keep both vertically centered on one line */
-  .section-title-split { display: table; width: 100%; }
-  .section-title-split .st-text { display: table-cell; vertical-align: middle; }
-  .section-title-split .st-aside { display: table-cell; vertical-align: middle; text-align: right; white-space: nowrap; }
+  /* Titre (rang 1 ou 2) avec un badge aligné à droite, centrés sur une ligne */
+  .section-title-split, .part-title-split { display: table; width: 100%; }
+  .section-title-split .st-text, .part-title-split .st-text { display: table-cell; vertical-align: middle; }
+  .section-title-split .st-aside, .part-title-split .st-aside { display: table-cell; vertical-align: middle; text-align: right; white-space: nowrap; }
   .resume {
     background: #fbfbfb; border: 1px solid #ececec; border-radius: 6px;
     padding: 11px 14px; font-size: 10.5px; margin-bottom: 4px;
@@ -201,8 +205,20 @@
   .env-cat-list li { font-size: 10px; margin-bottom: 3px; }
   .env-cat-list .env-dist { color: #7a7a7a; font-size: 8.5px; }
 
-  /* Market study */
-  .market { page-break-before: always; }
+  /* Copropriété : checklist des documents */
+  ul.doc-list { list-style: none; margin: 4px 0 0 0; padding: 0; }
+  ul.doc-list li { font-size: 10px; margin-bottom: 4px; padding-left: 2px; line-height: 1.35; }
+  ul.doc-list .doc-mark { display: inline-block; width: 13px; font-weight: bold; text-align: center; }
+  ul.doc-list li.doc-ok .doc-mark { color: #1a7f37; }
+  ul.doc-list li.doc-ko .doc-mark { color: #c0362c; }
+  ul.doc-list li.doc-na .doc-mark { color: #999; }
+  ul.doc-list li.doc-ko { color: #b5560d; }
+  ul.doc-list .doc-st { font-size: 8px; color: #7a7a7a; text-transform: uppercase; letter-spacing: .3px; }
+  /* Encart d'alerte (procédures, voirie non rétrocédée) */
+  .copro-alert { background: #fdecea; border: 1px solid #f3c9c4; border-radius: 6px;
+    padding: 8px 11px; font-size: 9.5px; color: #a02a22; margin-top: 6px; }
+
+  /* Market study (le saut de page est porté par le titre de rang 1 .part-title) */
   .chart-box { border: 1px solid #e4e8ec; border-radius: 6px; padding: 8px 10px; background: #fff; page-break-inside: avoid; margin-top: 4px; text-align: center; }
   .chart-box.eqh { height: 244px; display: flex; align-items: center; justify-content: center; }
   .chart-box.eqh svg { max-height: 226px; }
@@ -405,11 +421,64 @@
   </div>
   {% if en_dpe in ['E','F','G'] %}<div class="note">Logement en passoire thermique ({{ en_dpe }}) : restriction de location (G interdit à la location en 2025, F en 2028, E en 2034) et coût de rénovation énergétique à provisionner.</div>{% endif %}
 
+  {% if plan or environnement or caracteristiques %}
+  <div class="part-title{% if caracteristiques and caracteristiques.cadre_label %} part-title-split{% endif %}">
+    <span class="st-text">Le bien et son environnement</span>
+    {% if caracteristiques and caracteristiques.cadre_label %}<span class="st-aside"><span class="riskglobal {{ caracteristiques.cadre_cls }}">Cadre de vie : {{ caracteristiques.cadre_label }}</span></span>{% endif %}
+  </div>
+
+  {% if caracteristiques %}
+  {% if caracteristiques.synthese %}<div class="resume" style="-webkit-line-clamp:3">{{ caracteristiques.synthese | sup }}</div>{% endif %}
+
+  <div class="section-title">Caractéristiques et exposition</div>
+  {% if caracteristiques.kpis %}
+  <div class="kpi-row">
+    {% for k in caracteristiques.kpis[:4] %}<div class="kpi"><div class="kv">{{ k.valeur }}</div><div class="kl">{{ k.label }}</div></div>{% endfor %}
+  </div>
+  {% endif %}
+  {% set d = caracteristiques.details %}
+  <div class="id-cols" style="margin-top:6px">
+    <div class="idc">
+      <table class="kv">
+        {% if d.orientation %}<tr><td class="k">Orientation</td><td class="v"><span class="cl2">{{ d.orientation }}</span></td></tr>{% endif %}
+        {% if d.luminosite %}<tr><td class="k">Luminosité</td><td class="v"><span class="cl2">{{ d.luminosite }}</span></td></tr>{% endif %}
+        {% if d.vue %}<tr><td class="k">Vue et vis-à-vis</td><td class="v"><span class="cl2">{{ d.vue | sup }}</span></td></tr>{% endif %}
+        {% if d.hauteur_sous_plafond %}<tr><td class="k">Hauteur sous plafond</td><td class="v"><span class="cl2">{{ d.hauteur_sous_plafond }}</span></td></tr>{% endif %}
+        {% if d.accessibilite %}<tr><td class="k">Accessibilité</td><td class="v"><span class="cl2">{{ d.accessibilite }}</span></td></tr>{% endif %}
+      </table>
+    </div>
+    <div class="idc gap"></div>
+    <div class="idc">
+      <table class="kv">
+        {% if d.etat_general %}<tr><td class="k">État général</td><td class="v"><span class="cl2">{{ d.etat_general | sup }}</span></td></tr>{% endif %}
+        {% if d.menuiseries %}<tr><td class="k">Menuiseries</td><td class="v"><span class="cl2">{{ d.menuiseries }}</span></td></tr>{% endif %}
+        {% if d.chauffage %}<tr><td class="k">Chauffage</td><td class="v"><span class="cl2">{{ d.chauffage }}</span></td></tr>{% endif %}
+        {% if d.eau_chaude %}<tr><td class="k">Eau chaude</td><td class="v"><span class="cl2">{{ d.eau_chaude }}</span></td></tr>{% endif %}
+      </table>
+    </div>
+  </div>
+
+  {% if caracteristiques.espaces %}
+  <div class="section-title">Espaces extérieurs, annexes et stationnement</div>
+  <table class="mkt">
+    <thead><tr><th>Type</th><th>Détail</th><th>Remarque</th></tr></thead>
+    <tbody>
+      {% for e in caracteristiques.espaces %}
+      <tr><td><b>{{ e.type }}</b></td><td>{{ e.detail }}</td><td>{{ e.note | sup }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+  {% endif %}
+
   {% if plan %}
-  <div class="section-title" style="page-break-before: always">Plan du bien : {% if plan.mode == 'reproduction' %}reproduit, cotes réelles{% else %}schéma d'agencement estimatif{% endif %}</div>
+  <div class="section-title">Plan du bien : {% if plan.mode == 'reproduction' %}reproduit, cotes réelles{% else %}schéma d'agencement estimatif{% endif %}</div>
   <div class="cols">
     <div class="col" style="width:61%">
       <div class="plan-box">{{ plan.svg|safe }}</div>
+      {% if plan.compass_svg %}
+      <div style="text-align:center; margin-top:5px">{{ plan.compass_svg|safe }}<div style="font-size:8px; color:#7a7a7a; text-transform:uppercase; letter-spacing:.4px; margin-top:-1px">Orientation</div></div>
+      {% endif %}
     </div>
     <div class="col col-gap"></div>
     <div class="col" style="width:36%">
@@ -429,6 +498,38 @@
   {% endif %}
 
   {% if environnement %}
+  {% if environnement.situation or environnement.nuisances %}
+  <div class="section-title">Cadre de vie : situation, desserte et nuisances</div>
+  <div class="cols">
+    <div class="col" style="width:48%">
+      {% set s = environnement.situation %}
+      <table class="kv">
+        {% if s.quartier %}<tr><td class="k">Quartier / cadre</td><td class="v"><span class="cl2">{{ s.quartier | sup }}</span></td></tr>{% endif %}
+        {% if s.desserte %}<tr><td class="k">Desserte</td><td class="v"><span class="cl2">{{ s.desserte | sup }}</span></td></tr>{% endif %}
+        {% if s.stationnement %}<tr><td class="k">Stationnement</td><td class="v"><span class="cl2">{{ s.stationnement }}</span></td></tr>{% endif %}
+        {% if s.rue %}<tr><td class="k">Rue</td><td class="v"><span class="cl2">{{ s.rue }}</span></td></tr>{% endif %}
+      </table>
+    </div>
+    <div class="col col-gap"></div>
+    <div class="col" style="width:48%">
+      {% if environnement.nuisances %}
+      <table class="mkt">
+        <tbody>
+          {% for n in environnement.nuisances %}
+          <tr>
+            <td><b>{{ n.libelle }}</b></td>
+            <td style="width:62px">{% if n.niveau_label %}<span class="chip {{ n.niveau_cls }}">{{ n.niveau_label }}</span>{% endif %}</td>
+            <td>{{ n.commentaire | sup }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if environnement.groups %}
   <div class="section-title">Commerces et équipements alentours</div>
   <div class="env-cats">
     {% for g in environnement.groups %}
@@ -441,79 +542,157 @@
     {% endfor %}
   </div>
   {% endif %}
+  {% endif %}
+  {% endif %}
 
-  <div class="section-title{% if risque_global %} section-title-split{% endif %}" style="page-break-before: always">
-    <span class="st-text">Étude de risques (vraisemblance × impact)</span>
-    {% if risque_global %}<span class="st-aside"><span class="riskglobal {{ risque_global_cls }}">Risque global : {{ risque_global }}</span></span>{% endif %}
+  {% if copropriete %}
+  <div class="part-title part-title-split">
+    <span class="st-text">{{ copropriete.forme_label or 'Copropriété' }}</span>
+    {% if copropriete.sante_label %}<span class="st-aside"><span class="riskglobal {{ copropriete.sante_cls }}">Santé : {{ copropriete.sante_label }}</span></span>{% endif %}
   </div>
-  <table class="risk">
-    <thead>
-      <tr><th>Risque</th><th>Famille</th><th class="n">V</th><th class="n">I</th><th class="n">Crit.</th><th>Commentaire</th></tr>
-    </thead>
+
+  {% if copropriete.synthese %}<div class="resume" style="-webkit-line-clamp:3">{{ copropriete.synthese | sup }}</div>{% endif %}
+
+  {% set id = copropriete.identite %}
+  {% set fin = copropriete.finances %}
+  <div class="cols" style="margin-top:10px">
+    <div class="col" style="width:48%">
+      <div class="section-title" style="margin-top:2px">Identité de la copropriété</div>
+      <table class="kv">
+        {% if id.immatriculation %}<tr><td class="k">Immatriculation</td><td class="v">{{ id.immatriculation }}</td></tr>{% endif %}
+        {% if id.lots_total %}<tr><td class="k">Nombre de lots</td><td class="v">{{ id.lots_total }}{% if id.lots_habitation %} (dont {{ id.lots_habitation }} hab.){% endif %}</td></tr>{% endif %}
+        {% if id.batiments %}<tr><td class="k">Bâtiments</td><td class="v">{{ id.batiments }}</td></tr>{% endif %}
+        {% if id.annee_construction %}<tr><td class="k">Construction</td><td class="v">{{ id.annee_construction }}</td></tr>{% endif %}
+        {% if id.tantiemes_lot %}<tr><td class="k">Tantièmes du lot</td><td class="v">{{ id.tantiemes_lot }}</td></tr>{% endif %}
+        {% if id.syndic %}<tr><td class="k">Syndic</td><td class="v"><span class="cl2">{{ id.syndic }}</span></td></tr>{% endif %}
+        {% if id.chauffage %}<tr><td class="k">Chauffage</td><td class="v">{{ id.chauffage }}</td></tr>{% endif %}
+        {% if id.equipements %}<tr><td class="k">Équipements</td><td class="v"><span class="cl2">{{ id.equipements }}</span></td></tr>{% endif %}
+      </table>
+    </div>
+    <div class="col col-gap"></div>
+    <div class="col" style="width:48%">
+      <div class="section-title" style="margin-top:2px">Santé financière</div>
+      {% if copropriete.kpis %}
+      <div class="kpi-row">
+        {% for k in copropriete.kpis[:4] %}<div class="kpi"><div class="kv">{{ k.valeur }}</div><div class="kl">{{ k.label }}</div></div>{% endfor %}
+      </div>
+      {% endif %}
+      <table class="kv">
+        {% if fin.charges_annuelles %}<tr><td class="k">Charges annuelles</td><td class="v">{{ fin.charges_annuelles }}</td></tr>{% endif %}
+        {% if fin.charges_repere %}<tr><td class="k">Repère secteur</td><td class="v">{{ fin.charges_repere | sup }}</td></tr>{% endif %}
+        {% if fin.evolution_charges %}<tr><td class="k">Évolution charges</td><td class="v">{{ fin.evolution_charges }}</td></tr>{% endif %}
+        {% if fin.budget_previsionnel %}<tr><td class="k">Budget prévisionnel</td><td class="v">{{ fin.budget_previsionnel }}</td></tr>{% endif %}
+        {% if fin.emprunt_collectif %}<tr><td class="k">Emprunt collectif</td><td class="v">{{ fin.emprunt_collectif }}</td></tr>{% endif %}
+        {% if fin.dettes_fournisseurs %}<tr><td class="k">Dettes fournisseurs</td><td class="v">{{ fin.dettes_fournisseurs }}</td></tr>{% endif %}
+      </table>
+    </div>
+  </div>
+
+  {% if copropriete.charges_svg %}
+  <div class="ct-sub">Répartition des charges par poste</div>
+  <div class="chart-box">{{ copropriete.charges_svg | safe }}</div>
+  {% endif %}
+
+  {% set trav = copropriete.travaux %}
+  {% if trav.lignes or trav.ppt or trav.dtg %}
+  <div class="section-title">Travaux : réalisés, votés, à prévoir</div>
+  {% if trav.lignes %}
+  <table class="mkt">
+    <thead><tr><th>Poste</th><th>Statut</th><th class="num">Échéance</th><th class="num">Quote-part du lot</th><th>Qui paie</th></tr></thead>
     <tbody>
-      {% for r in risques %}
+      {% for l in trav.lignes %}
       <tr>
-        <td><b>{{ r.libelle }}</b></td>
-        <td>{{ r.famille }}</td>
-        <td class="n">{{ r.v }}</td>
-        <td class="n">{{ r.i }}</td>
-        <td class="n"><span class="chip {{ r.cls }}">{{ r.crit }}</span></td>
-        <td>{{ r.commentaire | sup }}</td>
+        <td><b>{{ l.intitule | sup }}</b></td>
+        <td>{% if l.statut_label %}<span class="chip {{ l.statut_cls }}">{{ l.statut_label }}</span>{% endif %}</td>
+        <td class="num">{{ l.echeance or 'nc' }}</td>
+        <td class="num">{{ l.quote_part or 'nc' }}</td>
+        <td>{% if l.payeur_label %}<span class="chip {{ l.payeur_cls }}">{{ l.payeur_label }}</span>{% endif %}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
-  <div class="note" style="margin-top:6px">Criticité = V × I. Zones : 1 à 4 faible (vert), 5 à 9 modérée (jaune), 10 à 14 élevée (orange), 15 à 25 critique (rouge).</div>
-
-  <div class="cols" style="margin-top:8px">
-    <div class="col" style="width:48%">
-      <div class="section-title">Points de vigilance</div>
-      <ul class="tight">
-        {% for v in vigilance %}<li>{{ v | sup }}</li>{% endfor %}
-      </ul>
-    </div>
-    <div class="col col-gap"></div>
-    <div class="col" style="width:48%">
-      <div class="section-title">Négociation</div>
-      {% if negociation.leviers %}
-      <ul class="tight">
-        {% for l in negociation.leviers %}<li>{{ l | sup }}</li>{% endfor %}
-      </ul>
-      {% endif %}
-      {% if negociation.argument_cle %}<div class="neg-arg">« {{ negociation.argument_cle | sup }} »</div>{% endif %}
-    </div>
-  </div>
-
-  {% if cout_revient_svg or radar_svg %}
-  <div class="section-title" style="page-break-before: always">Coût de revient et score du bien</div>
-  <div class="cols">
-    <div class="col" style="width:56%">
-      {% if cout_revient_svg %}
-      <div class="ct-sub">Coût de revient vs valeur après travaux</div>
-      <div class="chart-box eqh">{{ cout_revient_svg | safe }}</div>
-      {% endif %}
-    </div>
-    <div class="col col-gap"></div>
-    <div class="col" style="width:40%">
-      {% if radar_svg %}
-      <div class="ct-sub">Score du bien</div>
-      <div class="chart-box eqh">{{ radar_svg | safe }}</div>
-      {% endif %}
-    </div>
-  </div>
-  {% if cout_revient.note %}<div class="note" style="margin-top:5px">{{ cout_revient.note | sup }}</div>
-  {% else %}<div class="chart-legend" style="margin-top:5px">{% if cout_revient_svg %}Coût de revient : achat + frais + travaux + aléas, comparé à la valeur une fois rénové.{% endif %}{% if radar_svg %} Score : note sur 10 par critère.{% endif %}</div>{% endif %}
-
+  {% endif %}
+  {% if trav.ppt or trav.dtg %}
+  <div class="note" style="margin-top:6px">{% if trav.ppt %}<b>PPT</b> (plan pluriannuel de travaux) : {{ trav.ppt | sup }}.{% endif %}{% if trav.dtg %} <b>DTG</b> (diagnostic technique global) : {{ trav.dtg | sup }}.{% endif %}</div>
+  {% endif %}
   {% endif %}
 
-  {# Sans bloc marché, l'historique DVF garde sa propre section. #}
-  {% if dvf_historique and not marche %}
-  {{ dvf_historique_table(dvf_historique) }}
+  {% set g = copropriete.gouvernance %}
+  <div class="cols" style="margin-top:8px">
+    <div class="col" style="width:48%">
+      <div class="section-title">Gouvernance et procédures</div>
+      <table class="kv">
+        {% if g.conseil_syndical %}<tr><td class="k">Conseil syndical</td><td class="v"><span class="cl2">{{ g.conseil_syndical }}</span></td></tr>{% endif %}
+        {% if g.regularite_ag %}<tr><td class="k">Tenue des AG</td><td class="v"><span class="cl2">{{ g.regularite_ag }}</span></td></tr>{% endif %}
+        {% if g.participation %}<tr><td class="k">Participation</td><td class="v"><span class="cl2">{{ g.participation }}</span></td></tr>{% endif %}
+      </table>
+      {% if g.procedures %}
+      {% if g.alerte %}<div class="copro-alert"><b>Procédures :</b> {{ g.procedures | sup }}</div>
+      {% else %}<div class="note" style="margin-top:6px"><b>Procédures :</b> {{ g.procedures | sup }}</div>{% endif %}
+      {% endif %}
+    </div>
+    <div class="col col-gap"></div>
+    <div class="col" style="width:48%">
+      {% if copropriete.pv_ag %}
+      <div class="section-title">Lecture des PV d'assemblée générale</div>
+      <table class="mkt">
+        <tbody>
+          {% for pv in copropriete.pv_ag %}
+          <tr>
+            <td class="num" style="width:34px"><b>{{ pv.annee }}</b></td>
+            <td style="width:64px">{% if pv.statut_label %}<span class="chip {{ pv.statut_cls }}">{{ pv.statut_label }}</span>{% endif %}</td>
+            <td>{{ pv.resume | sup }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+    </div>
+  </div>
+
+  {% set rg = copropriete.reglement %}
+  <div class="cols" style="margin-top:8px">
+    <div class="col" style="width:48%">
+      {% if rg.date or rg.destination or rg.clauses or rg.jouissance_privative or rg.conformite %}
+      <div class="section-title">Règlement de copropriété</div>
+      <table class="kv">
+        {% if rg.date %}<tr><td class="k">Date / mises à jour</td><td class="v">{{ rg.date }}</td></tr>{% endif %}
+        {% if rg.destination %}<tr><td class="k">Destination</td><td class="v"><span class="cl2">{{ rg.destination }}</span></td></tr>{% endif %}
+        {% if rg.clauses %}<tr><td class="k">Clauses notables</td><td class="v"><span class="cl2">{{ rg.clauses | sup }}</span></td></tr>{% endif %}
+        {% if rg.jouissance_privative %}<tr><td class="k">Jouissance privative</td><td class="v"><span class="cl2">{{ rg.jouissance_privative | sup }}</span></td></tr>{% endif %}
+        {% if rg.conformite %}<tr><td class="k">Conformité de l'existant</td><td class="v"><span class="cl2">{{ rg.conformite | sup }}</span></td></tr>{% endif %}
+      </table>
+      {% endif %}
+    </div>
+    <div class="col col-gap"></div>
+    <div class="col" style="width:48%">
+      {% if copropriete.documents %}
+      <div class="section-title">Documents obtenus et manquants</div>
+      <ul class="doc-list">
+        {% for d in copropriete.documents %}
+        <li class="{{ d.cls }}"><span class="doc-mark">{{ d.mark }}</span> {{ d.doc }}{% if d.statut_label %} <span class="doc-st">{{ d.statut_label }}</span>{% endif %}</li>
+        {% endfor %}
+      </ul>
+      <div class="note" style="margin-top:4px">Chaque document manquant est une zone d'ombre à réclamer au vendeur ou au syndic avant l'offre.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% set lot = copropriete.lotissement %}
+  {% if lot and (lot.asl_aful or lot.cahier_charges or lot.retrocession_voirie) %}
+  <div class="section-title">Lotissement : ASL, cahier des charges, voirie</div>
+  <table class="kv">
+    {% if lot.asl_aful %}<tr><td class="k">ASL / AFUL</td><td class="v"><span class="cl2">{{ lot.asl_aful | sup }}</span></td></tr>{% endif %}
+    {% if lot.cahier_charges %}<tr><td class="k">Cahier des charges</td><td class="v"><span class="cl2">{{ lot.cahier_charges | sup }}</span></td></tr>{% endif %}
+    {% if lot.retrocession_voirie %}<tr><td class="k">Voirie et réseaux</td><td class="v"><span class="cl2">{{ lot.retrocession_voirie | sup }}</span></td></tr>{% endif %}
+  </table>
+  <div class="note" style="margin-top:6px">Voirie et réseaux non rétrocédés à la commune : leur entretien reste durablement à la charge des colotis. Le cahier des charges, souvent perpétuel, peut être plus contraignant que le PLU et lui survivre.</div>
+  {% endif %}
   {% endif %}
 
   {% if marche %}
   <div class="market">
-    <div class="section-title{% if marche.tendance and marche.tendance.badge %} section-title-split{% endif %}">
+    <div class="part-title{% if marche.tendance and marche.tendance.badge %} part-title-split{% endif %}">
       <span class="st-text">Étude de marché{% if marche.perimetre %} : {{ marche.perimetre }}{% endif %}</span>
       {% if marche.tendance and marche.tendance.badge %}<span class="st-aside"><span class="trend {{ marche.tendance.cls }}">Tendance : {{ marche.tendance.badge }}</span></span>{% endif %}
     </div>
@@ -572,17 +751,17 @@
        cible, répartition, historique du bien et courbe de tendance. #}
     {% if marche.boxplot_svg or marche.comparables or marche.cible_svg or marche.scatter_svg
           or marche.histogramme_svg or dvf_historique or marche.evolution_svg %}
-    <div class="section-title dvf-banner" style="page-break-before: always">Analyses DVF</div>
+    <div class="section-title">Analyses DVF</div>
     {% endif %}
 
     {% if marche.boxplot_svg %}
-    <div class="section-title">Distribution des prix par secteur (boîtes à moustache)</div>
+    <div class="ct-sub">Distribution des prix par secteur (boîtes à moustache)</div>
     <div class="chart-box">{{ marche.boxplot_svg | safe }}</div>
     <div class="chart-legend">Lecture : trait vertical = médiane, boîte = quartiles Q1 à Q3, moustaches = min et max des ventes signées. <b>◇</b> estimation portail ; <b>trait rouge</b> = prix du bien étudié (si renseigné).</div>
     {% endif %}
 
     {% if marche.comparables %}
-    <div class="section-title">Comparables DVF (ventes de référence)</div>
+    <div class="ct-sub">Comparables DVF (ventes de référence)</div>
     <table class="mkt">
       <thead>
         <tr><th>Secteur</th><th class="num">Surface</th><th class="num">Prix</th><th class="num">Prix/m²</th><th class="num">Date</th><th>Distance</th>{% if marche.has_panels %}<th>Panel</th>{% endif %}</tr>
@@ -616,17 +795,17 @@
     {% endif %}
 
     {% if marche.histogramme_svg %}
-    <div class="section-title">Répartition des ventes par prix/m² (DVF)</div>
+    <div class="ct-sub">Répartition des ventes par prix/m² (DVF)</div>
     <div class="chart-box">{{ marche.histogramme_svg | safe }}</div>
     <div class="chart-legend">Nombre de ventes par tranche de €/m². <b>Barre rouge</b> = tranche du bien étudié.</div>
     {% endif %}
 
     {% if dvf_historique %}
-    {{ dvf_historique_table(dvf_historique) }}
+    {{ dvf_historique_table(dvf_historique, 'ct-sub') }}
     {% endif %}
 
     {% if marche.evolution_svg %}
-    <div class="section-title">Tendance DVF dans le temps (€/m² médian)</div>
+    <div class="ct-sub">Tendance DVF dans le temps (€/m² médian)</div>
     <div class="chart-box">{{ marche.evolution_svg | safe }}</div>
     <div class="chart-legend">Prix médian au m² des ventes signées (DVF) par année, sur 5 ans, aux mêmes critères que l'analyse : même type de bien, surface ±20 %, panels <b>A</b> et <b>B</b> réunis.</div>
     {% endif %}
@@ -675,49 +854,123 @@
     </div>
     {% endif %}
 
-    {% set c = marche.conclusion %}
-    {% if c.fourchette_m2_defendable or c.recommandation or c.pouvoir_negociation or c.posture_pos is not none or c.bien_total %}
-    <div class="section-title">Conclusion pour l'acheteur</div>
-    <div class="concl">
-
-      {% if c.posture_pos is not none %}
-      <div class="posture">
-        <div class="pt-track"><div class="pt-marker" style="left:{{ c.posture_pos }}%"></div></div>
-        <div class="pt-scale"><span>Favorable acheteur</span><span class="mid">Équilibré</span><span class="end">Favorable vendeur</span></div>
-        {% if c.posture_label %}<div class="pt-label">{{ c.posture_label | sup }}</div>{% endif %}
-      </div>
-      {% endif %}
-
-      {% if c.bien_total %}
-      <div class="ct-compare">
-        <div class="ctc-cell"><div class="lab">Prix affiché</div><div class="num">{{ c.bien_total.affiche_fmt or (prix.affiche or 'nc') }}</div></div>
-        <div class="ctc-arrow">&rarr;</div>
-        <div class="ctc-cell ct-target"><div class="lab">Valeur défendable pour ce bien</div><div class="num">{{ c.bien_total.total_fmt }}</div><div class="sub">{{ c.bien_total.m2_fmt }} × {{ c.bien_total.surface }} m²{% if c.bien_total.ecart_fmt %} · écart {{ c.bien_total.ecart_fmt }} / affiché{% endif %}</div></div>
-      </div>
-      {% elif c.fourchette_m2_defendable %}
-      <div class="price-line price-strong"><div class="lab">Fourchette de prix/m² défendable (segment ciblé)</div><div class="val">{{ c.fourchette_m2_defendable }}</div></div>
-      {% endif %}
-
-      {% if c.kpis %}
-      <div class="kpi-row">
-        {% for k in c.kpis[:4] %}<div class="kpi"><div class="kv">{{ k.valeur }}</div><div class="kl">{{ k.label }}</div></div>{% endfor %}
-      </div>
-      {% endif %}
-
-      {% if c.plan_action %}
-      <div class="ct-sub">Plan d'action</div>
-      <ul class="plan">{% for a in c.plan_action[:4] %}<li>{{ a | sup }}</li>{% endfor %}</ul>
-      {% endif %}
-
-      {% if c.pouvoir_negociation %}<div class="price-line" style="border-bottom:0; margin-top:6px"><div class="lab">Pouvoir de négociation de l'acheteur</div><div class="val" style="font-size:11.5px">{{ c.pouvoir_negociation | sup }}</div></div>{% endif %}
-      {% if c.recommandation %}<div class="neg-arg" style="margin-top:6px">{{ c.recommandation | sup }}</div>{% endif %}
-    </div>
-    {% endif %}
   </div>
   {% endif %}
 
+  <div class="part-title">Risques et négociation</div>
+  <div class="section-title{% if risque_global %} section-title-split{% endif %}">
+    <span class="st-text">Étude de risques (vraisemblance × impact)</span>
+    {% if risque_global %}<span class="st-aside"><span class="riskglobal {{ risque_global_cls }}">Risque global : {{ risque_global }}</span></span>{% endif %}
+  </div>
+  <table class="risk">
+    <thead>
+      <tr><th>Risque</th><th>Famille</th><th class="n">V</th><th class="n">I</th><th class="n">Crit.</th><th>Commentaire</th></tr>
+    </thead>
+    <tbody>
+      {% for r in risques %}
+      <tr>
+        <td><b>{{ r.libelle }}</b></td>
+        <td>{{ r.famille }}</td>
+        <td class="n">{{ r.v }}</td>
+        <td class="n">{{ r.i }}</td>
+        <td class="n"><span class="chip {{ r.cls }}">{{ r.crit }}</span></td>
+        <td>{{ r.commentaire | sup }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="note" style="margin-top:6px">Criticité = V × I. Zones : 1 à 4 faible (vert), 5 à 9 modérée (jaune), 10 à 14 élevée (orange), 15 à 25 critique (rouge).</div>
+
+  <div class="cols" style="margin-top:8px">
+    <div class="col" style="width:48%">
+      <div class="section-title">Points de vigilance</div>
+      <ul class="tight">
+        {% for v in vigilance %}<li>{{ v | sup }}</li>{% endfor %}
+      </ul>
+    </div>
+    <div class="col col-gap"></div>
+    <div class="col" style="width:48%">
+      <div class="section-title">Négociation</div>
+      {% if negociation.leviers %}
+      <ul class="tight">
+        {% for l in negociation.leviers %}<li>{{ l | sup }}</li>{% endfor %}
+      </ul>
+      {% endif %}
+      {% if negociation.argument_cle %}<div class="neg-arg">« {{ negociation.argument_cle | sup }} »</div>{% endif %}
+    </div>
+  </div>
+
+  {% set c = marche.conclusion if marche else {} %}
+  {% if cout_revient_svg or radar_svg or (dvf_historique and not marche) or (marche and (c.fourchette_m2_defendable or c.recommandation or c.pouvoir_negociation or c.posture_pos is not none or c.bien_total)) %}
+  <div class="part-title">Conclusion pour l'acheteur</div>
+
+  {% if cout_revient_svg or radar_svg or (dvf_historique and not marche) %}
+  <div class="section-title">Coût de revient et valeur</div>
+  {% if cout_revient_svg or radar_svg %}
+  <div class="cols">
+    <div class="col" style="width:56%">
+      {% if cout_revient_svg %}
+      <div class="ct-sub">Coût de revient vs valeur après travaux</div>
+      <div class="chart-box eqh">{{ cout_revient_svg | safe }}</div>
+      {% endif %}
+    </div>
+    <div class="col col-gap"></div>
+    <div class="col" style="width:40%">
+      {% if radar_svg %}
+      <div class="ct-sub">Score du bien</div>
+      <div class="chart-box eqh">{{ radar_svg | safe }}</div>
+      {% endif %}
+    </div>
+  </div>
+  {% if cout_revient.note %}<div class="note" style="margin-top:5px">{{ cout_revient.note | sup }}</div>
+  {% else %}<div class="chart-legend" style="margin-top:5px">{% if cout_revient_svg %}Coût de revient : achat + frais + travaux + aléas, comparé à la valeur une fois rénové.{% endif %}{% if radar_svg %} Score : note sur 10 par critère.{% endif %}</div>{% endif %}
+  {% endif %}
+  {% if dvf_historique and not marche %}
+  {{ dvf_historique_table(dvf_historique, 'ct-sub') }}
+  {% endif %}
+  {% endif %}
+
+  {% if marche and (c.fourchette_m2_defendable or c.recommandation or c.pouvoir_negociation or c.posture_pos is not none or c.bien_total) %}
+  <div class="section-title">Synthèse et recommandation</div>
+  <div class="concl">
+
+    {% if c.posture_pos is not none %}
+    <div class="posture">
+      <div class="pt-track"><div class="pt-marker" style="left:{{ c.posture_pos }}%"></div></div>
+      <div class="pt-scale"><span>Favorable acheteur</span><span class="mid">Équilibré</span><span class="end">Favorable vendeur</span></div>
+      {% if c.posture_label %}<div class="pt-label">{{ c.posture_label | sup }}</div>{% endif %}
+    </div>
+    {% endif %}
+
+    {% if c.bien_total %}
+    <div class="ct-compare">
+      <div class="ctc-cell"><div class="lab">Prix affiché</div><div class="num">{{ c.bien_total.affiche_fmt or (prix.affiche or 'nc') }}</div></div>
+      <div class="ctc-arrow">&rarr;</div>
+      <div class="ctc-cell ct-target"><div class="lab">Valeur défendable pour ce bien</div><div class="num">{{ c.bien_total.total_fmt }}</div><div class="sub">{{ c.bien_total.m2_fmt }} × {{ c.bien_total.surface }} m²{% if c.bien_total.ecart_fmt %} · écart {{ c.bien_total.ecart_fmt }} / affiché{% endif %}</div></div>
+    </div>
+    {% elif c.fourchette_m2_defendable %}
+    <div class="price-line price-strong"><div class="lab">Fourchette de prix/m² défendable (segment ciblé)</div><div class="val">{{ c.fourchette_m2_defendable }}</div></div>
+    {% endif %}
+
+    {% if c.kpis %}
+    <div class="kpi-row">
+      {% for k in c.kpis[:4] %}<div class="kpi"><div class="kv">{{ k.valeur }}</div><div class="kl">{{ k.label }}</div></div>{% endfor %}
+    </div>
+    {% endif %}
+
+    {% if c.plan_action %}
+    <div class="ct-sub">Plan d'action</div>
+    <ul class="plan">{% for a in c.plan_action[:4] %}<li>{{ a | sup }}</li>{% endfor %}</ul>
+    {% endif %}
+
+    {% if c.pouvoir_negociation %}<div class="price-line" style="border-bottom:0; margin-top:6px"><div class="lab">Pouvoir de négociation de l'acheteur</div><div class="val" style="font-size:11.5px">{{ c.pouvoir_negociation | sup }}</div></div>{% endif %}
+    {% if c.recommandation %}<div class="neg-arg" style="margin-top:6px">{{ c.recommandation | sup }}</div>{% endif %}
+  </div>
+  {% endif %}
+  {% endif %}
+
   {% if sources %}
-  <div class="section-title" style="page-break-before: always">Sources et références</div>
+  <div class="part-title">Sources et références</div>
   <ol class="sources">
     {% for s in sources %}
     <li><span class="s-nom">{{ s.nom }}</span>{% if s.detail %} <span class="s-detail">: {{ s.detail }}</span>{% endif %}{% if s.url %}<br><a class="s-url" href="{{ s.url }}">{{ s.url }}</a>{% endif %}</li>
@@ -733,7 +986,7 @@
   </div>
 
   {% if aide_decision %}
-  <div class="section-title" style="page-break-before: always">Aide à la décision : questions au vendeur</div>
+  <div class="part-title">Aide à la décision : questions au vendeur</div>
   <div class="ad-intro">À remplir lors des visites et des échanges avec le vendeur, l'agence ou le syndic. Les réponses complètent l'analyse et sécurisent la décision.</div>
   {% for grp in aide_decision %}
   <div class="ad-theme">{{ grp.theme }}</div>
@@ -745,7 +998,7 @@
   {% endif %}
 
   {% if notes_page %}
-  <div class="section-title" style="page-break-before: always">Notes</div>
+  <div class="part-title">Notes</div>
   {% for i in range(31) %}<div class="notes-line"></div>{% endfor %}
   {% endif %}
 

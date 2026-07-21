@@ -7,6 +7,27 @@
 > script ; tu n'y touches jamais pour un bien donné. Si un texte est trop long, tu
 > le raccourcis, tu ne modifies ni le CSS ni les polices.
 
+## Hiérarchie du document (deux rangs de titres)
+
+Après la page 1 (synthèse), la fiche est organisée en **grandes parties** (rang 1,
+bandeau bleu `.part-title`) qui regroupent des **sections** (rang 2,
+`.section-title`). C'est le seul niveau de titres autorisé : au-delà, on utilise
+des libellés de figure (`.ct-sub`) ou des légendes, jamais un 3ᵉ rang de titre.
+**Règle de pagination** : un titre de rang 1 commence toujours une nouvelle page ;
+un titre de rang 2 n'introduit jamais de saut de page (les sections d'une même
+partie s'enchaînent). Les parties, dans l'ordre : **Le bien et son environnement**
+(caractéristiques et exposition, espaces et annexes, plan, cadre de vie et
+nuisances, commerces) · **Copropriété** (si bloc `copropriete`) · **Étude de marché**
+(si bloc `marche`) · **Risques et négociation** (étude V × I, vigilance,
+négociation) · **Conclusion pour l'acheteur** (rang 2 : « Coût de revient et
+valeur » avec cascade, score et historique DVF ; puis « Synthèse et
+recommandation » issue de l'étude de marché) · puis **Sources et références**,
+**Aide à la décision** et **Notes**. Chaque partie commence sur une nouvelle page.
+La conclusion place l'analyse (bien, copropriété, marché, risques) en amont et la
+réunit en fin de fiche : coût de revient réel et recommandation chiffrée. Le
+remplisseur de JSON ne pilote pas cette structure (le gabarit s'en charge) : il
+fournit les blocs, la hiérarchie est fixe.
+
 ## Barème du verdict (feu tricolore)
 
 Le verdict synthétise l'intérêt du bien pour l'acheteur, en croisant le prix (par
@@ -119,7 +140,8 @@ saisie propre est préférable. La bande correspondante est surlignée sur l'ét
 graphique.
 
 **Analyse : coût de revient, score, historique DVF.** Trois champs optionnels
-ajoutent une page « Coût de revient et score du bien » après l'étude de risques :
+alimentent la section de rang 2 « Coût de revient et valeur », au sein de la partie
+finale « Conclusion pour l'acheteur » :
 
 - `cout_revient` : `{prix_achat, frais, travaux, aleas, vat, note?}` (nombres €).
   Le script trace une **cascade** prix + frais + travaux + aléas = coût de revient
@@ -183,6 +205,62 @@ Recommandations : lister les risques les plus critiques d'abord (le script les
 retrie par criticité), viser 4 à 8 risques sur la fiche pour rester lisible (le
 détail exhaustif va dans l'étude complète), et 3 à 5 points de vigilance.
 
+### Bloc `caracteristiques` optionnel : caractéristiques et exposition du bien
+
+Ajouter une clé `caracteristiques` étoffe la partie « Le bien et son
+environnement » avec deux sections placées avant le plan : **« Caractéristiques et
+exposition »** (quatre tuiles + un tableau de détails) et **« Espaces extérieurs,
+annexes et stationnement »** (tableau). Ce bloc décrit le **permanent** du bien
+(orientation, vue, extérieurs, stationnement), ce qui ne se corrige pas par des
+travaux et se valorise à part du réparable (principe 3). Absent, aucune de ces
+sections n'est rendue.
+
+```json
+{
+  "caracteristiques": {
+    "note_sur_10": 5,
+    "synthese": "1er sur porche, séjour plein sud mais mono-orienté, sans extérieur ni stationnement.",
+    "exposition": "Sud (séjour)",
+    "etage_vue": "1er / sur rue",
+    "exterieur": "Aucun",
+    "stationnement": "Aucun",
+    "details": {
+      "orientation": "Mono-orienté sud",
+      "luminosite": "Non traversant, séjour lumineux",
+      "vue": "Sur rue, vis-à-vis modéré",
+      "hauteur_sous_plafond": "3,10 m",
+      "etat_general": "À rénover intégralement",
+      "menuiseries": "Simple vitrage bois d'origine",
+      "chauffage": "Individuel électrique",
+      "eau_chaude": "Ballon électrique",
+      "accessibilite": "Sans ascenseur, 1er sur porche"
+    },
+    "espaces": [
+      {"type": "Cave voûtée", "detail": "≈ 10 m²", "note": "Humide, remontées [2]"},
+      {"type": "Extérieur", "detail": "Aucun", "note": "Ni balcon ni cour"},
+      {"type": "Stationnement", "detail": "Aucun", "note": "Rue réglementée"}
+    ]
+  }
+}
+```
+
+**Tuiles et badge.** Les quatre champs `exposition`, `etage_vue`, `exterieur` et
+`stationnement` forment les tuiles de tête (valeurs **courtes**, l'unité dans le
+libellé) ; chacune n'apparaît que si renseignée. `note_sur_10` (0 à 10) pilote le
+badge de partie « Cadre de vie » : ≥ 7 « Agréable » (vert), 4 à 6,9 « Mitigé »
+(orange), < 4 « Exposé » (rouge). Elle doit rester cohérente avec l'axe
+« Emplacement » du `radar`.
+
+**Détails et espaces.** `details` alimente le tableau (orientation, luminosité, vue
+et vis-à-vis, hauteur sous plafond, état général, menuiseries, chauffage, eau
+chaude, accessibilité), chaque ligne n'apparaissant que si renseignée. `espaces`
+est une liste `{type, detail, note}` pour les extérieurs (balcon, terrasse, loggia,
+jardin), annexes (cave, cellier, grenier) et stationnement (parking, garage, box) :
+un extérieur ou un parking pèsent lourd sur la valeur, trop résumés par la ligne
+« annexes » de la grille d'identité de la page 1. Les appels de note `[n]` sont
+rendus en exposant dans `synthese`, `details.vue`, `details.etat_general` et les
+remarques d'`espaces`.
+
 ### Bloc `plan` optionnel : plan du bien dans le PDF
 
 Ajouter une clé `plan` dessine un **plan du bien** dans la fiche (après le bloc
@@ -197,12 +275,24 @@ prix). Deux modes :
   pièce, mètre-étalon tracé. À utiliser uniquement quand un plan à l'échelle
   existe : ne jamais inventer des cotes en mode reproduction.
 
-Chaque pièce est un rectangle positionné `(x, y, w, h)`, `x` vers la droite, `y`
-vers le bas. C'est le modèle qui calcule un agencement cohérent et non
-chevauchant ; le script se contente de dessiner. `type` colore la pièce (`jour`,
-`nuit`, `eau`, `service`, `circulation`, `exterieur`). `fenetres` place des
-ouvertures sur les arêtes exposées (`N`, `S`, `E`, `O`, en repère écran). `nord`
-oriente la boussole (`haut` par défaut, ou `bas`/`gauche`/`droite`).
+Chaque pièce est soit un **rectangle** `(x, y, w, h)` (`x` vers la droite, `y` vers
+le bas), soit un **polygone** `points: [[x,y], …]` pour les pièces **en L, pans
+coupés ou alcôves** (au-delà des formes carrées). Le rectangle reste le mode simple
+par défaut ; le polygone pour les cas qui le méritent. C'est le modèle qui calcule
+un agencement cohérent et non chevauchant ; le script se contente de dessiner.
+`type` colore la pièce **et y pose un mobilier léger** automatique (`nuit` = lit,
+`jour` = canapé et table, `service` ou pièce « cuisine » = plan de travail en L et
+évier, `eau` = baignoire et lavabo, `circulation` / `exterieur` = rien).
+
+`fenetres` place des ouvertures (**coupures bleues dans le mur**) : soit un côté
+`N`, `S`, `E`, `O` (repère écran, centré sur la boîte de la pièce), soit un segment
+explicite `[[x1,y1],[x2,y2]]` (utile en polygone). `portes`, au niveau du plan,
+dessine des **ouvertures avec arc de débattement** : chaque porte est
+`{x, y, w, mur, vers}`, gond en `(x, y)`, `mur` = `"h"` (mur horizontal) ou `"v"`
+(mur vertical), `vers` = `1` ou `-1` (côté vers lequel le vantail s'ouvre). Les
+murs extérieurs sont tracés plus épais que les refends intérieurs. La **boussole**
+(rose des vents) est placée **sous le plan**, orientée par `nord` (`haut` par
+défaut, ou `bas`/`gauche`/`droite`).
 
 ```json
 {
@@ -214,31 +304,49 @@ oriente la boussole (`haut` par défaut, ou `bas`/`gauche`/`droite`).
       {"nom": "Chambre", "x": 0, "y": 0, "w": 4.0, "h": 2.6, "surface": "11 m²", "type": "nuit", "fenetres": ["N"]},
       {"nom": "Cuisine", "x": 4.0, "y": 0, "w": 2.0, "h": 2.6, "surface": "6 m²", "type": "service", "fenetres": ["N"]},
       {"nom": "Salle de bains", "x": 6.0, "y": 0, "w": 2.0, "h": 2.6, "surface": "5 m²", "type": "eau", "fenetres": ["E"]},
-      {"nom": "Entrée", "x": 0, "y": 2.6, "w": 1.4, "h": 3.0, "surface": "4 m²", "type": "circulation", "fenetres": []},
-      {"nom": "Séjour", "x": 1.4, "y": 2.6, "w": 6.6, "h": 3.0, "surface": "18 m²", "type": "jour", "fenetres": ["S", "E"]}
+      {"nom": "Entrée", "x": 0, "y": 2.6, "w": 1.4, "h": 1.6, "surface": "4 m²", "type": "circulation"},
+      {"nom": "Séjour", "points": [[1.4, 2.6], [8, 2.6], [8, 5.6], [0, 5.6], [0, 4.2], [1.4, 4.2]], "surface": "20 m²", "type": "jour", "fenetres": ["S", "E"]}
+    ],
+    "portes": [
+      {"x": 0, "y": 2.75, "w": 0.9, "mur": "v", "vers": 1},
+      {"x": 2.2, "y": 2.6, "w": 0.9, "mur": "h", "vers": -1}
     ],
     "legende": ["Bien non traversant", "Cuisine séparée"]
   }
 }
 ```
 
-En mode `reproduction`, `w`/`h` sont les dimensions réelles en mètres (le libellé
-affiche alors `L × l m`) ; `surface` sert surtout au mode estimation. Placer les
-`fenetres` sur les arêtes qui donnent réellement sur l'extérieur. Le bloc est
-entièrement optionnel : absent, la fiche n'a pas de plan. Toujours rappeler, dans
-le message ou la légende, qu'un schéma estimé n'est pas un relevé.
+En mode `reproduction`, pour une pièce rectangulaire `w`/`h` sont les dimensions
+réelles en mètres (le libellé affiche `L × l m`) et un mètre-étalon est tracé ;
+`surface` sert surtout au mode estimation. Placer `fenetres` et `portes` sur des
+arêtes qui existent réellement ; ne jamais inventer de cotes ni de portes en mode
+reproduction. Le bloc est entièrement optionnel : absent, la fiche n'a pas de plan.
+Toujours rappeler, dans le message ou la légende, qu'un schéma estimé n'est pas un
+relevé.
 
-### Bloc `environnement` optionnel : commerces et équipements alentours
+### Bloc `environnement` optionnel : cadre de vie et commerces alentours
 
-Ajouter une clé `environnement` insère, **sous le plan du bien**, la section
-« Commerces et équipements alentours » : les lieux sont **regroupés par type**
-(Transports, Commerces, Écoles, Santé, Parcs et loisirs), chaque groupe avec une
-**icône** de couleur, listant les lieux (nom + distance). Entièrement autonome,
-**aucune carte ni réseau**.
+La clé `environnement` porte trois volets, tous optionnels : `situation` (quartier,
+desserte), `nuisances` (voisinage) et `pois` (commerces et équipements). Les deux
+premiers forment la section **« Cadre de vie : situation, desserte et nuisances »**
+(sous le plan) ; `pois` forme **« Commerces et équipements alentours »**, lieux
+**regroupés par type** (Transports, Commerces, Écoles, Santé, Parcs et loisirs)
+avec une **icône** de couleur. Entièrement autonome, **aucune carte ni réseau**.
 
 ```json
 {
   "environnement": {
+    "situation": {
+      "quartier": "Secteur sauvegardé, hyper-centre",
+      "desserte": "Gare à 6 min à pied, tram T1 à 2 min [1]",
+      "stationnement": "Zone réglementée, difficile",
+      "rue": "Rue passante, passage sous porche"
+    },
+    "nuisances": [
+      {"libelle": "Bruit routier", "niveau": "modere", "commentaire": "Rue passante en journée [1]"},
+      {"libelle": "Vis-à-vis", "niveau": "calme", "commentaire": "Vue dégagée sur jardins"},
+      {"libelle": "Couloir aérien", "niveau": "expose", "commentaire": "Trajectoire, survols matinaux [7]"}
+    ],
     "pois": [
       {"nom": "Gare de Bourges", "categorie": "transport", "distance": "400 m"},
       {"nom": "Carrefour City", "categorie": "commerce", "distance": "150 m"},
@@ -249,11 +357,190 @@ Ajouter une clé `environnement` insère, **sous le plan du bien**, la section
 }
 ```
 
-Chaque lieu a une `categorie` (`transport`, `commerce`, `ecole`, `sante`, `parc` ;
-sinon rangé dans « Autres »), un `nom` qui doit être le **nom exact du lieu**
-(« Carrefour City », « Gare de Bourges »), jamais une catégorie générique, et une
-`distance` (à pied de préférence). Viser une **dizaine de lieux** parmi les plus
-utiles. Ne renseigner que des lieux **réels et vérifiés**.
+**Situation.** `situation` est un objet libre (`quartier`, `desserte`,
+`stationnement`, `rue`) : chaque ligne n'apparaît que si renseignée.
+
+**Nuisances : niveaux sourcés.** Chaque nuisance a un `niveau` (`calme` = vert,
+`modere` = orange, `expose` = rouge) et un `commentaire`. Les niveaux de bruit se
+sourcent (classement sonore des voies, cartes de bruit stratégiques, Bruitparif en
+Île-de-France) ou se marquent « observé sur place » via un appel de note `[n]`,
+jamais inventés. C'est le pendant honnête des points forts : le permanent négatif
+que l'annonce tait (bruit routier ou ferroviaire, couloir aérien, vis-à-vis,
+établissement bruyant, chantier à proximité). Ces nuisances nourrissent aussi la
+famille « Nuisances » de l'étude de risques.
+
+**Commerces (`pois`).** Chaque lieu a une `categorie` (`transport`, `commerce`,
+`ecole`, `sante`, `parc` ; sinon rangé dans « Autres »), un `nom` qui doit être le
+**nom exact du lieu** (« Carrefour City », « Gare de Bourges »), jamais une
+catégorie générique, et une `distance` (à pied de préférence). Viser une **dizaine
+de lieux** parmi les plus utiles. Ne renseigner que des lieux **réels et vérifiés**.
+
+### Bloc `copropriete` optionnel : analyse de la copropriété
+
+Ajouter une clé `copropriete` insère la partie **« Copropriété »** (ou
+« Lotissement » selon `forme`) sur sa propre page, entre « Le bien et son
+environnement » et « Étude de marché ». La quote-part de travaux alimente ensuite,
+en fin de fiche, la cascade « Coût de revient et valeur » de la conclusion. À
+n'ajouter **que si le bien est en copropriété ou en lotissement** (appartement,
+maison en lotissement, local en immeuble collectif) : sans objet pour une maison
+individuelle sur sa parcelle, on omet le bloc. Entièrement optionnel et 100 %
+autonome (aucun réseau, tous les visuels sont des SVG générés).
+
+Le champ `forme` distingue trois cas qui n'ont pas les mêmes questions :
+`copropriete` (défaut), `lotissement` (ASL/AFUL) ou `mixte`. La sous-section
+`lotissement` ne s'affiche que pour `lotissement` ou `mixte`.
+
+```json
+{
+  "copropriete": {
+    "forme": "copropriete",
+    "note_sur_10": 4,
+    "synthese": "Copropriété ancienne de 18 lots sur 2 bâtiments, sans PPT ni DTG [1] ; ravalement voté non appelé, quote-part à provisionner.",
+    "identite": {
+      "immatriculation": "AB1234567 (registre national)",
+      "lots_total": 18,
+      "lots_habitation": 14,
+      "batiments": 2,
+      "annee_construction": "avant 1949",
+      "tantiemes_lot": "78 / 1000",
+      "syndic": "Cabinet X (professionnel), depuis 2018",
+      "chauffage": "Individuel gaz",
+      "equipements": "Cour commune, sans ascenseur"
+    },
+    "finances": {
+      "charges_m2_an": "42 €",
+      "impayes_pct": "9 %",
+      "fonds_travaux": "1 900 €",
+      "quote_part_travaux": "14 000 €",
+      "charges_annuelles": "≈ 1 790 €/an (150 €/mois)",
+      "charges_repere": "Ancien sans ascenseur : 25 à 40 €/m²/an [5]",
+      "evolution_charges": "+22 % sur 3 ans",
+      "budget_previsionnel": "≈ 32 000 €/an",
+      "emprunt_collectif": "Aucun",
+      "dettes_fournisseurs": "1 impayé fournisseur (2024)",
+      "postes": [
+        {"poste": "Ravalement / gros entretien", "montant": 620},
+        {"poste": "Entretien parties communes", "montant": 410},
+        {"poste": "Honoraires de syndic", "montant": 340}
+      ]
+    },
+    "travaux": {
+      "ppt": "absent, non établi",
+      "dtg": "absent",
+      "lignes": [
+        {"intitule": "Ravalement façade", "statut": "vote", "echeance": "appel T4 2026", "quote_part": "≈ 14 000 €", "payeur": "acquereur"},
+        {"intitule": "Réfection couverture", "statut": "a_prevoir", "echeance": "3 à 5 ans", "quote_part": "≈ 9 000 €"},
+        {"intitule": "Sécurité électrique communs", "statut": "realise", "echeance": "2021"}
+      ]
+    },
+    "gouvernance": {
+      "conseil_syndical": "Actif, 3 membres",
+      "regularite_ag": "AG annuelles tenues, 1 report en 2024",
+      "participation": "Quorum atteint de justesse",
+      "procedures": "Aucune procédure collective (ni mandataire ad hoc, ni administrateur provisoire)",
+      "alerte": false
+    },
+    "pv_ag": [
+      {"annee": "2025", "statut": "attention", "resume": "Ravalement voté après 2 reports ; trésorerie tendue"},
+      {"annee": "2024", "statut": "alerte", "resume": "Impayés en hausse (9 %), report d'AG"},
+      {"annee": "2023", "statut": "ok", "resume": "Gestion courante, budget reconduit"}
+    ],
+    "reglement": {
+      "date": "1961, modifié 1998",
+      "destination": "Bourgeois simple",
+      "clauses": "Location saisonnière soumise à autorisation d'AG",
+      "jouissance_privative": "Cave voûtée privative ; pas de partie extérieure privative",
+      "conformite": "Combles d'un lot aménagés : vérifier l'autorisation d'AG et l'EDD"
+    },
+    "documents": [
+      {"doc": "PV des 3 dernières AG", "statut": "obtenu"},
+      {"doc": "Règlement de copropriété + EDD", "statut": "obtenu"},
+      {"doc": "Carnet d'entretien", "statut": "manquant"},
+      {"doc": "Pré-état daté", "statut": "manquant"},
+      {"doc": "PPT", "statut": "inexistant"}
+    ],
+    "lotissement": {
+      "asl_aful": "ASL, cotisation 320 €/an, adhésion obligatoire",
+      "cahier_charges": "Perpétuel : clôtures et teintes imposées, plus strict que le PLU",
+      "retrocession_voirie": "Voirie et réseaux NON rétrocédés : entretien à la charge des colotis"
+    }
+  }
+}
+```
+
+**Santé et tuiles financières.** `note_sur_10` (0 à 10) pilote la pastille de
+santé du bandeau : ≥ 7 « Saine » (vert), 4 à 6,9 « À surveiller » (orange),
+< 4 « Fragile » (rouge) ; omise, aucune pastille. Elle doit rester cohérente avec
+l'axe « Copropriété » du `radar`. Les quatre tuiles KPI de la santé financière
+sont bâties automatiquement à partir de `finances.charges_m2_an`, `impayes_pct`,
+`fonds_travaux` et `quote_part_travaux` (chacune n'apparaît que si renseignée) :
+garder des **valeurs courtes** (« 42 € », « 9 % »), l'unité est portée par le
+libellé de la tuile. `postes` (liste `{poste, montant}`, même unité, €/an de
+préférence, ≥ 2 postes) trace les **barres de répartition des charges** : c'est là
+qu'un ascenseur ou une chaufferie collective explique un écart au repère.
+
+**Repères et seuils : toujours sourcés, jamais codés en dur.** `charges_repere`
+est un texte libre : n'y mettre un repère (« 25 à 40 €/m²/an ») qu'avec une
+**source datée** (observatoire des charges, registre national des copropriétés,
+ANIL) citée par un appel de note `[n]`. Le script ne code aucun seuil de charges
+ni aucun seuil légal (déclenchement d'un mandataire ad hoc, calendrier
+d'obligation du PPT ou du DTG selon la taille) : ces éléments se vérifient à la
+source (Service-Public, registre) avant d'être affirmés, conformément à la
+primauté des faits.
+
+**Travaux : trois régimes.** Chaque ligne porte un `statut` (`realise` = vert,
+`vote` = orange, `a_prevoir` = jaune ; `abandonne`) et, pour les travaux votés, un
+`payeur` (`vendeur` = vert favorable à l'acheteur, `acquereur` = rouge à charge,
+`partage`). La distinction **voté mais non encore appelé** est la plus souvent
+passée sous silence dans une annonce : préciser `echeance` (date d'appel de fonds)
+et `quote_part` du lot. `ppt` et `dtg` sont des textes libres décrivant leur
+statut (présent, absent, en cours) : leur absence sur un immeuble ancien est une
+zone d'ombre à afficher, pas un blanc.
+
+**PV d'AG et gouvernance.** `pv_ag` est une lecture (pas un recopiage) des 3
+derniers exercices, une ligne par année avec un `statut` (`ok` / `attention` /
+`alerte`) et un `resume` des signaux faibles (travaux reportés faute de
+trésorerie, changement fréquent de syndic, impayés en hausse). Dans
+`gouvernance`, le champ `procedures` est déterminant : mettre `"alerte": true`
+pour une procédure en cours (mandataire ad hoc, administrateur provisoire, plan de
+sauvegarde, arrêté de péril) affiche un encart rouge ; un feu rouge ici prime sur
+le reste de la fiche.
+
+**Documents : checklist ✓ / ✗ / ○.** `documents` est une liste `{doc, statut}`
+avec `statut` = `obtenu` (✓ vert), `manquant` (✗ rouge, « à réclamer ») ou
+`inexistant` / `na` (○ gris). Un statut vide ou inconnu est traité comme
+**manquant** : l'absence d'information est elle-même un facteur de risque, jamais
+un blanc à combler par une supposition optimiste.
+
+**Lotissement.** La sous-section `lotissement` (`asl_aful`, `cahier_charges`,
+`retrocession_voirie`) ne s'affiche que si `forme` vaut `lotissement` ou `mixte`.
+Le point de vigilance clé est la **rétrocession de la voirie et des réseaux** :
+non rétrocédés à la commune, leur entretien reste durablement à la charge des
+colotis. Le cahier des charges, souvent perpétuel, peut être plus contraignant que
+le PLU et lui survivre. Ces éléments n'apparaissent jamais dans une annonce.
+
+**Copropriété sans documents (mode dégradé).** Si le bien est bien en copropriété
+mais que peu de documents sont fournis, **remplir quand même le bloc en version
+dégradée** (identité sommaire, `synthese` signalant la zone d'ombre, checklist des
+documents manquants) plutôt que de l'omettre : une fiche sans section copropriété
+laisserait croire qu'il n'y a rien à signaler, ce qui est l'inverse du message.
+
+**Raccords avec le reste de la fiche** (à tenir cohérents, le script ne les
+synchronise pas automatiquement) :
+
+- `radar` : l'axe « Copropriété » reprend le `note_sur_10` de ce bloc.
+- `cout_revient.travaux` : y intégrer la `quote_part_travaux` à provisionner.
+  **Ne jamais compter deux fois** : cette quote-part va soit dans le coût de
+  revient, soit dans la décote de négociation, jamais dans les deux.
+- `risques` : les alertes du bloc deviennent des lignes de la famille
+  « Copropriété » de l'étude de risques.
+- `aide_decision` : les documents manquants se reformulent en questions au syndic.
+- `bien.copropriete` reste la ligne courte de la grille d'identité (le détail vit
+  dans ce bloc).
+
+Les appels de note `[n]` sont rendus en exposant dans `synthese`, `charges_repere`,
+les intitulés de travaux, `ppt`/`dtg`, les résumés de PV, `procedures` et les
+champs texte du règlement et du lotissement.
 
 ### Bloc `marche` optionnel : étude de marché dans le PDF (Fonction 5)
 

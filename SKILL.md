@@ -235,8 +235,28 @@ Un bloc `plan` optionnel dessine aussi un **plan du bien** : soit un schéma
 d'agencement estimé d'après l'annonce, les photos et les documents (mode
 `estimation`, explicitement non métré), soit la reproduction cotée d'un plan à
 l'échelle déjà fourni (mode `reproduction`). N'invente jamais de cotes en mode
-reproduction : sans plan source à l'échelle, reste en schéma estimatif. Schéma
-dans `references/fiche-etude.md`.
+reproduction : sans plan source à l'échelle, reste en schéma estimatif. Les pièces
+peuvent être rectangulaires ou **polygonales** (L, pans coupés) ; le script trace
+murs hiérarchisés, **portes avec arc de débattement**, fenêtres et **mobilier léger
+par type de pièce**, avec la boussole sous le plan. Schéma dans
+`references/fiche-etude.md`.
+
+Deux blocs optionnels étoffent la partie **« Le bien et son environnement »** :
+`caracteristiques` (exposition, vue, extérieurs, annexes, stationnement, état, avec
+tuiles et badge « Cadre de vie ») décrit le **permanent** du bien, à valoriser à
+part du réparable ; `environnement` porte le **cadre de vie** (situation, desserte,
+nuisances de voisinage avec pastilles de niveau) et les **commerces alentours**
+(POIs par catégorie). Les niveaux de bruit se sourcent (classement sonore, cartes
+de bruit), jamais inventés. Schéma dans `references/fiche-etude.md`.
+
+Un bloc `copropriete` optionnel ajoute une partie **« Copropriété »**
+(identité, santé financière et répartition des charges, travaux réalisés/votés/à
+prévoir avec quote-part et payeur, gouvernance et procédures, lecture des PV d'AG,
+règlement, checklist des documents obtenus/manquants, et sous-section lotissement
+ASL/AFUL). À ne renseigner **que si le bien est en copropriété ou en lotissement**
+(sans objet pour une maison individuelle). Les repères de charges et seuils légaux
+n'y figurent qu'avec une source datée, jamais codés en dur. Schéma et raccords
+(radar, coût de revient, risques) dans `references/fiche-etude.md`.
 
 ---
 

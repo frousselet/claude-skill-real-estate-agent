@@ -131,6 +131,80 @@ def panel_of(val):
     return str(val).strip()[:8], "panel-b"
 
 
+# ---------------------------------------------------------------------------
+# Copropriété : formes, statuts (travaux, PV d'AG), payeur, documents
+# ---------------------------------------------------------------------------
+
+COPRO_FORME = {
+    "copropriete": "Copropriété",
+    "copro": "Copropriété",
+    "lotissement": "Lotissement",
+    "asl": "Lotissement",
+    "aful": "Lotissement",
+    "mixte": "Copropriété et lotissement",
+}
+
+# Statut d'une résolution de PV d'AG : pastille (libellé, classe couleur).
+COPRO_STATUT = {
+    "ok": ("OK", "crit-faible"),
+    "bon": ("OK", "crit-faible"),
+    "ras": ("OK", "crit-faible"),
+    "attention": ("Attention", "crit-elevee"),
+    "vigilance": ("Attention", "crit-elevee"),
+    "alerte": ("Alerte", "crit-critique"),
+    "alert": ("Alerte", "crit-critique"),
+}
+
+# Statut d'un poste de travaux (réalisé / voté non appelé / à prévoir).
+TRAVAUX_STATUT = {
+    "realise": ("Réalisé", "crit-faible"),
+    "fait": ("Réalisé", "crit-faible"),
+    "vote": ("Voté", "crit-elevee"),
+    "vote_non_appele": ("Voté", "crit-elevee"),
+    "a_prevoir": ("À prévoir", "crit-moderee"),
+    "prevoir": ("À prévoir", "crit-moderee"),
+    "abandonne": ("Abandonné", "crit-faible"),
+}
+
+# Qui paie un poste de travaux voté (couleur du point de vue de l'acheteur :
+# vendeur = vert favorable, acquéreur = rouge à charge).
+PAYEUR = {
+    "vendeur": ("Vendeur", "crit-faible"),
+    "acquereur": ("Acquéreur", "crit-critique"),
+    "acheteur": ("Acquéreur", "crit-critique"),
+    "partage": ("À répartir", "crit-moderee"),
+    "repartir": ("À répartir", "crit-moderee"),
+}
+
+# Statut d'un document de copropriété : (marque, classe, libellé). Un statut
+# inconnu ou vide est traité comme manquant (l'absence est un facteur de risque).
+DOC_STATUT = {
+    "obtenu": ("✓", "doc-ok", "obtenu"),
+    "oui": ("✓", "doc-ok", "obtenu"),
+    "fourni": ("✓", "doc-ok", "obtenu"),
+    "manquant": ("✗", "doc-ko", "à réclamer"),
+    "non": ("✗", "doc-ko", "à réclamer"),
+    "inexistant": ("○", "doc-na", "inexistant"),
+    "na": ("○", "doc-na", "sans objet"),
+    "sans_objet": ("○", "doc-na", "sans objet"),
+}
+
+
+def _label_cls(mapping, val, maxlen=12):
+    """Normalise une valeur-clé en (libellé, classe). Une valeur libre inconnue
+    est reprise telle quelle en couleur neutre ; une valeur vide rend ('', '')."""
+    key = str(val or "").strip().lower()
+    if key in mapping:
+        return mapping[key]
+    if not key:
+        return "", ""
+    return str(val).strip()[:maxlen], "crit-moderee"
+
+
+def doc_statut_of(val):
+    return DOC_STATUT.get(str(val or "").strip().lower(), ("✗", "doc-ko", "à réclamer"))
+
+
 def _fmt_eur(v):
     """7400 -> '7 400' (séparateur de milliers, espace)."""
     return f"{int(round(v)):,}".replace(",", " ")
@@ -286,6 +360,43 @@ def build_waterfall_svg(cr, accent="#c0362c"):
         o.append(f'<text x="0" y="{cy+3:.1f}" font-size="8.3" fill="#333">{_sx(label)}</text>')
         o.append(f'<rect x="{x1:.1f}" y="{cy-6:.1f}" width="{max(1.0, x2-x1):.1f}" height="12" fill="{color}"/>')
         o.append(f'<text x="{x2+4:.1f}" y="{cy+3:.1f}" font-size="8" fill="#333">{_fmt_eur(b - a if a > 0 else b)} €</text>')
+    o.append("</svg>")
+    return "".join(o)
+
+
+def build_charges_svg(postes):
+    """Répartition des charges de copropriété par poste : barres horizontales,
+    montant et part en % à droite. `postes` = liste de {poste, montant} (nombres,
+    même unité, €/an de préférence). C'est là qu'on voit qu'un ascenseur ou une
+    chaufferie collective explique un écart de charges au repère du secteur."""
+    rows = []
+    for p in postes or []:
+        if not isinstance(p, dict):
+            continue
+        try:
+            m = float(p.get("montant"))
+        except (TypeError, ValueError):
+            continue
+        if m > 0:
+            rows.append((str(p.get("poste", "")), m))
+    if len(rows) < 2:
+        return ""
+    total = sum(m for _, m in rows)
+    hi = (max(m for _, m in rows) or 1.0) * 1.16
+    W, ML, MR = 470.0, 156.0, 76.0
+    rowh, top = 22.0, 6.0
+    H = top + rowh * len(rows) + 2
+    pw = W - ML - MR
+    fx = lambda v: v / hi * pw
+    o = [f'<svg viewBox="0 0 {W:.0f} {H:.0f}" width="100%" style="max-width:{W:.0f}px" '
+         f'xmlns="http://www.w3.org/2000/svg" font-family="DejaVu Sans, Arial, sans-serif">']
+    for i, (label, m) in enumerate(rows):
+        cy = top + rowh * i + rowh / 2
+        bw = fx(m)
+        pct = round(m / total * 100)
+        o.append(f'<text x="0" y="{cy+3:.1f}" font-size="8.3" fill="#333">{_sx(label[:30])}</text>')
+        o.append(f'<rect x="{ML:.1f}" y="{cy-7:.1f}" width="{max(1.0, bw):.1f}" height="14" rx="1.5" fill="#5b83b8"/>')
+        o.append(f'<text x="{ML+bw+5:.1f}" y="{cy+3:.1f}" font-size="8" fill="#333">{_fmt_eur(m)} € · {pct} %</text>')
     o.append("</svg>")
     return "".join(o)
 
@@ -658,98 +769,358 @@ def _sx(s):
     return _html.escape(str(s), quote=True)
 
 
-def build_plan_svg(plan):
-    """Construit un SVG inline du plan à partir de pièces rectangulaires
-    positionnées (x, y, w, h) sur une grille. En mode 'reproduction', les
-    coordonnées sont en mètres et un mètre-étalon est tracé ; en mode
-    'estimation', la grille est relative et le rendu est explicitement non métré.
-    Le SVG est autonome (aucune dépendance externe)."""
-    rooms = []
-    for p in plan.get("pieces") or []:
+FURN = "#b7b7b7"  # mobilier : trait léger, sous les étiquettes
+
+
+def _poly_area(pts):
+    a = 0.0
+    n = len(pts)
+    for i in range(n):
+        x0, y0 = pts[i]
+        x1, y1 = pts[(i + 1) % n]
+        a += x0 * y1 - x1 * y0
+    return abs(a) * 0.5
+
+
+def _poly_centroid(pts):
+    a = cx = cy = 0.0
+    n = len(pts)
+    for i in range(n):
+        x0, y0 = pts[i]
+        x1, y1 = pts[(i + 1) % n]
+        cr = x0 * y1 - x1 * y0
+        a += cr
+        cx += (x0 + x1) * cr
+        cy += (y0 + y1) * cr
+    if abs(a) < 1e-9:
+        return sum(p[0] for p in pts) / n, sum(p[1] for p in pts) / n
+    a *= 0.5
+    return cx / (6 * a), cy / (6 * a)
+
+
+def _room_geom(p):
+    """Normalise une pièce en polygone (liste de points en unités de grille).
+    Une pièce peut être un rectangle (x, y, w, h) ou un polygone (points), ce qui
+    permet les pièces en L, pans coupés et alcôves."""
+    pts = p.get("points")
+    is_rect = False
+    wm = hm = 0.0
+    if isinstance(pts, list) and len(pts) >= 3:
+        poly = []
+        for pt in pts:
+            try:
+                poly.append((float(pt[0]), float(pt[1])))
+            except (TypeError, ValueError, IndexError):
+                continue
+        if len(poly) < 3:
+            return None
+    else:
         w, h = _num(p.get("w")), _num(p.get("h"))
         if w <= 0 or h <= 0:
-            continue
-        rooms.append({
-            "x": _num(p.get("x")), "y": _num(p.get("y")), "w": w, "h": h,
-            "nom": p.get("nom", ""), "surface": p.get("surface", ""),
-            "fenetres": [str(f).strip().upper()[:1] for f in (p.get("fenetres") or [])],
-            "type": (p.get("type") or "").lower(),
-        })
+            return None
+        x, y = _num(p.get("x")), _num(p.get("y"))
+        poly = [(x, y), (x + w, y), (x + w, y + h), (x, y + h)]
+        is_rect, wm, hm = True, w, h
+    xs = [q[0] for q in poly]
+    ys = [q[1] for q in poly]
+    bbox = (min(xs), min(ys), max(xs), max(ys))
+    return {"poly": poly, "bbox": bbox, "is_rect": is_rect, "wm": wm, "hm": hm,
+            "type": (p.get("type") or "").lower(), "nom": p.get("nom", ""),
+            "surface": p.get("surface", ""), "fenetres": p.get("fenetres") or [],
+            "w": bbox[2] - bbox[0], "h": bbox[3] - bbox[1]}
+
+
+def _window_segment(f, bbox):
+    """Segment d'une fenêtre : soit un côté N/S/E/O (centré à 55 % de l'arête de la
+    boîte englobante), soit un segment explicite [[x1,y1],[x2,y2]]."""
+    if isinstance(f, (list, tuple)) and len(f) == 2 \
+            and all(isinstance(e, (list, tuple)) for e in f):
+        try:
+            return ((float(f[0][0]), float(f[0][1])), (float(f[1][0]), float(f[1][1])))
+        except (TypeError, ValueError, IndexError):
+            return None
+    x0, y0, x1, y1 = bbox
+    w, h = x1 - x0, y1 - y0
+    s = str(f).strip().upper()[:1]
+    if s == "N":
+        return ((x0 + w * 0.22, y0), (x0 + w * 0.78, y0))
+    if s == "S":
+        return ((x0 + w * 0.22, y1), (x0 + w * 0.78, y1))
+    if s == "E":
+        return ((x1, y0 + h * 0.22), (x1, y0 + h * 0.78))
+    if s == "O":
+        return ((x0, y0 + h * 0.22), (x0, y0 + h * 0.78))
+    return None
+
+
+def _door_svg(d, fx, fy, scale):
+    """Porte : coupure dans le mur + vantail + arc de débattement (quart de
+    cercle). `d` = {x, y, w, mur ('h'|'v'), vers (1|-1)}, gond en (x, y)."""
+    try:
+        x, y, w = float(d["x"]), float(d["y"]), float(d.get("w", 0.8))
+    except (KeyError, TypeError, ValueError):
+        return ""
+    if w <= 0:
+        return ""
+    mur = str(d.get("mur", "h")).strip().lower()[:1]
+    vers = 1.0 if _num(d.get("vers", 1), 1.0) >= 0 else -1.0
+    if mur == "v":
+        closed, openp = (x, y + w), (x + vers * w, y)
+    else:
+        closed, openp = (x + w, y), (x, y + vers * w)
+    hx, hy = fx(x), fy(y)
+    cx, cy = fx(closed[0]), fy(closed[1])
+    ox, oy = fx(openp[0]), fy(openp[1])
+    r = w * scale
+    # Sweep-flag pour que l'arc soit centré sur le gond (débattement réaliste).
+    sweep = 1 if ((cx - hx) * (oy - hy) - (cy - hy) * (ox - hx)) > 0 else 0
+    return (
+        '<line x1="{:.1f}" y1="{:.1f}" x2="{:.1f}" y2="{:.1f}" stroke="#ffffff" stroke-width="4.5"/>'
+        '<path d="M {:.1f} {:.1f} A {:.1f} {:.1f} 0 0 {} {:.1f} {:.1f}" fill="none" stroke="#b3b3b3" stroke-width="0.9"/>'
+        '<line x1="{:.1f}" y1="{:.1f}" x2="{:.1f}" y2="{:.1f}" stroke="#8f8f8f" stroke-width="1.1"/>'
+    ).format(hx, hy, cx, cy, cx, cy, r, r, sweep, ox, oy, hx, hy, ox, oy)
+
+
+def _door_keepout(d, fx, fy, scale):
+    """Zone de débattement d'une porte : boîte englobante (device) de l'arc + point
+    d'ouverture (en grille), pour rattacher la porte à la pièce où elle s'ouvre et
+    éviter d'y poser du mobilier."""
+    try:
+        x, y, w = float(d["x"]), float(d["y"]), float(d.get("w", 0.8))
+    except (KeyError, TypeError, ValueError):
+        return None
+    if w <= 0:
+        return None
+    mur = str(d.get("mur", "h")).strip().lower()[:1]
+    vers = 1.0 if _num(d.get("vers", 1), 1.0) >= 0 else -1.0
+    if mur == "v":
+        closed, openp = (x, y + w), (x + vers * w, y)
+    else:
+        closed, openp = (x + w, y), (x, y + vers * w)
+    xs, ys = (x, closed[0], openp[0]), (y, closed[1], openp[1])
+    return {"box": (fx(min(xs)), fy(min(ys)), fx(max(xs)), fy(max(ys))),
+            "open": (openp[0], openp[1])}
+
+
+def _furniture_svg(r, fx, fy, scale, keepout):
+    """Mobilier léger et iconique selon le type de pièce, placé contre un mur en
+    évitant le débattement des portes (`keepout` = boîtes device des arcs qui
+    s'ouvrent dans la pièce). Tracé faible, sous les étiquettes."""
+    x0, y0, x1, y1 = r["bbox"]
+    X, Y = fx(x0), fy(y0)
+    RW, RH = (x1 - x0) * scale, (y1 - y0) * scale
+    if RW < 46 or RH < 34:
+        return ""
+    nom = (r["nom"] or "").lower()
+    t = r["type"] or ""
+    if "cuisine" in nom or (t == "service" and "cuisine" not in nom and "bain" not in nom):
+        t = "cuisine"
+    elif "bain" in nom or "douche" in nom or "eau" in nom:
+        t = "eau"
+    elif nom.startswith("wc") or "toilet" in nom:
+        t = "wc"
+    m = 5.0
+    rr = lambda a, b, w, h, rad=2.0: ('<rect x="{:.1f}" y="{:.1f}" width="{:.1f}" height="{:.1f}" '
+        'rx="{:.1f}" fill="none" stroke="{}" stroke-width="1"/>').format(a, b, w, h, rad, FURN)
+    ln = lambda a, b, c, e: ('<line x1="{:.1f}" y1="{:.1f}" x2="{:.1f}" y2="{:.1f}" '
+        'stroke="{}" stroke-width="1"/>').format(a, b, c, e, FURN)
+    ci = lambda a, b, rad: ('<circle cx="{:.1f}" cy="{:.1f}" r="{:.1f}" fill="none" '
+        'stroke="{}" stroke-width="1"/>').format(a, b, rad, FURN)
+
+    def place_bottom(fw, fh):
+        """(x, y) d'un meuble fw × fh contre le mur du bas, décalé le long du mur
+        pour éviter le débattement des portes ; repli contre le mur du haut si le
+        bas est trop encombré."""
+        lo, hi = X + m, X + RW - m
+        band_top = Y + RH - fh - m
+        blocked = [(bx0 - 3, bx1 + 3) for (bx0, by0, bx1, by1) in keepout
+                   if by1 >= band_top and by0 <= Y + RH + 1]
+        for c in ((lo + hi) / 2 - fw / 2, lo, hi - fw):
+            if c >= lo - 0.6 and c + fw <= hi + 0.6 \
+                    and all(c + fw <= b0 or c >= b1 for (b0, b1) in blocked):
+                return c, Y + RH - fh - m
+        return (lo + hi) / 2 - fw / 2, Y + m + 4  # repli : contre le mur du haut
+
+    s = []
+    if t == "nuit":
+        # lit : matelas + deux oreillers en tête
+        bw = min(RW * 0.5, 66)
+        bh = min(RH * 0.46, bw * 1.1)
+        bx, by = place_bottom(bw, bh)
+        pw, ph = bw * 0.4, bh * 0.2
+        s.append(rr(bx, by, bw, bh, 3))
+        s.append(rr(bx + bw * 0.05, by + bh * 0.06, pw, ph, 2))
+        s.append(rr(bx + bw * 0.95 - pw, by + bh * 0.06, pw, ph, 2))
+    elif t == "jour":
+        # canapé : assise + séparation de coussins
+        sw2 = min(RW * 0.5, 82)
+        sh2 = min(RH * 0.26, 28)
+        sx, sy = place_bottom(sw2, sh2)
+        s.append(rr(sx, sy, sw2, sh2, 3))
+        s.append(ln(sx + 3, sy + sh2 - 3, sx + sw2 - 3, sy + sh2 - 3))
+        s.append(ln(sx + sw2 / 2, sy + 4, sx + sw2 / 2, sy + sh2 - 4))
+    elif t == "cuisine":
+        # plan de travail le long du mur gauche (évite la porte, souvent en bas)
+        ct = max(8.0, min(RW, RH) * 0.2)
+        ih = RH - 2 * m
+        s.append(rr(X + m, Y + m, ct, ih, 1))
+        s.append(rr(X + m + ct * 0.22, Y + m + ih * 0.30, ct * 0.55, ct * 0.55, 1))
+        s.append(ci(X + m + ct * 0.5, Y + m + ih * 0.66, ct * 0.16))
+        s.append(ci(X + m + ct * 0.5, Y + m + ih * 0.66 + ct * 0.55, ct * 0.16))
+    elif t == "eau":
+        # baignoire (avec bonde) + vasque dans un coin haut
+        tw = min(RW * 0.5, 60)
+        th = min(RH * 0.3, tw * 0.42)
+        tx, ty = place_bottom(tw, th)
+        s.append(rr(tx, ty, tw, th, 4))
+        s.append(ci(tx + tw - 8, ty + th / 2, 2))
+        s.append(ci(X + RW - m - 7, Y + m + 7, 4.5))
+    elif t == "wc":
+        # cuvette + réservoir
+        cx, cy = X + RW / 2, Y + RH / 2
+        s.append(rr(cx - 5, cy - 4, 10, 12, 4))
+        s.append(rr(cx - 6, cy - 8, 12, 4, 1))
+    else:
+        return ""
+    return "".join(s)
+
+
+def build_plan_svg(plan):
+    """SVG inline du plan : pièces rectangulaires (x, y, w, h) ou polygonales
+    (points, pour les pièces en L, pans coupés, alcôves), murs hiérarchisés
+    (périmètre extérieur épais), portes avec arc de débattement, fenêtres en
+    coupure de mur et mobilier léger par type de pièce. En mode 'reproduction' les
+    coordonnées sont en mètres (mètre-étalon tracé) ; en 'estimation', la grille
+    est relative, rendu explicitement non métré. Autonome, sans dépendance."""
+    rooms = [g for g in (_room_geom(p) for p in (plan.get("pieces") or [])) if g]
     if not rooms:
         return ""
-    max_x = max(r["x"] + r["w"] for r in rooms)
-    max_y = max(r["y"] + r["h"] for r in rooms)
-    if max_x <= 0 or max_y <= 0:
+    min_x = min(r["bbox"][0] for r in rooms)
+    min_y = min(r["bbox"][1] for r in rooms)
+    max_x = max(r["bbox"][2] for r in rooms)
+    max_y = max(r["bbox"][3] for r in rooms)
+    span_x, span_y = max_x - min_x, max_y - min_y
+    if span_x <= 0 or span_y <= 0:
         return ""
 
-    PAD, TARGET_W, MAX_H = 14.0, 344.0, 300.0
-    scale = (TARGET_W - 2 * PAD) / max_x
-    if max_y * scale + 2 * PAD > MAX_H:
-        scale = (MAX_H - 2 * PAD) / max_y
-    W = max_x * scale + 2 * PAD
-    H = max_y * scale + 2 * PAD
+    PAD, TARGET_W, MAX_H = 16.0, 344.0, 300.0
+    scale = (TARGET_W - 2 * PAD) / span_x
+    if span_y * scale + 2 * PAD > MAX_H:
+        scale = (MAX_H - 2 * PAD) / span_y
+    W = span_x * scale + 2 * PAD
+    H = span_y * scale + 2 * PAD
     repro = plan.get("mode") == "reproduction"
+    fx = lambda gx: PAD + (gx - min_x) * scale
+    fy = lambda gy: PAD + (gy - min_y) * scale
 
-    out = [
-        '<svg viewBox="0 0 {:.0f} {:.0f}" width="100%" style="max-width:{:.0f}px" '
-        'xmlns="http://www.w3.org/2000/svg" font-family="DejaVu Sans, Arial, sans-serif">'
-        .format(W, H, W)
-    ]
+    # Footprint quasi rectangulaire -> mur extérieur épais autour de la boîte
+    total_area = sum(_poly_area(r["poly"]) for r in rooms)
+    rectangular = total_area >= 0.90 * span_x * span_y
+
+    o = ['<svg viewBox="0 0 {:.0f} {:.0f}" width="100%" style="max-width:{:.0f}px" '
+         'xmlns="http://www.w3.org/2000/svg" font-family="DejaVu Sans, Arial, sans-serif">'
+         .format(W, H, W)]
+
+    # 1) Remplissages + refends intérieurs (trait fin)
     for r in rooms:
-        X, Y = PAD + r["x"] * scale, PAD + r["y"] * scale
-        RW, RH = r["w"] * scale, r["h"] * scale
+        pts = " ".join("{:.1f},{:.1f}".format(fx(x), fy(y)) for x, y in r["poly"])
         fill = ROOM_FILL.get(r["type"], ROOM_FILL[""])
-        out.append('<rect x="{:.1f}" y="{:.1f}" width="{:.1f}" height="{:.1f}" '
-                   'fill="{}" stroke="{}" stroke-width="1.4"/>'
-                   .format(X, Y, RW, RH, fill, ROOM_STROKE))
-        # Fenêtres : segment épais bleu, centré sur 55 % de l'arête
-        for edge in r["fenetres"]:
-            if edge in ("N", "S"):
-                y = Y if edge == "N" else Y + RH
-                x1, x2 = X + RW * 0.22, X + RW * 0.78
-                out.append('<line x1="{:.1f}" y1="{:.1f}" x2="{:.1f}" y2="{:.1f}" '
-                           'stroke="{}" stroke-width="3"/>'.format(x1, y, x2, y, WINDOW_COLOR))
-            elif edge in ("E", "O"):
-                x = X + RW if edge == "E" else X
-                y1, y2 = Y + RH * 0.22, Y + RH * 0.78
-                out.append('<line x1="{:.1f}" y1="{:.1f}" x2="{:.1f}" y2="{:.1f}" '
-                           'stroke="{}" stroke-width="3"/>'.format(x, y1, x, y2, WINDOW_COLOR))
-        # Étiquettes
-        cx, cy = X + RW / 2, Y + RH / 2
-        if RW > 34 and RH > 18:
-            two = RH > 30
-            name_y = cy - 4 if two else cy + 3
-            out.append('<text x="{:.1f}" y="{:.1f}" text-anchor="middle" '
-                       'font-size="8.2" font-weight="bold" fill="#242424">{}</text>'
-                       .format(cx, name_y, _sx(r["nom"])))
-            if two:
-                sub = "{:.1f} × {:.1f} m".format(r["w"], r["h"]) if repro else (
-                    "~" + _sx(r["surface"]) if r["surface"] else "")
-                if sub:
-                    out.append('<text x="{:.1f}" y="{:.1f}" text-anchor="middle" '
-                               'font-size="7" fill="#777">{}</text>'
-                               .format(cx, cy + 7, sub))
-    # Mètre-étalon en mode reproduction
+        o.append('<polygon points="{}" fill="{}" stroke="{}" stroke-width="1.4" '
+                 'stroke-linejoin="round"/>'.format(pts, fill, ROOM_STROKE))
+
+    # 2) Mobilier (sous les étiquettes et les murs), en évitant le débattement
+    #    des portes : chaque porte est rattachée à la pièce où elle s'ouvre.
+    door_kos = [k for k in (_door_keepout(d, fx, fy, scale) for d in (plan.get("portes") or [])) if k]
+    for r in rooms:
+        bx0, by0, bx1, by1 = r["bbox"]
+        ko = [k["box"] for k in door_kos
+              if bx0 - 0.01 <= k["open"][0] <= bx1 + 0.01 and by0 - 0.01 <= k["open"][1] <= by1 + 0.01]
+        o.append(_furniture_svg(r, fx, fy, scale, ko))
+
+    # 3) Mur extérieur épais
+    if rectangular:
+        o.append('<rect x="{:.1f}" y="{:.1f}" width="{:.1f}" height="{:.1f}" fill="none" '
+                 'stroke="{}" stroke-width="3.4"/>'
+                 .format(fx(min_x), fy(min_y), span_x * scale, span_y * scale, ROOM_STROKE))
+    else:
+        for r in rooms:
+            pts = " ".join("{:.1f},{:.1f}".format(fx(x), fy(y)) for x, y in r["poly"])
+            o.append('<polygon points="{}" fill="none" stroke="{}" stroke-width="2.2" '
+                     'stroke-linejoin="round"/>'.format(pts, ROOM_STROKE))
+
+    # 4) Fenêtres : coupure blanche dans le mur + trait bleu
+    for r in rooms:
+        for f in r["fenetres"]:
+            seg = _window_segment(f, r["bbox"])
+            if not seg:
+                continue
+            (ax, ay), (bx, by) = seg
+            o.append('<line x1="{:.1f}" y1="{:.1f}" x2="{:.1f}" y2="{:.1f}" stroke="#ffffff" '
+                     'stroke-width="4.5"/>'.format(fx(ax), fy(ay), fx(bx), fy(by)))
+            o.append('<line x1="{:.1f}" y1="{:.1f}" x2="{:.1f}" y2="{:.1f}" stroke="{}" '
+                     'stroke-width="2.4"/>'.format(fx(ax), fy(ay), fx(bx), fy(by), WINDOW_COLOR))
+
+    # 5) Portes (arc de débattement)
+    for d in plan.get("portes") or []:
+        o.append(_door_svg(d, fx, fy, scale))
+
+    # 6) Étiquettes (au centroïde de la pièce)
+    for r in rooms:
+        gx, gy = _poly_centroid(r["poly"])
+        cx, cy = fx(gx), fy(gy)
+        bw, bh = r["w"] * scale, r["h"] * scale
+        if bw <= 32 or bh <= 16:
+            continue
+        two = bh > 30
+        o.append('<text x="{:.1f}" y="{:.1f}" text-anchor="middle" font-size="8.2" '
+                 'font-weight="bold" fill="#242424">{}</text>'
+                 .format(cx, cy - 3 if two else cy + 3, _sx(r["nom"])))
+        if two:
+            surf = str(r["surface"]).strip().lstrip("~").strip()  # évite le double tilde
+            if repro and r["is_rect"] and r["wm"] and r["hm"]:
+                sub = "{:.1f} × {:.1f} m".format(r["wm"], r["hm"])
+            elif repro and surf:
+                sub = surf  # pas de « ~ » en reproduction (cotes réelles)
+            elif surf:
+                sub = "~" + surf
+            else:
+                sub = ""
+            if sub:
+                o.append('<text x="{:.1f}" y="{:.1f}" text-anchor="middle" font-size="7" '
+                         'fill="#777">{}</text>'.format(cx, cy + 8, _sx(sub)))
+
+    # 7) Mètre-étalon (reproduction)
     if repro:
-        bx, by = PAD, H - 4
-        out.append('<line x1="{:.1f}" y1="{:.1f}" x2="{:.1f}" y2="{:.1f}" '
-                   'stroke="#555" stroke-width="1.2"/>'.format(bx, by, bx + scale, by))
-        out.append('<text x="{:.1f}" y="{:.1f}" font-size="7" fill="#555">1 m</text>'
-                   .format(bx + scale + 4, by + 2))
-    # Boussole (Nord)
-    dx, dy = NORD_DIR.get(str(plan.get("nord", "haut")).lower(), (0, -1))
-    ncx, ncy, L = W - 16, 18, 11
-    tx, ty = ncx + dx * L, ncy + dy * L
-    px, py = -dy, dx  # perpendiculaire pour la pointe de flèche
-    out.append('<line x1="{:.1f}" y1="{:.1f}" x2="{:.1f}" y2="{:.1f}" stroke="#333" '
-               'stroke-width="1.3"/>'.format(ncx - dx * L, ncy - dy * L, tx, ty))
-    out.append('<polygon points="{:.1f},{:.1f} {:.1f},{:.1f} {:.1f},{:.1f}" fill="#333"/>'
-               .format(tx, ty, tx - dx * 5 + px * 3, ty - dy * 5 + py * 3,
-                       tx - dx * 5 - px * 3, ty - dy * 5 - py * 3))
-    out.append('<text x="{:.1f}" y="{:.1f}" text-anchor="middle" font-size="7.5" '
-               'font-weight="bold" fill="#333">N</text>'.format(tx + dx * 5, ty + dy * 6 + 2))
-    out.append('</svg>')
-    return "".join(out)
+        bx, by = PAD, H - 5
+        o.append('<line x1="{:.1f}" y1="{:.1f}" x2="{:.1f}" y2="{:.1f}" stroke="#555" '
+                 'stroke-width="1.2"/>'.format(bx, by, bx + scale, by))
+        o.append('<text x="{:.1f}" y="{:.1f}" font-size="7" fill="#555">1 m</text>'
+                 .format(bx + scale + 4, by + 2))
+    o.append('</svg>')
+    return "".join(o)
+
+
+def build_compass_svg(nord):
+    """Petite rose des vents autonome, aiguille orientée selon `nord`
+    (haut/bas/gauche/droite), destinée à être placée sous le plan."""
+    dx, dy = NORD_DIR.get(str(nord or "haut").strip().lower(), (0, -1))
+    W = H = 48.0
+    cx, cy, R = W / 2, H / 2, 14.0
+    tx, ty = cx + dx * R, cy + dy * R
+    bx, by = cx - dx * R, cy - dy * R
+    px, py = -dy, dx
+    return (
+        '<svg viewBox="0 0 {:.0f} {:.0f}" width="46" height="46" '
+        'xmlns="http://www.w3.org/2000/svg" font-family="DejaVu Sans, Arial, sans-serif">'
+        '<circle cx="{:.1f}" cy="{:.1f}" r="{:.1f}" fill="#fff" stroke="#d0d0d0" stroke-width="1"/>'
+        '<polygon points="{:.1f},{:.1f} {:.1f},{:.1f} {:.1f},{:.1f}" fill="#33383d"/>'
+        '<polygon points="{:.1f},{:.1f} {:.1f},{:.1f} {:.1f},{:.1f}" fill="#c9c9c9"/>'
+        '<text x="{:.1f}" y="{:.1f}" text-anchor="middle" font-size="8" font-weight="bold" fill="#33383d">N</text>'
+        '</svg>'
+    ).format(W, H, cx, cy, R + 3,
+             tx, ty, cx + px * 4, cy + py * 4, cx - px * 4, cy - py * 4,
+             bx, by, cx + px * 4, cy + py * 4, cx - px * 4, cy - py * 4,
+             cx + dx * (R + 8), cy + dy * (R + 8) + 3)
 
 
 def process_plan(data):
@@ -768,7 +1139,9 @@ def process_plan(data):
         plan.setdefault("note", "Schéma d'agencement estimatif d'après l'annonce, les photos "
                                 "et les documents disponibles. Non métré, non contractuel : "
                                 "surfaces et proportions approximatives.")
+    plan.setdefault("portes", [])
     plan["svg"] = build_plan_svg(plan)
+    plan["compass_svg"] = build_compass_svg(plan.get("nord"))
     data["plan"] = plan if plan["svg"] else None
     return data
 
@@ -806,9 +1179,23 @@ def _env_icon(key, color):
             'style="vertical-align:-2px" xmlns="http://www.w3.org/2000/svg">' + body + "</svg>")
 
 
+# Niveau d'une nuisance de voisinage : pastille (libellé, classe couleur).
+NUISANCE = {
+    "calme": ("Calme", "crit-faible"),
+    "faible": ("Calme", "crit-faible"),
+    "aucun": ("Calme", "crit-faible"),
+    "nul": ("Calme", "crit-faible"),
+    "modere": ("Modéré", "crit-elevee"),
+    "moyen": ("Modéré", "crit-elevee"),
+    "expose": ("Exposé", "crit-critique"),
+    "fort": ("Exposé", "crit-critique"),
+}
+
+
 def process_environnement(data):
     """Regroupe les commerces et équipements alentours par type (transports,
-    commerces, écoles, santé, parcs) avec une icône par catégorie. Rendu 100 %
+    commerces, écoles, santé, parcs) avec une icône par catégorie, et prépare le
+    cadre de vie (situation, desserte, nuisances de voisinage). Rendu 100 %
     autonome (aucune carte, aucun réseau)."""
     env = data.get("environnement")
     if not env:
@@ -825,7 +1212,132 @@ def process_environnement(data):
         if members:
             groups.append({"label": label, "icon": _env_icon(key, color), "pois": members})
     env["groups"] = groups
-    data["environnement"] = env if groups else None
+
+    # Cadre de vie : situation (quartier, desserte) et nuisances de voisinage.
+    env.setdefault("situation", {})
+    nuisances = env.get("nuisances", []) or []
+    for n in nuisances:
+        n.setdefault("libelle", "")
+        n.setdefault("commentaire", "")
+        n["niveau_label"], n["niveau_cls"] = _label_cls(NUISANCE, n.get("niveau"))
+    env["nuisances"] = nuisances
+
+    has_cadre = bool(env["situation"]) or bool(nuisances)
+    data["environnement"] = env if (groups or has_cadre) else None
+    return data
+
+
+def process_caracteristiques(data):
+    """Prépare le bloc « Caractéristiques du bien » s'il est présent : chip de
+    cadre de vie (note_sur_10), tuiles d'exposition (exposition, étage/vue,
+    extérieur, stationnement), tableau de détails et liste des espaces extérieurs,
+    annexes et stationnement. Absent, aucune de ces sections n'est rendue."""
+    c = data.get("caracteristiques")
+    if not c:
+        data["caracteristiques"] = None
+        return data
+
+    # Chip de cadre de vie (même logique que la santé de copropriété).
+    try:
+        n = float(c.get("note_sur_10"))
+        if n >= 7:
+            c["cadre_label"], c["cadre_cls"] = "Agréable", "crit-faible"
+        elif n >= 4:
+            c["cadre_label"], c["cadre_cls"] = "Mitigé", "crit-elevee"
+        else:
+            c["cadre_label"], c["cadre_cls"] = "Exposé", "crit-critique"
+    except (TypeError, ValueError):
+        c["cadre_label"], c["cadre_cls"] = "", ""
+
+    # Tuiles d'exposition : valeurs courtes, l'intitulé porte le libellé.
+    kpis = []
+    for key, label in (("exposition", "Exposition"), ("etage_vue", "Étage / vue"),
+                       ("exterieur", "Extérieur"), ("stationnement", "Stationnement")):
+        if c.get(key):
+            kpis.append({"valeur": c[key], "label": label})
+    c["kpis"] = kpis
+
+    c.setdefault("details", {})
+    espaces = c.get("espaces", []) or []
+    for e in espaces:
+        e.setdefault("type", "")
+        e.setdefault("detail", "")
+        e.setdefault("note", "")
+    c["espaces"] = espaces
+
+    data["caracteristiques"] = c
+    return data
+
+
+def process_copropriete(data):
+    """Prépare le bloc « Analyse de la copropriété » s'il est présent : forme
+    (copropriété / lotissement / mixte), chip de santé, tuiles financières,
+    répartition des charges (SVG), statuts des travaux et des PV d'AG, payeur,
+    et checklist des documents. Absent, aucune section copropriété n'est rendue.
+    Le bloc est volontairement tolérant : une copropriété sans documents rend
+    une version dégradée (identité sommaire + checklist des manquants) plutôt que
+    de disparaître, car l'absence d'information est elle-même un signal."""
+    copro = data.get("copropriete")
+    if not copro:
+        data["copropriete"] = None
+        return data
+
+    forme_key = str(copro.get("forme", "copropriete")).strip().lower()
+    copro["forme_label"] = COPRO_FORME.get(forme_key, "Copropriété")
+    copro["is_lotissement"] = forme_key in ("lotissement", "asl", "aful", "mixte")
+
+    # Chip de santé, dérivé de note_sur_10 (même logique que le risque global).
+    try:
+        n = float(copro.get("note_sur_10"))
+        if n >= 7:
+            copro["sante_label"], copro["sante_cls"] = "Saine", "crit-faible"
+        elif n >= 4:
+            copro["sante_label"], copro["sante_cls"] = "À surveiller", "crit-elevee"
+        else:
+            copro["sante_label"], copro["sante_cls"] = "Fragile", "crit-critique"
+    except (TypeError, ValueError):
+        copro["sante_label"], copro["sante_cls"] = "", ""
+
+    copro.setdefault("identite", {})
+
+    # Santé financière : 4 tuiles KPI (valeurs courtes, l'unité est dans le label).
+    fin = copro.setdefault("finances", {})
+    kpis = []
+    if fin.get("charges_m2_an"):
+        kpis.append({"valeur": fin["charges_m2_an"], "label": "Charges /m²/an"})
+    if fin.get("impayes_pct"):
+        kpis.append({"valeur": fin["impayes_pct"], "label": "Taux d'impayés"})
+    if fin.get("fonds_travaux"):
+        kpis.append({"valeur": fin["fonds_travaux"], "label": "Fonds travaux (lot)"})
+    if fin.get("quote_part_travaux"):
+        kpis.append({"valeur": fin["quote_part_travaux"], "label": "Travaux à provisionner"})
+    copro["kpis"] = kpis
+    copro["charges_svg"] = build_charges_svg(fin.get("postes"))
+
+    trav = copro.setdefault("travaux", {})
+    for l in trav.get("lignes", []) or []:
+        l.setdefault("intitule", "")
+        l.setdefault("echeance", "")
+        l.setdefault("quote_part", "")
+        l["statut_label"], l["statut_cls"] = _label_cls(TRAVAUX_STATUT, l.get("statut"))
+        l["payeur_label"], l["payeur_cls"] = _label_cls(PAYEUR, l.get("payeur"))
+
+    copro.setdefault("gouvernance", {})
+
+    for pv in copro.get("pv_ag", []) or []:
+        pv.setdefault("annee", "")
+        pv.setdefault("resume", "")
+        pv["statut_label"], pv["statut_cls"] = _label_cls(COPRO_STATUT, pv.get("statut"))
+
+    for doc in copro.get("documents", []) or []:
+        doc.setdefault("doc", "")
+        doc["mark"], doc["cls"], doc["statut_label"] = doc_statut_of(doc.get("statut"))
+
+    copro.setdefault("reglement", {})
+    if copro["is_lotissement"]:
+        copro.setdefault("lotissement", {})
+
+    data["copropriete"] = copro
     return data
 
 
@@ -898,6 +1410,8 @@ def process(data):
 
     process_plan(data)
     process_environnement(data)
+    process_caracteristiques(data)
+    process_copropriete(data)
     process_analyse(data)
     process_marche(data)
     process_conclusion(data)

@@ -1,0 +1,788 @@
+{
+  "meta": {
+    "date": "2026-07-19",
+    "auteur": "Agent Immobilier, conseiller d'acquéreur sans conflit d'intérêt"
+  },
+  "bien": {
+    "adresse": "12 rue des Lilas, 00000 Villexemple",
+    "secteur": "Centre-ville",
+    "type": "Appartement 2 pièces",
+    "surface_m2": 42.7,
+    "pieces": 2,
+    "etage": "1er (sur porche)",
+    "annee": "XVIIIe, avant 1949",
+    "dpe": "G",
+    "dpe_kwh": 468,
+    "ges": "G",
+    "ges_kgco2": 106,
+    "charges": "non communiqué",
+    "taxe_fonciere": "non communiqué",
+    "copropriete": "Plusieurs bâtiments, sans PPT ni DTG",
+    "annexes": "Cave voûtée (humide)"
+  },
+  "prix": {
+    "affiche": "350 000 €",
+    "prix_m2_affiche": "~8 200 €/m²",
+    "reference_marche": "5 900 €/m² médian, panel A ≤ 250 m (DVF) [3]",
+    "valeur_defendable": "180 000 € (plafond 190 000 €)",
+    "cible_negociation": "180 000 à 190 000 €",
+    "decote": "≈ 46 % / prix affiché"
+  },
+  "verdict": {
+    "feu": "rouge",
+    "note_sur_100": 42,
+    "resume": "Appartement 2 pièces de 42,7 m² au 1er étage sur porche, immeuble ancien (XVIIIe) sans ascenseur, cave voûtée, sans extérieur [1]. Emplacement rare et recherché, mais le prix affiché [1] correspond à un bien déjà rénové appliqué à un logement classé G à rénover. L'écart avec la valeur défendable (fondée sur les prix réels DVF [3], panel A) recouvre travaux et aléas du bâti."
+  },
+  "points_forts": [
+    "Emplacement rare, secteur sauvegardé [2], proche gare",
+    "Cachet ancien (XVIIIe), séjour exposé sud, cave voûtée",
+    "Marché tendu, bonne liquidité à la revente",
+    "Cuisine séparée, salle de bains avec fenêtre"
+  ],
+  "points_faibles": [
+    "DPE G (passoire), rénovation lourde à prévoir",
+    "Prix affiché très au-dessus de la valeur défendable",
+    "1er sur porche : plancher sur passage, isolation complexe",
+    "Copropriété ancienne sans PPT ni DTG"
+  ],
+  "risque_global": "Élevé",
+  "risques": [
+    {
+      "libelle": "DPE G (passoire énergétique)",
+      "famille": "Bâti",
+      "v": 5,
+      "i": 4,
+      "commentaire": "Passoire G, 468 kWh/m²/an [4] ; location des G interdite depuis 2025"
+    },
+    {
+      "libelle": "Survalorisation vs marché réel",
+      "famille": "Marché",
+      "v": 5,
+      "i": 4,
+      "commentaire": "Prix affiché au niveau du rénové pour un bien à rénover [3]"
+    },
+    {
+      "libelle": "Retrait-gonflement des argiles",
+      "famille": "Naturel",
+      "v": 4,
+      "i": 4,
+      "commentaire": "Aléa fort argiles [2] ; fissures et fondations à vérifier"
+    },
+    {
+      "libelle": "Secteur sauvegardé / avis ABF",
+      "famille": "Urbanisme",
+      "v": 5,
+      "i": 3,
+      "commentaire": "Matériaux imposés, délais et surcoûts"
+    },
+    {
+      "libelle": "Copropriété sans PPT ni DTG",
+      "famille": "Copropriété",
+      "v": 4,
+      "i": 3,
+      "commentaire": "Travaux collectifs probables non chiffrés"
+    },
+    {
+      "libelle": "Plomb (CREP)",
+      "famille": "Bâti",
+      "v": 4,
+      "i": 3,
+      "commentaire": "Bâti avant 1949 ; précautions de dépose"
+    },
+    {
+      "libelle": "Remontée de nappe",
+      "famille": "Naturel",
+      "v": 3,
+      "i": 2,
+      "commentaire": "Cave humide, infiltrations possibles"
+    }
+  ],
+  "vigilance": [
+    "Argiles en aléa fort : faire vérifier fissures et fondations",
+    "DPE G : chiffrer la sortie de passoire avant toute offre",
+    "Copropriété : réclamer PV d'AG, carnet d'entretien, fonds de travaux",
+    "Prix aligné sur du rénové : négociation indispensable"
+  ],
+  "negociation": {
+    "leviers": [
+      "Classe G et rénovation intégrale",
+      "Prix au-dessus des prix réels DVF (panel A) [3]",
+      "Travaux incompressibles",
+      "Copropriété sans visibilité"
+    ],
+    "argument_cle": "Payer 350 000 € reviendrait à acheter une valeur rénovée que le bien n'a pas encore, puis à financer les travaux une seconde fois."
+  },
+  "cout_revient": {
+    "prix_achat": 214000,
+    "frais": 16000,
+    "travaux": 90000,
+    "aleas": 15000,
+    "vat": 300000,
+    "note": "Coût de revient (335 000 €) supérieur à la valeur rénovée (300 000 €) : payer le prix affiché reviendrait à surinvestir."
+  },
+  "radar": [
+    {
+      "axe": "Emplacement",
+      "note": 9
+    },
+    {
+      "axe": "Énergie",
+      "note": 1
+    },
+    {
+      "axe": "État",
+      "note": 3
+    },
+    {
+      "axe": "Copropriété",
+      "note": 4
+    },
+    {
+      "axe": "Prix",
+      "note": 2
+    },
+    {
+      "axe": "Risques",
+      "note": 3
+    }
+  ],
+  "dvf_historique": [
+    {
+      "date": "2015",
+      "prix": "185 000 €",
+      "detail": "Même lot, vente précédente (panel D)"
+    },
+    {
+      "date": "2006",
+      "prix": "138 000 €",
+      "detail": "Même immeuble, T2 comparable (panel D)"
+    }
+  ],
+  "copropriete": {
+    "forme": "copropriete",
+    "note_sur_10": 4,
+    "synthese": "Copropriété ancienne de 18 lots sur 2 bâtiments (XVIIIe), sans PPT ni DTG [1]. Charges élevées, fonds de travaux mince, ravalement voté non encore appelé : la quote-part est à provisionner et à faire porter sur le prix avant l'offre.",
+    "identite": {
+      "immatriculation": "AB1234567 (registre national)",
+      "lots_total": 18,
+      "lots_habitation": 14,
+      "batiments": 2,
+      "annee_construction": "XVIIIe, avant 1949",
+      "tantiemes_lot": "78 / 1000",
+      "syndic": "Cabinet Berry Syndic (professionnel), depuis 2018",
+      "chauffage": "Individuel gaz",
+      "equipements": "Cour commune, sans ascenseur"
+    },
+    "finances": {
+      "charges_m2_an": "42 €",
+      "impayes_pct": "9 %",
+      "fonds_travaux": "1 900 €",
+      "quote_part_travaux": "14 000 €",
+      "charges_annuelles": "≈ 1 790 €/an (150 €/mois)",
+      "charges_repere": "Ancien sans ascenseur : 25 à 40 €/m²/an [5]",
+      "evolution_charges": "+22 % sur 3 ans",
+      "budget_previsionnel": "≈ 32 000 €/an",
+      "emprunt_collectif": "Aucun",
+      "dettes_fournisseurs": "1 impayé fournisseur (2024)",
+      "postes": [
+        {"poste": "Ravalement / gros entretien", "montant": 620},
+        {"poste": "Entretien parties communes", "montant": 410},
+        {"poste": "Honoraires de syndic", "montant": 340},
+        {"poste": "Assurance immeuble", "montant": 300},
+        {"poste": "Eau et électricité communes", "montant": 120}
+      ]
+    },
+    "travaux": {
+      "ppt": "absent, non établi (obligation selon la taille de la copropriété)",
+      "dtg": "absent",
+      "lignes": [
+        {"intitule": "Ravalement façade sur rue", "statut": "vote", "echeance": "appel de fonds T4 2026", "quote_part": "≈ 14 000 €", "payeur": "acquereur"},
+        {"intitule": "Réfection couverture (zinguerie)", "statut": "a_prevoir", "echeance": "3 à 5 ans", "quote_part": "≈ 9 000 €"},
+        {"intitule": "Reprise réseau eaux usées (cave)", "statut": "a_prevoir", "echeance": "non planifié", "quote_part": "non chiffré"},
+        {"intitule": "Mise en sécurité électrique des communs", "statut": "realise", "echeance": "2021"}
+      ]
+    },
+    "gouvernance": {
+      "conseil_syndical": "Actif, 3 membres",
+      "regularite_ag": "AG annuelles tenues, 1 report en 2024",
+      "participation": "Quorum atteint de justesse (art. 25)",
+      "procedures": "Aucune procédure collective (ni mandataire ad hoc, ni administrateur provisoire)",
+      "alerte": false
+    },
+    "pv_ag": [
+      {"annee": "2025", "statut": "attention", "resume": "Ravalement voté après 2 reports ; trésorerie jugée tendue par le conseil syndical"},
+      {"annee": "2024", "statut": "alerte", "resume": "Impayés en hausse (9 %), 1 dette fournisseur, report d'AG"},
+      {"annee": "2023", "statut": "ok", "resume": "Gestion courante, budget reconduit sans travaux lourds"}
+    ],
+    "reglement": {
+      "date": "1961, modifié 1998",
+      "destination": "Bourgeois simple (habitation et professions libérales)",
+      "clauses": "Location saisonnière soumise à autorisation d'AG ; jouissance de la cour commune",
+      "jouissance_privative": "Cave voûtée privative ; aucune partie extérieure privative au lot",
+      "conformite": "Combles d'un lot voisin aménagés : vérifier l'autorisation d'AG et la mise à jour de l'EDD"
+    },
+    "documents": [
+      {"doc": "PV des 3 dernières AG", "statut": "obtenu"},
+      {"doc": "Règlement de copropriété + EDD", "statut": "obtenu"},
+      {"doc": "Contrat de syndic en cours", "statut": "obtenu"},
+      {"doc": "Carnet d'entretien", "statut": "manquant"},
+      {"doc": "Fiche synthétique", "statut": "manquant"},
+      {"doc": "Pré-état daté", "statut": "manquant"},
+      {"doc": "Plan pluriannuel de travaux (PPT)", "statut": "inexistant"},
+      {"doc": "Diagnostic technique global (DTG)", "statut": "inexistant"}
+    ]
+  },
+  "plan": {
+    "mode": "estimation",
+    "nord": "haut",
+    "source": "Estimé d'après l'annonce, 9 photos et le mesurage Carrez (42,7 m²)",
+    "pieces": [
+      {
+        "nom": "Chambre",
+        "x": 0,
+        "y": 0,
+        "w": 4.0,
+        "h": 2.6,
+        "surface": "11 m²",
+        "type": "nuit",
+        "fenetres": [
+          "N"
+        ]
+      },
+      {
+        "nom": "Cuisine",
+        "x": 4.0,
+        "y": 0,
+        "w": 2.0,
+        "h": 2.6,
+        "surface": "6 m²",
+        "type": "service",
+        "fenetres": [
+          "N"
+        ]
+      },
+      {
+        "nom": "Salle de bains",
+        "x": 6.0,
+        "y": 0,
+        "w": 2.0,
+        "h": 2.6,
+        "surface": "5 m²",
+        "type": "eau",
+        "fenetres": [
+          "E"
+        ]
+      },
+      {
+        "nom": "Entrée",
+        "x": 0,
+        "y": 2.6,
+        "w": 1.4,
+        "h": 1.6,
+        "surface": "4 m²",
+        "type": "circulation",
+        "fenetres": []
+      },
+      {
+        "nom": "Séjour",
+        "points": [[1.4, 2.6], [8.0, 2.6], [8.0, 5.6], [0, 5.6], [0, 4.2], [1.4, 4.2]],
+        "surface": "20 m²",
+        "type": "jour",
+        "fenetres": ["S", "E"]
+      }
+    ],
+    "portes": [
+      {"x": 0, "y": 2.75, "w": 0.9, "mur": "v", "vers": 1},
+      {"x": 1.4, "y": 2.75, "w": 0.9, "mur": "v", "vers": 1},
+      {"x": 2.2, "y": 2.6, "w": 0.9, "mur": "h", "vers": -1},
+      {"x": 4.6, "y": 2.6, "w": 0.8, "mur": "h", "vers": -1},
+      {"x": 6.6, "y": 2.6, "w": 0.8, "mur": "h", "vers": -1}
+    ],
+    "legende": [
+      "Bien non traversant : séjour au sud, chambre au nord",
+      "Cuisine séparée, salle de bains avec fenêtre"
+    ]
+  },
+  "caracteristiques": {
+    "note_sur_10": 5,
+    "synthese": "1er étage sur porche, séjour exposé sud mais logement mono-orienté, sans extérieur ni stationnement ; volumes anciens (3,10 m sous plafond), à rénover intégralement.",
+    "exposition": "Sud (séjour)",
+    "etage_vue": "1er / sur rue",
+    "exterieur": "Aucun",
+    "stationnement": "Aucun",
+    "details": {
+      "orientation": "Mono-orienté sud",
+      "luminosite": "Non traversant, séjour lumineux",
+      "vue": "Sur rue, vis-à-vis modéré",
+      "hauteur_sous_plafond": "3,10 m (cachet ancien)",
+      "etat_general": "À rénover intégralement",
+      "menuiseries": "Simple vitrage bois d'origine",
+      "chauffage": "Individuel électrique (convecteurs)",
+      "eau_chaude": "Ballon électrique",
+      "accessibilite": "Sans ascenseur, 1er sur porche"
+    },
+    "espaces": [
+      {"type": "Cave voûtée", "detail": "≈ 10 m²", "note": "Humide, remontées de nappe [2]"},
+      {"type": "Extérieur", "detail": "Aucun", "note": "Ni balcon ni cour privative"},
+      {"type": "Stationnement", "detail": "Aucun", "note": "Rue en zone réglementée"}
+    ]
+  },
+  "environnement": {
+    "situation": {
+      "quartier": "Secteur sauvegardé, hyper-centre",
+      "desserte": "Gare à 6 min à pied, tram T1 à 2 min [1]",
+      "stationnement": "Zone réglementée, stationnement difficile",
+      "rue": "Rue passante, passage sous porche"
+    },
+    "nuisances": [
+      {"libelle": "Passage sous porche", "niveau": "modere", "commentaire": "Séjour sur plancher du passage commun"},
+      {"libelle": "Bruit routier", "niveau": "modere", "commentaire": "Rue passante en journée [1]"},
+      {"libelle": "Vis-à-vis", "niveau": "modere", "commentaire": "Immeuble d'en face, rue étroite"},
+      {"libelle": "Couloir aérien", "niveau": "calme", "commentaire": "Hors trajectoire connue"}
+    ],
+    "pois": [
+      {
+        "nom": "Gare de Villexemple",
+        "categorie": "transport",
+        "distance": "400 m"
+      },
+      {
+        "nom": "Arrêt tram T1 « Cathédrale »",
+        "categorie": "transport",
+        "distance": "120 m"
+      },
+      {
+        "nom": "Carrefour City",
+        "categorie": "commerce",
+        "distance": "150 m"
+      },
+      {
+        "nom": "Marché Saint-Bonnet",
+        "categorie": "commerce",
+        "distance": "250 m"
+      },
+      {
+        "nom": "Boulangerie Maison Fou",
+        "categorie": "commerce",
+        "distance": "80 m"
+      },
+      {
+        "nom": "École Jean-Jaurès",
+        "categorie": "ecole",
+        "distance": "200 m"
+      },
+      {
+        "nom": "Lycée Alain-Fournier",
+        "categorie": "ecole",
+        "distance": "550 m"
+      },
+      {
+        "nom": "Pharmacie du Centre",
+        "categorie": "sante",
+        "distance": "180 m"
+      },
+      {
+        "nom": "Cabinet médical des Lices",
+        "categorie": "sante",
+        "distance": "300 m"
+      },
+      {
+        "nom": "Jardin de l'Archevêché",
+        "categorie": "parc",
+        "distance": "350 m"
+      }
+    ]
+  },
+  "marche": {
+    "perimetre": "Villexemple (00000), centre-ville",
+    "date_donnees": "DVF millésime avril 2026 (panels 2023-2025, tendance 5 ans) · INSEE 2023 · Surface ±20 % (34-51 m²)",
+    "tendance": {
+      "direction": "stable",
+      "evolution_3_ans": "-3 %",
+      "evolution_5_ans": "+7 %",
+      "evolution_10_ans": "+38 %",
+      "volume_transactions": "≈ 950 ventes/an",
+      "delai_vente": "≈ 95 jours",
+      "dynamique": "Marché d'acheteurs sur l'ancien à rénover"
+    },
+    "profil": {
+      "population": "85 200 hab.",
+      "demographie": "Stable",
+      "emploi": "Tertiaire, tourisme",
+      "attractivite": "Forte",
+      "desserte": "RER, gares, autoroutes",
+      "socio": "Ménages aisés, 62 % de propriétaires"
+    },
+    "prix": [
+      {
+        "secteur": "Panel A (≤ 250 m)",
+        "typologie": "Appart. à rénover, 34-51 m²",
+        "prix_m2_median": "5 900 €/m²",
+        "fourchette": "5 000 à 6 800 €/m²",
+        "volume": "7 mutations",
+        "estimation_portail": "7 200 €/m²",
+        "tendance": "baisse"
+      },
+      {
+        "secteur": "Panel B (250-500 m)",
+        "typologie": "Appart. à rénover, 34-51 m²",
+        "prix_m2_median": "6 400 €/m²",
+        "fourchette": "5 300 à 7 600 €/m²",
+        "volume": "22 mutations",
+        "estimation_portail": "7 400 €/m²",
+        "tendance": "stable"
+      },
+      {
+        "secteur": "Panel A+B",
+        "typologie": "Appart. à rénover, 34-51 m²",
+        "prix_m2_median": "6 200 €/m²",
+        "fourchette": "5 000 à 7 600 €/m²",
+        "volume": "29 mutations",
+        "estimation_portail": "7 300 €/m²",
+        "tendance": "stable"
+      },
+      {
+        "secteur": "Panel R (neuf, hors ancien)",
+        "typologie": "Appartement neuf / VEFA",
+        "prix_m2_median": "8 100 €/m²",
+        "fourchette": "7 600 à 8 900 €/m²",
+        "volume": "11 mutations",
+        "estimation_portail": "8 300 €/m²",
+        "tendance": "stable"
+      }
+    ],
+    "evolution": [
+      {
+        "annee": 2021,
+        "prix_m2": 6450
+      },
+      {
+        "annee": 2022,
+        "prix_m2": 6700
+      },
+      {
+        "annee": 2023,
+        "prix_m2": 6500
+      },
+      {
+        "annee": 2024,
+        "prix_m2": 6300
+      },
+      {
+        "annee": 2025,
+        "prix_m2": 6200
+      }
+    ],
+    "boxplot": [
+      {
+        "label": "Panel A (≤ 250 m)",
+        "min": 4900,
+        "q1": 5300,
+        "median": 5900,
+        "q3": 6500,
+        "max": 8200,
+        "bien": 8200
+      },
+      {
+        "label": "Panel B (250-500 m)",
+        "min": 5100,
+        "q1": 5700,
+        "median": 6400,
+        "q3": 7000,
+        "max": 7900
+      },
+      {
+        "label": "Panel A+B",
+        "min": 4900,
+        "q1": 5500,
+        "median": 6200,
+        "q3": 6900,
+        "max": 8200,
+        "portail": 7300
+      },
+      {
+        "label": "Panel R (neuf)",
+        "min": 7500,
+        "q1": 7800,
+        "median": 8100,
+        "q3": 8500,
+        "max": 8900
+      }
+    ],
+    "comparables": [
+      {
+        "secteur": "12 rue des Lilas (même immeuble)",
+        "surface": "44 m²",
+        "prix": "232 000 €",
+        "prix_m2": "5 270 €/m²",
+        "date": "06/2024",
+        "distance": "0 m",
+        "panel": "direct"
+      },
+      {
+        "secteur": "Rue Moyenne",
+        "surface": "40 m²",
+        "prix": "238 000 €",
+        "prix_m2": "5 950 €/m²",
+        "date": "03/2026",
+        "distance": "180 m",
+        "panel": "A"
+      },
+      {
+        "secteur": "Place du Marché",
+        "surface": "45 m²",
+        "prix": "279 000 €",
+        "prix_m2": "6 200 €/m²",
+        "date": "01/2026",
+        "distance": "220 m",
+        "panel": "A"
+      },
+      {
+        "secteur": "Rue des Arènes",
+        "surface": "38 m²",
+        "prix": "205 000 €",
+        "prix_m2": "5 400 €/m²",
+        "date": "11/2025",
+        "distance": "300 m",
+        "panel": "B"
+      },
+      {
+        "secteur": "Bd de la République",
+        "surface": "52 m²",
+        "prix": "286 000 €",
+        "prix_m2": "5 500 €/m²",
+        "date": "10/2025",
+        "distance": "450 m",
+        "panel": "B"
+      },
+      {
+        "secteur": "Rue Bourbonnoux",
+        "surface": "44 m²",
+        "prix": "290 000 €",
+        "prix_m2": "6 590 €/m²",
+        "date": "09/2025",
+        "distance": "260 m",
+        "panel": "B"
+      }
+    ],
+    "cible": [
+      {
+        "label": "0 à 250 m",
+        "prix_m2": "5 900 €/m²",
+        "volume": "7 mutations",
+        "panel": "A"
+      },
+      {
+        "label": "250 à 500 m",
+        "prix_m2": "6 400 €/m²",
+        "volume": "22 mutations",
+        "panel": "B"
+      }
+    ],
+    "scatter": {
+      "x_label": "Surface (m²)",
+      "points": [
+        {
+          "x": 34,
+          "y": 6300
+        },
+        {
+          "x": 36,
+          "y": 5800
+        },
+        {
+          "x": 38,
+          "y": 5400
+        },
+        {
+          "x": 39,
+          "y": 6100
+        },
+        {
+          "x": 40,
+          "y": 5950
+        },
+        {
+          "x": 41,
+          "y": 5200
+        },
+        {
+          "x": 42,
+          "y": 6450
+        },
+        {
+          "x": 43,
+          "y": 4900
+        },
+        {
+          "x": 44,
+          "y": 6590
+        },
+        {
+          "x": 44,
+          "y": 5270
+        },
+        {
+          "x": 45,
+          "y": 6200
+        },
+        {
+          "x": 46,
+          "y": 5750
+        },
+        {
+          "x": 47,
+          "y": 6800
+        },
+        {
+          "x": 48,
+          "y": 5600
+        },
+        {
+          "x": 50,
+          "y": 6050
+        },
+        {
+          "x": 52,
+          "y": 5500
+        }
+      ],
+      "bien": {
+        "x": 42.7,
+        "y": 8200
+      }
+    },
+    "histogramme": [
+      {
+        "tranche": "< 5 000",
+        "ventes": 2
+      },
+      {
+        "tranche": "5-6 000",
+        "ventes": 11
+      },
+      {
+        "tranche": "6-7 000",
+        "ventes": 15
+      },
+      {
+        "tranche": "7-8 000",
+        "ventes": 6
+      },
+      {
+        "tranche": "> 8 000",
+        "ventes": 4,
+        "bien": true
+      }
+    ],
+    "locatif": {
+      "loyer_m2": "21 à 25 €/m²",
+      "rendement_brut": "3,0 à 3,6 %",
+      "tension": "Forte",
+      "encadrement": "Non applicable"
+    },
+    "segments_privilegier": [
+      "Ancien à rénover en secteur coté",
+      "Biens F-G bien situés : levier de négociation"
+    ],
+    "segments_eviter": [
+      "Ancien affiché au prix du rénové",
+      "Neuf (panel R) comparé à tort à l'ancien"
+    ],
+    "risques_marche": [
+      "Écart prix affichés / prix signés",
+      "Durcissement réglementaire des passoires",
+      "Panel A mince (7 mutations) : médiane fragile"
+    ],
+    "conclusion": {
+      "posture": "plutot_acheteur",
+      "defendable_m2_min": 5000,
+      "defendable_m2_max": 6000,
+      "fourchette_m2_defendable": "5 000 à 6 000 €/m² pour un 2 pièces à rénover (panel A, surface ±20 %, hors outliers de Tukey)",
+      "kpis": [
+        {
+          "label": "Délai de vente",
+          "valeur": "≈ 95 j"
+        },
+        {
+          "label": "Évolution 3 ans",
+          "valeur": "-3 %"
+        },
+        {
+          "label": "Tension",
+          "valeur": "Forte"
+        },
+        {
+          "label": "Écart portail/réel",
+          "valeur": "+18 %"
+        }
+      ],
+      "plan_action": [
+        "Viser l'ancien à rénover en secteur coté, sous 6 000 €/m²",
+        "Demander une décote de 25 à 35 % sur le prix affiché",
+        "Sécuriser DPE, copropriété et plancher sur porche avant l'offre"
+      ],
+      "pouvoir_negociation": "Modéré à fort sur l'ancien à rénover et les classes F-G",
+      "recommandation": "Viser la valeur défendable : l'emplacement justifie une prime, pas le paiement d'une valeur rénovée que le bien n'a pas encore."
+    }
+  },
+  "aide_decision": [
+    {
+      "theme": "Copropriété",
+      "questions": [
+        "Montant réel des charges annuelles et ce qu'elles couvrent ?",
+        "Travaux votés ou à prévoir (toiture, ravalement, PPT) et quote-part ?",
+        "Fonds de travaux disponible et procédures en cours ?"
+      ]
+    },
+    {
+      "theme": "Bâti et travaux",
+      "questions": [
+        "Nature et date des derniers travaux ; factures et garanties ?",
+        "Plancher sur porche : isolation et état de la structure vérifiés ?"
+      ]
+    },
+    {
+      "theme": "Diagnostics et énergie",
+      "questions": [
+        "Dossier de diagnostics complet et à jour (DPE, amiante, plomb, élec, gaz) ?",
+        "Estimation chiffrée de la sortie de passoire (audit énergétique) ?"
+      ]
+    },
+    {
+      "theme": "Vente et juridique",
+      "questions": [
+        "Motif et durée de mise en vente ; offres déjà reçues ?",
+        "Servitudes, contentieux ou préemption connus ?"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "nom": "Annonce (SeLoger)",
+      "url": "https://www.seloger.com/annonces/achat/appartement/villexemple/centre/210987654.htm",
+      "detail": "Annonce consultée le 19/07/2026"
+    },
+    {
+      "nom": "Géorisques",
+      "url": "https://www.georisques.gouv.fr/mes-risques/connaitre-les-risques-pres-de-chez-moi/rapport?codeInsee=00000&adresse=12+rue+des+Lilas",
+      "detail": "Rapport des risques à l'adresse"
+    },
+    {
+      "nom": "DVF (DGFiP / Etalab)",
+      "url": "https://app.dvf.etalab.gouv.fr/?code_commune=00000&section=AB&type=appartement",
+      "detail": "Mutations 2023-2025, millésime avril 2026, panels A/B/R"
+    },
+    {
+      "nom": "Observatoire DPE (ADEME)",
+      "url": "https://observatoire-dpe-audit.ademe.fr/afficher-dpe/2312E0123456A",
+      "detail": "DPE n° 2312E0123456A"
+    },
+    {
+      "nom": "Registre national des copropriétés + observatoire des charges",
+      "url": "https://www.registre-coproprietes.gouv.fr/",
+      "detail": "Immatriculation, données financières déclarées et repère de charges par m²"
+    }
+  ],
+  "avertissement": "Analyse indépendante d'aide à la décision. Ni expertise judiciaire, ni conseil en investissement, ni avis juridique. La décision et le prix relèvent de l'acquéreur."
+}
