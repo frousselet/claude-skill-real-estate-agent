@@ -26,7 +26,7 @@ jobs:
           cp SKILL.md "$STAGE/$PKG/"
           cp references/*.md "$STAGE/$PKG/references/"
           cp scripts/*.py "$STAGE/$PKG/scripts/"
-          cp assets/fiche_template.html "$STAGE/$PKG/assets/"
+          cp assets/*.html "$STAGE/$PKG/assets/"
           ZIP="$GITHUB_WORKSPACE/${PKG}-${GITHUB_REF_NAME}.zip"
           ( cd "$STAGE" && zip -r -X "$ZIP" "$PKG" )
           echo "ZIP=$ZIP" >> "$GITHUB_ENV"

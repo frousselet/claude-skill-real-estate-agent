@@ -1,0 +1,133 @@
+{
+  "mode": "location",
+  "meta": {
+    "date": "12 mars 2026"
+  },
+  "projet": {
+    "titre": "Location d'un T3 non meublé, Rennes centre",
+    "porteur": "Léa M. et Samir B.",
+    "composition": "2 adultes, 1 enfant (2 ans)",
+    "usage": "Résidence principale",
+    "resume": "Couple en CDI cherchant un T3 non meublé d'au moins 60 m² à Rennes, dans un rayon de 20 minutes à pied ou en métro du CHU, disponible au 1er juin 2026. Budget plafonné à 1 050 € charges comprises, soit un taux d'effort de 28 %. Dossier complet et garant Visale : la priorité est d'être choisis vite sur un marché tendu, sans céder sur le DPE ni sur le calme.",
+    "motivation": "Mutation professionnelle de Samir au CHU en juin 2026. Le logement actuel, à 45 minutes de voiture, impose deux trajets quotidiens et une seconde voiture. L'objectif est de supprimer ce trajet et de rapprocher l'enfant d'une crèche municipale.",
+    "horizon": "3 ans minimum"
+  },
+  "identite": [
+    { "k": "Type de bail visé", "v": "Bail nu, loi de 1989, 3 ans" },
+    { "k": "Entrée souhaitée", "v": "1er juin 2026, tolérance jusqu'au 15 juillet" },
+    { "k": "Situation actuelle", "v": "Locataires, préavis de 3 mois (hors zone tendue)" },
+    { "k": "Typologie recherchée", "v": "T3, 60 m² minimum" },
+    { "k": "Situation professionnelle", "v": "Deux CDI, période d'essai terminée" },
+    { "k": "Animaux", "v": "Aucun" },
+    { "k": "Disponibilité pour visiter", "v": "Sous 24 h, y compris en visio" },
+    { "k": "Décision", "v": "Immédiate en fin de visite si le bien correspond" }
+  ],
+  "arbitrage": {
+    "position": 35,
+    "label": "Proximité prioritaire"
+  },
+  "surface": {
+    "min_m2": 60,
+    "cible_m2": 68,
+    "pieces_min": 3,
+    "chambres_min": 2
+  },
+  "non_negociables": [
+    "20 minutes maximum du CHU à pied, à vélo ou en métro",
+    "2 chambres réelles, fermées et avec fenêtre",
+    "DPE E minimum : un G est interdit à la location, un F le sera en 2028",
+    "Loyer charges comprises inférieur ou égal à 1 050 €"
+  ],
+  "redhibitoires": [
+    "Chauffage électrique convecteurs sur un DPE E ou pire : facture ingérable",
+    "Rez-de-chaussée sur rue avec fenêtres accessibles depuis le trottoir",
+    "Colocation imposée ou bail mobilité déguisé",
+    "Logement non décent : humidité visible, absence de ventilation, 2,20 m sous plafond"
+  ],
+  "budget": {
+    "loyer_max": 1050,
+    "loyer_cible": 950,
+    "revenus_mensuels": 3750,
+    "taux_effort": "28 % maximum",
+    "garant": "Garantie Visale obtenue (visa valide jusqu'en décembre 2026)",
+    "depot_garantie": "1 mois de loyer hors charges, disponible",
+    "honoraires_max": "12 €/m² maximum (plafond légal zone tendue), soit environ 720 €",
+    "postes": [
+      { "poste": "Loyer hors charges", "montant": 10800 },
+      { "poste": "Charges locatives", "montant": 1800 },
+      { "poste": "Énergie estimée (DPE D)", "montant": 1250 },
+      { "poste": "Assurance habitation", "montant": 190 }
+    ],
+    "details": [
+      { "k": "Budget d'entrée dans les lieux", "v": "Environ 2 700 € (dépôt, honoraires, premier loyer)" },
+      { "k": "Aide au logement", "v": "APL non éligible au vu des revenus" }
+    ],
+    "note": "Le plafond de 1 050 € s'entend charges comprises. Un loyer affiché à 980 € hors charges avec 120 € de provisions sort du cadre : c'est le coût total mensuel qui décide, pas le loyer affiché."
+  },
+  "localisation": {
+    "secteurs": [
+      { "nom": "Villejean / Beauregard", "priorite": 1, "commentaire": "Métro ligne A, à 10 minutes du CHU, meilleur rapport surface/loyer" },
+      { "nom": "Sainte-Thérèse / Bourg-l'Évêque", "priorite": 1, "commentaire": "Calme, crèches municipales, à vélo du CHU" },
+      { "nom": "Centre / Sainte-Anne", "priorite": 2, "commentaire": "Loyers plus élevés, surfaces plus petites : acceptable si 60 m² tenus" },
+      { "nom": "Saint-Grégoire limite Rennes", "priorite": 3, "commentaire": "Repli si rien ne sort avant mai, sous réserve d'une ligne de bus directe" }
+    ],
+    "ancrages": [
+      { "lieu": "CHU de Rennes", "mode": "Métro ou vélo", "duree_max": "20 min", "commentaire": "Horaires décalés : ligne desservie tôt le matin" },
+      { "lieu": "Crèche municipale", "mode": "À pied", "duree_max": "12 min", "commentaire": "Place à demander en mairie dès la signature du bail" },
+      { "lieu": "Gare de Rennes", "mode": "Transports", "duree_max": "25 min", "commentaire": "Déplacements professionnels hebdomadaires de Léa" }
+    ],
+    "exclus": [
+      "Secteurs sans desserte métro ou bus fréquente après 20 h",
+      "Immeubles en travaux de ravalement pendant la durée du bail"
+    ]
+  },
+  "criteres": [
+    { "famille": "Localisation", "critere": "Secteur", "exigence": "Priorité 1 ou 2, 20 min maximum du CHU", "niveau": "dur", "poids": 5 },
+    { "famille": "Le bien", "critere": "Chambres", "exigence": "2 chambres fermées, avec fenêtre", "niveau": "dur", "poids": 5 },
+    { "famille": "Le bien", "critere": "Surface", "exigence": "60 m² minimum (surface habitable au bail)", "niveau": "dur", "poids": 5 },
+    { "famille": "Énergie", "critere": "DPE", "exigence": "E minimum, D ou mieux souhaité", "niveau": "dur", "poids": 5, "commentaire": "Décence énergétique : G interdit depuis 2025, F en 2028" },
+    { "famille": "Bail", "critere": "Type de bail", "exigence": "Bail nu de 3 ans, non meublé", "niveau": "dur", "poids": 4 },
+    { "famille": "Le bien", "critere": "Chauffage", "exigence": "Collectif, gaz individuel ou pompe à chaleur", "niveau": "important", "poids": 5, "commentaire": "Le mode de chauffage pèse plus que le loyer sur le coût réel" },
+    { "famille": "Environnement", "critere": "Calme", "exigence": "Chambres non exposées à un axe passant", "niveau": "important", "poids": 4 },
+    { "famille": "Le bien", "critere": "Luminosité", "exigence": "Séjour traversant ou exposé sud ou ouest", "niveau": "important", "poids": 4 },
+    { "famille": "Le bien", "critere": "Extérieur", "exigence": "Balcon ou loggia, même petit", "niveau": "souhait", "poids": 3 },
+    { "famille": "Le bien", "critere": "Rangements", "exigence": "Cave ou local vélo sécurisé", "niveau": "souhait", "poids": 3 },
+    { "famille": "Le bien", "critere": "Étage", "exigence": "1er étage ou plus ; ascenseur au-delà du 3e", "niveau": "souhait", "poids": 2 },
+    { "famille": "Le bien", "critere": "Stationnement", "exigence": "Place ou stationnement résidentiel", "niveau": "bonus", "poids": 1 }
+  ],
+  "tolerances": [
+    { "k": "État du logement", "v": "Rafraîchissement accepté si réalisé avant l'entrée dans les lieux" },
+    { "k": "Cuisine", "v": "Non équipée acceptée (budget 800 € prévu)" },
+    { "k": "Meublé", "v": "Accepté seulement si le loyer reste dans l'enveloppe et le bail en 3 ans" },
+    { "k": "Charges", "v": "Provisions acceptées si la régularisation des 2 dernières années est fournie" },
+    { "k": "Étage sans ascenseur", "v": "Jusqu'au 3e" }
+  ],
+  "arbitrages": [
+    { "rang": 1, "concession": "Extérieur : renoncer au balcon", "contrepartie": "Secteur de priorité 1 et séjour lumineux" },
+    { "rang": 2, "concession": "Surface : descendre à 58 m² bien agencés", "contrepartie": "Deux vraies chambres et rangements" },
+    { "rang": 3, "concession": "Loyer : monter à 1 100 € charges comprises", "contrepartie": "DPE C ou mieux, charges de chauffage réduites d'autant" },
+    { "rang": 4, "concession": "Secteur : élargir à Saint-Grégoire", "contrepartie": "Uniquement à partir de mai 2026, avec bus direct au CHU" }
+  ],
+  "calendrier": [
+    { "jalon": "Dossier de candidature complet", "date": "10 mars 2026", "statut": "fait", "commentaire": "Un exemplaire numérique prêt à envoyer en 5 minutes" },
+    { "jalon": "Recherche active et visites", "date": "mars à mai 2026", "statut": "en_cours", "commentaire": "Alertes portails, réponse sous 24 h" },
+    { "jalon": "Préavis du logement actuel", "date": "à poser dès le bail signé", "statut": "bloquant", "commentaire": "3 mois : ne jamais le poser avant la signature du nouveau bail" },
+    { "jalon": "Entrée dans les lieux", "date": "1er juin 2026", "statut": "a_faire", "commentaire": "État des lieux à faire de jour, avec relevés de compteurs" }
+  ],
+  "dossier": [
+    { "piece": "Trois derniers bulletins de salaire des deux locataires", "statut": "obtenu" },
+    { "piece": "Contrats de travail et attestations d'employeur", "statut": "obtenu" },
+    { "piece": "Deux derniers avis d'imposition", "statut": "obtenu" },
+    { "piece": "Attestation de garantie Visale", "statut": "obtenu" },
+    { "piece": "Trois dernières quittances de loyer", "statut": "obtenu" },
+    { "piece": "Attestation d'assurance habitation (à souscrire avant remise des clés)", "statut": "manquant" }
+  ],
+  "questions": [
+    "Quel est le montant réel des charges, et la régularisation des deux dernières années ?",
+    "Quel est le mode de chauffage, et la consommation constatée par les précédents occupants ?",
+    "Le logement est-il soumis à l'encadrement des loyers, et quel est le loyer de référence majoré ?",
+    "Des travaux sont-ils prévus dans l'immeuble pendant la durée du bail ?",
+    "Quel est le montant des honoraires de location mis à la charge du locataire ?",
+    "Le dépôt de garantie du précédent locataire a-t-il été restitué en intégralité ?"
+  ]
+}

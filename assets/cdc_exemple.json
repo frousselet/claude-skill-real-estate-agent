@@ -1,0 +1,148 @@
+{
+  "mode": "achat",
+  "meta": {
+    "date": "12 mars 2026"
+  },
+  "projet": {
+    "titre": "Résidence principale familiale, Nantes ouest",
+    "porteur": "Camille et Alex D.",
+    "composition": "2 adultes, 2 enfants (4 et 7 ans)",
+    "usage": "Résidence principale",
+    "resume": "Couple de primo-accédants, locataires d'un T3 de 62 m² à Nantes, cherchant un T4 ou T5 d'au moins 85 m² avec extérieur, dans l'ouest de la ville, à vélo du travail et à pied d'une école publique. Enveloppe tout compris plafonnée à 420 000 €, dont 30 000 € de travaux acceptés. Emménagement visé avant la rentrée de septembre 2026, avec un préavis de 3 mois à poser. L'emplacement et le calme priment sur la surface : un 85 m² bien placé l'emporte sur un 100 m² en bord de rocade.",
+    "motivation": "Naissance du second enfant et télétravail 3 jours par semaine : le T3 actuel ne permet plus ni chambre séparée par enfant, ni poste de travail. Le projet vise à stabiliser la famille sur un secteur scolaire choisi, pour au moins 8 ans, tout en sortant d'un loyer de 1 050 € qui ne construit aucun patrimoine.",
+    "horizon": "8 à 10 ans"
+  },
+  "identite": [
+    { "k": "Type de projet", "v": "Primo-accession, résidence principale" },
+    { "k": "Horizon de détention", "v": "8 à 10 ans" },
+    { "k": "Situation actuelle", "v": "Locataires, préavis de 3 mois" },
+    { "k": "Emménagement visé", "v": "Avant le 1er septembre 2026" },
+    { "k": "Typologie recherchée", "v": "T4 ou T5, appartement ou maison de ville" },
+    { "k": "Surface", "v": "85 m² minimum, 100 m² visés" },
+    { "k": "Disponibilité pour visiter", "v": "Mercredi après-midi et samedi" },
+    { "k": "Décision", "v": "À deux, sous 48 h après visite" }
+  ],
+  "arbitrage": {
+    "position": 28,
+    "label": "Emplacement prioritaire"
+  },
+  "surface": {
+    "min_m2": 85,
+    "cible_m2": 100,
+    "pieces_min": 4,
+    "chambres_min": 3
+  },
+  "non_negociables": [
+    "Nantes ouest : Hauts-Pavés, Zola, Contrie ou Procé, à vélo du travail",
+    "3 chambres minimum, dont une d'au moins 11 m²",
+    "École publique élémentaire à moins de 10 minutes à pied",
+    "Extérieur privatif : balcon, terrasse ou jardin, 6 m² minimum"
+  ],
+  "redhibitoires": [
+    "DPE F ou G : passoire thermique, travaux et interdiction de location à terme",
+    "Rez-de-chaussée sur rue passante ou vis-à-vis direct à moins de 8 m",
+    "Copropriété en procédure, en impayés lourds ou sans fonds travaux",
+    "Zone d'aléa retrait-gonflement des argiles fort sans étude de sol"
+  ],
+  "budget": {
+    "enveloppe_max": 420000,
+    "prix_cible": 365000,
+    "apport": 78000,
+    "mensualite_max": 1700,
+    "duree_annees": 25,
+    "taux_pct": 3.45,
+    "taux_endettement": "31 % (avant travaux)",
+    "financement_statut": "Accord de principe obtenu le 4 mars 2026 (banque régionale), valable 3 mois",
+    "dispositifs": "PTZ éligible sur l'ancien avec travaux (zone B1), à confirmer par le courtier",
+    "postes": [
+      { "poste": "Prix du bien", "montant": 365000 },
+      { "poste": "Frais de notaire (7,5 %)", "montant": 27400 },
+      { "poste": "Travaux", "montant": 20000 },
+      { "poste": "Mobilier et déménagement", "montant": 5000 },
+      { "poste": "Frais de garantie et dossier", "montant": 2600 }
+    ],
+    "details": [
+      { "k": "Épargne conservée après achat", "v": "12 000 € (matelas de sécurité, non mobilisable)" },
+      { "k": "Revente du bien actuel", "v": "Sans objet (locataires)" }
+    ],
+    "note": "L'enveloppe de 420 000 € est le plafond tout compris : un bien à 395 000 € ne laisse plus de place aux travaux et sort du cadre. Le prix affiché acceptable se calcule toujours en retranchant frais et travaux de l'enveloppe."
+  },
+  "localisation": {
+    "secteurs": [
+      { "nom": "Hauts-Pavés / Saint-Félix", "priorite": 1, "commentaire": "Écoles publiques bien notées, commerces de proximité, à vélo du travail par les quais" },
+      { "nom": "Zola / Contrie", "priorite": 1, "commentaire": "Meilleur rapport surface/prix du secteur ouest, tramway ligne 1" },
+      { "nom": "Procé / Monselet", "priorite": 2, "commentaire": "Cadre très recherché, prix au m² supérieur : acceptable si surface réduite" },
+      { "nom": "Chantenay (haut)", "priorite": 2, "commentaire": "En cours de valorisation, à vérifier rue par rue (nuisances ferroviaires)" },
+      { "nom": "Saint-Herblain limite Nantes", "priorite": 3, "commentaire": "Solution de repli si rien ne sort intra-muros avant juin" }
+    ],
+    "ancrages": [
+      { "lieu": "Travail (île de Nantes)", "mode": "Vélo", "duree_max": "25 min", "commentaire": "Itinéraire sécurisé souhaité, sans franchissement de rocade" },
+      { "lieu": "École élémentaire publique", "mode": "À pied", "duree_max": "10 min", "commentaire": "Secteur scolaire à vérifier auprès de la mairie, pas sur l'annonce" },
+      { "lieu": "Crèche ou halte-garderie", "mode": "À pied", "duree_max": "12 min", "commentaire": "Jusqu'à septembre 2027" },
+      { "lieu": "Gare de Nantes", "mode": "Transports", "duree_max": "30 min", "commentaire": "Déplacements professionnels mensuels" }
+    ],
+    "exclus": [
+      "Bord de périphérique et abords immédiats de la rocade (bruit permanent)",
+      "Secteurs sous plan d'exposition au bruit de l'aéroport",
+      "Communes hors agglomération : le projet suppose de ne pas dépendre de la voiture"
+    ],
+    "note": "Les temps de trajet se vérifient aux heures réelles de déplacement (8 h et 18 h), jamais sur un calcul d'itinéraire hors pointe."
+  },
+  "criteres": [
+    { "famille": "Localisation", "critere": "Secteur", "exigence": "Nantes ouest, secteurs cibles de priorité 1 ou 2", "niveau": "dur", "poids": 5 },
+    { "famille": "Le bien", "critere": "Chambres", "exigence": "3 minimum, la principale ≥ 11 m²", "niveau": "dur", "poids": 5 },
+    { "famille": "Le bien", "critere": "Surface habitable", "exigence": "85 m² Carrez minimum", "niveau": "dur", "poids": 5 },
+    { "famille": "Le bien", "critere": "Extérieur privatif", "exigence": "Balcon, terrasse ou jardin, 6 m² minimum", "niveau": "dur", "poids": 5, "commentaire": "Un balcon filant de 4 m² non meublable ne compte pas" },
+    { "famille": "Énergie", "critere": "DPE", "exigence": "E minimum, D ou mieux souhaité", "niveau": "dur", "poids": 4 },
+    { "famille": "Le bien", "critere": "Luminosité et exposition", "exigence": "Séjour exposé sud, sud-ouest ou ouest", "niveau": "important", "poids": 5 },
+    { "famille": "Environnement", "critere": "Calme", "exigence": "Rue résidentielle, pas d'axe passant sous les fenêtres", "niveau": "important", "poids": 5, "commentaire": "À vérifier sur place à 18 h, jamais sur photos" },
+    { "famille": "Le bien", "critere": "Pièce de travail", "exigence": "Bureau, alcôve ou séjour permettant un poste isolé", "niveau": "important", "poids": 4, "commentaire": "Télétravail 3 jours par semaine à deux" },
+    { "famille": "Copropriété", "critere": "Santé de la copropriété", "exigence": "Fonds travaux alimenté, impayés < 10 %, aucune procédure", "niveau": "important", "poids": 4 },
+    { "famille": "Le bien", "critere": "Stationnement", "exigence": "Place, garage ou stationnement résidentiel accessible", "niveau": "important", "poids": 3, "commentaire": "Une voiture, usage week-end" },
+    { "famille": "Le bien", "critere": "Étage et ascenseur", "exigence": "Rez-de-jardin à R+3 ; au-delà, ascenseur exigé", "niveau": "important", "poids": 3 },
+    { "famille": "Le bien", "critere": "Rangements et annexes", "exigence": "Cave, cellier ou local vélo sécurisé", "niveau": "souhait", "poids": 3, "commentaire": "Deux vélos et une remorque enfant" },
+    { "famille": "Le bien", "critere": "Cuisine", "exigence": "Cuisine séparée ou semi-ouverte, refaisable", "niveau": "souhait", "poids": 2 },
+    { "famille": "Le bien", "critere": "Salle d'eau", "exigence": "Deux points d'eau (salle de bains et salle d'eau) à terme", "niveau": "souhait", "poids": 2 },
+    { "famille": "Environnement", "critere": "Commerces de proximité", "exigence": "Boulangerie, primeur ou marché à moins de 8 min à pied", "niveau": "souhait", "poids": 3 },
+    { "famille": "Le bien", "critere": "Charme et cachet", "exigence": "Parquet, moulures, hauteur sous plafond", "niveau": "bonus", "poids": 1 }
+  ],
+  "tolerances": [
+    { "k": "Travaux acceptés", "v": "Rafraîchissement complet et cuisine, jusqu'à 25 000 € et 3 mois de chantier" },
+    { "k": "Travaux refusés", "v": "Structure, toiture, ravalement voté non financé" },
+    { "k": "Étage sans ascenseur", "v": "Jusqu'au 3e, pas au-delà" },
+    { "k": "Copropriété", "v": "Jusqu'à 60 lots ; charges ≤ 35 €/m²/an hors chauffage" },
+    { "k": "Vis-à-vis et bruit", "v": "Vis-à-vis toléré au-delà de 15 m ; axe classé bruyant refusé" },
+    { "k": "Maison", "v": "Maison de ville acceptée si jardin ≥ 40 m²" }
+  ],
+  "arbitrages": [
+    { "rang": 1, "concession": "Surface : descendre à 85 m² au lieu de 100 m²", "contrepartie": "Secteur de priorité 1 et extérieur de plus de 10 m²" },
+    { "rang": 2, "concession": "Stationnement : renoncer à la place dédiée", "contrepartie": "Stationnement résidentiel disponible et local vélo sécurisé" },
+    { "rang": 3, "concession": "État : accepter une cuisine et une salle de bains à refaire", "contrepartie": "Prix réduit du montant des devis, pas d'une estimation de principe" },
+    { "rang": 4, "concession": "DPE : accepter un E au lieu d'un D", "contrepartie": "Plan de travaux chiffré et provision au budget, écart déduit du prix" },
+    { "rang": 5, "concession": "Secteur : élargir à Saint-Herblain limite Nantes", "contrepartie": "Uniquement si aucune visite concluante avant fin juin 2026" }
+  ],
+  "calendrier": [
+    { "jalon": "Accord de principe bancaire", "date": "4 mars 2026", "statut": "fait", "commentaire": "Valable 3 mois, à faire proroger si besoin" },
+    { "jalon": "Phase de visites", "date": "mars à juin 2026", "statut": "en_cours", "commentaire": "Objectif : 3 à 5 visites par mois, grille de notation remplie à chaque fois" },
+    { "jalon": "Offre et compromis", "date": "juin 2026 au plus tard", "statut": "a_faire", "commentaire": "Délai moyen compromis-acte : 3 mois" },
+    { "jalon": "Préavis de location", "date": "à poser à la signature du compromis", "statut": "bloquant", "commentaire": "3 mois : un préavis posé trop tôt fait payer deux logements" },
+    { "jalon": "Emménagement", "date": "septembre 2026", "statut": "a_faire", "commentaire": "Avant la rentrée scolaire" }
+  ],
+  "dossier": [
+    { "piece": "Attestation de financement ou accord de principe", "statut": "obtenu" },
+    { "piece": "Trois derniers bulletins de salaire des deux acquéreurs", "statut": "obtenu" },
+    { "piece": "Deux derniers avis d'imposition", "statut": "obtenu" },
+    { "piece": "Justificatif d'apport (relevés d'épargne)", "statut": "obtenu" },
+    { "piece": "Simulation de PTZ confirmée par le courtier", "statut": "manquant" },
+    { "piece": "Pièces d'identité", "statut": "obtenu" }
+  ],
+  "questions": [
+    "Depuis combien de temps le bien est-il en vente, et le prix a-t-il déjà baissé ?",
+    "Pourquoi le vendeur vend-il, et sous quel délai souhaite-t-il signer ?",
+    "Quel est le montant réel des charges annuelles, et que couvrent-elles précisément ?",
+    "Des travaux ont-ils été votés en assemblée générale et non encore appelés ?",
+    "Quels sont le DPE, sa date, et le montant estimé des consommations annuelles ?",
+    "Le secteur scolaire de l'adresse est-il bien celui annoncé (confirmation mairie) ?",
+    "Quelles nuisances la rue connaît-elle en soirée et le week-end ?"
+  ]
+}

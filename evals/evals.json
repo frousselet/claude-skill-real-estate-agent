@@ -19,7 +19,9 @@
       "id": 2,
       "prompt": "Fais-moi une fiche récap A4 PDF pour ce bien à partir de cette annonce : evals/files/annonce_nantes.md",
       "expected_output": "Un PDF A4 généré par scripts/generer_fiche_pdf.py, avec identité du bien, étiquette DPE graphique, tableau de risques V×I, prix et valeur d'acquisition défendable, négociation.",
-      "files": ["evals/files/annonce_nantes.md"],
+      "files": [
+        "evals/files/annonce_nantes.md"
+      ],
       "expectations": [
         "Un fichier PDF est généré au moyen du script generer_fiche_pdf.py de la skill",
         "Le PDF reprend correctement les données de l'annonce (prix 425 000 €, 92 m², DPE D)",
@@ -52,6 +54,21 @@
         "Chaque candidat reçoit un avis (à creuser / à écarter) au service de l'acheteur",
         "Les critères sont respectés (surface ≥ 100 m² soit ~1075 sqft, budget < 2 M$)",
         "La date de recherche et la volatilité des annonces sont signalées"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Aide-moi à définir mon cahier des charges : je cherche à acheter un appartement familial, je ne sais pas trop par où commencer.",
+      "expected_output": "Un questionnaire mené par blocs (3 à 5 questions à la fois, avec options proposées), une synthèse validée, puis un PDF généré par scripts/generer_cdc_pdf.py : projet, budget chiffré, secteurs, critères pondérés par niveau, grille de notation, arbitrages.",
+      "files": [],
+      "expectations": [
+        "Les questions sont posées par blocs successifs (3 à 5 à la fois), pas toutes d'un coup",
+        "Chaque question fermée propose des options plutôt qu'une case vide",
+        "Le budget est chiffré et validé (enveloppe tout compris, apport, mensualité, capacité d'emprunt indicative)",
+        "Les critères sont hiérarchisés en non négociables, importants et souhaits, avec des poids",
+        "L'ordre des concessions (arbitrages) est demandé avant les visites",
+        "Une synthèse est soumise à validation avant la génération du livrable",
+        "Un fichier PDF est généré au moyen du script generer_cdc_pdf.py de la skill"
       ]
     }
   ]

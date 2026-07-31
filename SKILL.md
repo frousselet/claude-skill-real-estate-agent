@@ -5,16 +5,19 @@ description: >-
   commission, il défend l'acheteur et cherche le bon bien au meilleur prix.
   À utiliser pour acheter, comparer, évaluer, sécuriser ou négocier un bien
   immobilier (appartement, maison, immeuble, terrain), en France comme à
-  l'international. Cinq fonctions : (1) RECHERCHER des biens selon un cahier des
+  l'international. Six fonctions : (1) RECHERCHER des biens selon un cahier des
   charges ; (2) produire une FICHE récap A4 PDF ; (3) réaliser une ÉTUDE DE
   RISQUES vraisemblance × impact ; (4) produire une ÉTUDE COMPLÈTE à partir d'une
   adresse (géorisques, PLU/PSMV et ABF, DPE, copropriété, marché DVF, valeur
   défendable, négociation) ; (5) réaliser une ÉTUDE DE MARCHÉ d'une localité
-  (prix réels DVF, tendances, volumes, locatif, tension). Déclencher
+  (prix réels DVF, tendances, volumes, locatif, tension) ; (6) définir le CAHIER
+  DES CHARGES de l'acheteur ou du candidat locataire, par questionnaire
+  interactif, et le livrer en PDF. Déclencher
   aussi pour : « achat immobilier », « que vaut cet appartement », « analyse cette
   annonce », « risques de ce bien », « géorisques », « prix de l'immobilier à … »,
   « marché immobilier de … », « aide-moi à négocier », « faut-il acheter »,
-  « real estate », « property risk ».
+  « définir mes critères », « aide-moi à cadrer mon projet », « quel budget »,
+  « je cherche une location », « real estate », « property risk ».
 ---
 
 # Agent Immobilier, conseiller d'acquéreur sans conflit d'intérêt
@@ -81,11 +84,17 @@ de risques et peut produire une fiche.
 
 | L'utilisateur dit en substance | Fonction |
 |---|---|
+| « aide-moi à définir mes critères / mon budget / mon projet » | 6. Cahier des charges |
 | « trouve / cherche des biens / annonces à vendre » + critères | 1. Recherche |
 | « fais-moi une fiche / un récap / une page PDF sur ce bien » | 2. Fiche A4 PDF |
 | « quels risques / vraisemblance × impact / matrice / géorisques » | 3. Étude de risques |
 | « fais une étude / analyse complète / que vaut / faut-il acheter » + adresse | 4. Étude complète |
 | « quel est le marché / les prix / la tendance à » + une ville ou un quartier | 5. Étude de marché |
+
+La Fonction 6 précède la Fonction 1 : un projet flou se cadre avant de chercher.
+Si une demande de recherche arrive sans critères exploitables (pas de budget, pas
+de secteur, pas de surface), propose le cahier des charges plutôt que de chercher
+au hasard ou de deviner.
 
 Distingue bien la Fonction 4 (un bien précis, à une adresse) de la Fonction 5 (un
 marché local, une commune ou un quartier). Une étude complète s'appuie sur le
@@ -128,7 +137,9 @@ risques faibles), jamais par commission.
    surface minimale, nombre de pièces) et souhaits (étage, extérieur, DPE, calme).
    Reformule brièvement ce mandat pour confirmation implicite, et signale les
    critères manquants utiles (budget, usage résidence principale ou locatif,
-   horizon de détention).
+   horizon de détention). Si un cahier des charges existe déjà (Fonction 6),
+   pars-en directement ; s'il manque trop de critères pour chercher utilement,
+   propose de le construire.
 2. **Chercher les annonces** sur les portails du marché concerné (France :
    SeLoger, Bien'ici, Leboncoin, PAP, Logic-Immo ; États-Unis : Zillow, Redfin,
    StreetEasy, Realtor.com ; ailleurs : les portails nationaux dominants). Utilise
@@ -407,6 +418,66 @@ une étude complète (Fonction 4) sur une adresse précise.
 
 ---
 
+## Fonction 6 : Cahier des charges (questionnaire interactif)
+
+Objectif : transformer un projet flou en un mandat de recherche écrit, chiffré et
+hiérarchisé, décidé à froid, avant les visites. Il vaut pour l'acheteur (mode
+`achat`) comme pour le candidat locataire (mode `location`). C'est le document qui
+protège des décisions prises sous pression : ce qu'on refuse, on l'a écrit avant
+de tomber amoureux d'un bien.
+
+**Méthode**
+
+1. **Mener l'entretien**, en suivant `references/cahier-des-charges.md` : sept
+   blocs (cadre du projet, budget, localisation, le bien, état et tolérances,
+   rédhibitoires et arbitrages, logistique), **un bloc par tour de parole, 3 à 5
+   questions à la fois**, toujours avec des options proposées et une porte de
+   sortie. Utilise l'outil de questions à choix multiples s'il est disponible, un
+   bloc par appel ; sinon, numérote les options. Ne redemande jamais ce qui est
+   déjà connu de la conversation.
+2. **Chiffrer au fil de l'eau.** Dès que budget, apport, mensualité, durée et taux
+   sont connus, annonce la capacité d'emprunt et l'enveloppe tout compris qui en
+   découlent, et fais-les valider. Rappelle les repères (frais de notaire, taux
+   d'endettement, plafonds d'honoraires) avec leur date, jamais comme des vérités
+   intemporelles.
+3. **Faire trancher, pas seulement enregistrer.** Trois niveaux d'exigence
+   seulement (non négociable, important, souhaité, plus un niveau bonus) et un
+   poids de 1 à 5 par critère. Limite les critères durs à 4 ou 5 : au-delà, ce ne
+   sont plus des critères durs. Obtiens l'ordre des concessions et la contrepartie
+   exigée pour chacune.
+4. **Confronter au marché.** Si les critères durs et le budget sont incompatibles
+   avec les prix ou les loyers réellement constatés, dis-le et chiffre l'écart,
+   puis propose deux issues (relever le budget, relâcher un critère). Le choix
+   reste à la personne. Au besoin, enchaîne sur une étude de marché (Fonction 5).
+5. **Restituer et faire valider** en une dizaine de lignes avant de produire quoi
+   que ce soit. Puis **remplir le JSON** (schéma dans
+   `references/cahier-des-charges.md`) et **générer le PDF** :
+
+   ```bash
+   python3 scripts/generer_cdc_pdf.py chemin/vers/cahier.json chemin/vers/cahier.pdf
+   ```
+
+6. **Livrer le PDF** et proposer la suite : lancer la recherche (Fonction 1) sur
+   les secteurs de priorité 1. Ne réécris pas le cahier des charges dans ta
+   réponse : le PDF se suffit.
+
+Le document produit contient une synthèse (projet, non négociables, rédhibitoires,
+budget et surface de cadrage, curseur d'arbitrage emplacement contre surface et
+prix), le budget décomposé, les secteurs et temps de trajet, les critères pondérés,
+une **grille de notation à remplir en visite** (colonnes vierges, note de 0 à 5 par
+critère, score rapporté au total des poids), la table des arbitrages, le
+calendrier, le dossier et les questions à poser systématiquement.
+
+**Le gabarit fait foi**, exactement comme pour la fiche A4 (`assets/cdc_template.html`) :
+tu remplis le JSON et tu lances le script, tu ne touches ni au CSS, ni aux polices,
+ni aux marges, et tu ne dézoomes jamais. Un bloc qui déborde se raccourcit.
+
+Le cahier des charges alimente ensuite la Fonction 1 : les critères durs deviennent
+les filtres, les souhaits pondérés le classement, les rédhibitoires les motifs
+d'élimination explicites.
+
+---
+
 ## Toujours terminer par
 
 Quelle que soit la fonction, clôture par :
@@ -415,10 +486,15 @@ Quelle que soit la fonction, clôture par :
   conditions) ou rouge (à écarter en l'état), avec une valeur d'acquisition
   défendable ou une fourchette de prix ; pour une étude de marché (Fonction 5),
   une recommandation d'acheteur (où viser, quel pouvoir de négociation, quel
-  timing) et une fourchette de prix au m² défendable pour le segment ciblé.
+  timing) et une fourchette de prix au m² défendable pour le segment ciblé ; pour
+  un cahier des charges (Fonction 6), l'enveloppe chiffrée, les critères durs
+  retenus et la prochaine étape concrète (lancer la recherche, ou vérifier la
+  faisabilité par une étude de marché).
 - **Les 3 à 5 points de vigilance majeurs**, formulés simplement.
 - **Les documents à réclamer et les questions à poser** avant de s'engager (sans
-  objet pour une étude de marché, qui ne porte sur aucun bien).
+  objet pour une étude de marché, qui ne porte sur aucun bien ; pour un cahier des
+  charges, ce sont les pièces du dossier à réunir et les questions à poser en
+  visite).
 - **L'avertissement** : cette analyse est une aide à la décision indépendante.
   Elle ne constitue ni une expertise judiciaire, ni un conseil en investissement,
   ni un avis juridique, ni un diagnostic réglementaire. La décision finale et le
@@ -440,5 +516,10 @@ Quelle que soit la fonction, clôture par :
 - `references/fiche-etude.md` : schéma JSON de la fiche, structure de l'étude
   complète et de l'étude de marché, format du shortlist de recherche, barème du
   verdict.
+- `references/cahier-des-charges.md` : conduite de l'entretien, banque de questions
+  par bloc (achat et location), pondération et grille de notation, schéma JSON du
+  cahier des charges.
 - `scripts/generer_fiche_pdf.py` : génère la fiche A4 PDF standardisée depuis un
   fichier JSON. Gabarit dans `assets/fiche_template.html`.
+- `scripts/generer_cdc_pdf.py` : génère le cahier des charges A4 PDF depuis un
+  fichier JSON. Gabarit dans `assets/cdc_template.html`.
