@@ -1,0 +1,248 @@
+{
+  "mode": "location",
+  "meta": {"date": "2026-07-21"},
+  "bien": {
+    "adresse": "8 rue des Tanneurs, 00000 Villexemple",
+    "secteur": "Vieux-Centre",
+    "type": "Appartement 3 pièces",
+    "surface_m2": 52,
+    "pieces": 3,
+    "etage": "2e avec ascenseur",
+    "annee": "1970, rénové 2019",
+    "dpe": "E",
+    "dpe_kwh": 280,
+    "ges": "D",
+    "ges_kgco2": 42,
+    "charges": "140 €/mois (provision)",
+    "depot_garantie": "1 150 € (1 mois HC)",
+    "meuble": "Non (location nue)",
+    "disponibilite": "1er septembre 2026",
+    "honoraires": "364 € (locataire, 7 €/m²)",
+    "annexes": "Cave, local vélos"
+  },
+  "verdict": {
+    "feu": "orange",
+    "note_sur_100": 58,
+    "resume": "Appartement 3 pièces de 52 m² au 2e avec ascenseur, rénové en 2019, DPE E. Emplacement central très demandé, mais le loyer affiché (1 290 €/mois CC) dépasse le plafond légal d'encadrement : complément de loyer contestable. Bon bien à condition de faire aligner le loyer sur le majoré."
+  },
+  "points_forts": [
+    "Hyper-centre, tram et commerces à pied [1]",
+    "Rénové en 2019, ascenseur, cave et local vélos",
+    "Chauffage collectif (charges maîtrisées)"
+  ],
+  "points_faibles": [
+    "Loyer au-dessus du plafond d'encadrement [4]",
+    "DPE E : facture d'énergie non négligeable",
+    "Rue animée le soir (bars à proximité)"
+  ],
+  "loyer": {
+    "affiche": "1 290 €/mois CC",
+    "loyer_m2": "24,1 €/m² HC",
+    "marche": "1 150 €/mois",
+    "plafond": "1 210 €/mois",
+    "reference_marche": "20 à 24 €/m² HC (observatoire) [3]",
+    "ecart": "+7 % / plafond légal [4]"
+  },
+  "risque_global": "Modéré",
+  "risques": [
+    {"libelle": "Complément de loyer non justifié", "famille": "Juridique", "v": 4, "i": 3, "commentaire": "Loyer > majoré [4] ; complément contestable en conciliation"},
+    {"libelle": "DPE E (énergie)", "famille": "Bâti", "v": 4, "i": 3, "commentaire": "280 kWh/m²/an [2] ; facture de chauffage à anticiper"},
+    {"libelle": "Bruit nocturne (bars)", "famille": "Nuisances", "v": 4, "i": 2, "commentaire": "Rue animée le soir, chambres sur rue"},
+    {"libelle": "Charges sous-estimées", "famille": "Financier", "v": 3, "i": 2, "commentaire": "Provision 140 € : vérifier la dernière régularisation"}
+  ],
+  "vigilance": [
+    "Exiger l'alignement du loyer sur le loyer de référence majoré [4]",
+    "Demander la dernière régularisation de charges et le DPE complet",
+    "Vérifier l'état des lieux d'entrée (menuiseries, humidité)"
+  ],
+  "negociation": {
+    "leviers": [
+      "Loyer au-dessus du plafond d'encadrement [4]",
+      "DPE E : argument sur la facture d'énergie",
+      "Bien resté 3 semaines en ligne"
+    ],
+    "argument_cle": "Le loyer affiché dépasse le loyer de référence majoré : sans caractéristique exceptionnelle documentée, le complément de loyer est contestable et doit être retiré."
+  },
+  "caracteristiques": {
+    "note_sur_10": 6,
+    "synthese": "Traversant est-ouest au 2e avec ascenseur, séjour clair, cuisine équipée, salle de bains rénovée. Bien entretenu, sans extérieur.",
+    "exposition": "Est-ouest, traversant",
+    "etage_vue": "2e / sur rue et cour",
+    "exterieur": "Aucun",
+    "stationnement": "Aucun (zone réglementée)",
+    "details": {
+      "orientation": "Traversant est-ouest",
+      "luminosite": "Bonne, séjour côté cour",
+      "vue": "Rue animée / cour au calme",
+      "hauteur_sous_plafond": "2,55 m",
+      "etat_general": "Rénové 2019, bon état",
+      "menuiseries": "Double vitrage PVC",
+      "chauffage": "Collectif gaz",
+      "eau_chaude": "Collective",
+      "accessibilite": "Ascenseur, 2e étage"
+    },
+    "espaces": [
+      {"type": "Cave", "detail": "6 m²", "note": "Saine"},
+      {"type": "Local vélos", "detail": "Commun", "note": "Sécurisé"},
+      {"type": "Extérieur", "detail": "Aucun", "note": "Ni balcon ni terrasse"}
+    ]
+  },
+  "environnement": {
+    "situation": {
+      "quartier": "Vieux-Centre, hyper-central",
+      "desserte": "Tram A à 3 min, gare à 12 min à pied [1]",
+      "stationnement": "Zone réglementée, difficile",
+      "rue": "Rue commerçante, animée le soir"
+    },
+    "nuisances": [
+      {"libelle": "Bruit nocturne (bars)", "niveau": "expose", "commentaire": "Plusieurs bars dans la rue, week-ends"},
+      {"libelle": "Bruit routier", "niveau": "modere", "commentaire": "Rue passante en journée"},
+      {"libelle": "Vis-à-vis", "niveau": "modere", "commentaire": "Immeuble d'en face côté rue"}
+    ],
+    "pois": [
+      {"nom": "Tram A - Tanneurs", "categorie": "transport", "distance": "180 m"},
+      {"nom": "Monoprix", "categorie": "commerce", "distance": "120 m"},
+      {"nom": "Marché du Centre", "categorie": "commerce", "distance": "300 m"},
+      {"nom": "École Voltaire", "categorie": "ecole", "distance": "350 m"},
+      {"nom": "Pharmacie des Halles", "categorie": "sante", "distance": "90 m"},
+      {"nom": "Square des Tanneurs", "categorie": "parc", "distance": "220 m"}
+    ]
+  },
+  "bail": {
+    "type": "Nu (loi de 1989, 3 ans)",
+    "duree": "3 ans reconductibles",
+    "preavis": "1 mois (zone tendue)",
+    "depot": "1 mois de loyer hors charges",
+    "meuble": "Non",
+    "charges_mode": "Provision mensuelle + régularisation annuelle",
+    "assurance": "Assurance habitation obligatoire (attestation exigée)",
+    "garanties": "Garant physique ou garantie Visale acceptée",
+    "etat_lieux": "Contradictoire à l'entrée et à la sortie",
+    "disponibilite": "1er septembre 2026",
+    "clauses": "Sous-location interdite ; animaux tolérés ; travaux à la charge du bailleur pour la mise aux normes"
+  },
+  "immeuble": {
+    "chauffage": "Collectif gaz (compté)",
+    "equipements": "Ascenseur, local vélos, interphone",
+    "charges_recuperables": "Chauffage, eau froide, entretien communs, ascenseur",
+    "etat": "Ravalement 2018, communs entretenus",
+    "entretien": "Gardien à mi-temps",
+    "postes": [
+      {"poste": "Chauffage collectif", "montant": 780},
+      {"poste": "Ascenseur", "montant": 300},
+      {"poste": "Entretien / ménage", "montant": 360},
+      {"poste": "Eau froide", "montant": 240}
+    ]
+  },
+  "cout_occupation": {
+    "loyer": 13800,
+    "charges": 1680,
+    "energie": 1100,
+    "assurance": 180,
+    "revenus_mensuels": 3600,
+    "note": "Coût d'occupation à comparer à un loyer aligné sur le majoré (1 210 €/mois CC) : ~200 €/an d'économie."
+  },
+  "radar": [
+    {"axe": "Emplacement", "note": 9},
+    {"axe": "Énergie", "note": 4},
+    {"axe": "État", "note": 7},
+    {"axe": "Loyer", "note": 4},
+    {"axe": "Calme", "note": 3},
+    {"axe": "Risques", "note": 6}
+  ],
+  "marche": {
+    "perimetre": "Villexemple (00000), Vieux-Centre",
+    "date_donnees": "Observatoire local des loyers 2025 · Encadrement préfectoral 2026 · INSEE 2023",
+    "tendance": {
+      "direction": "hausse",
+      "evolution_3_ans": "+6 %",
+      "evolution_5_ans": "+11 %",
+      "volume_transactions": "≈ 1 400 baux/an",
+      "delai_vente": "≈ 12 jours",
+      "dynamique": "Forte demande étudiante et jeunes actifs"
+    },
+    "profil": {
+      "population": "85 200 hab.",
+      "demographie": "Croissance",
+      "emploi": "Tertiaire, université",
+      "attractivite": "Forte",
+      "desserte": "Tram A/B, gare TGV",
+      "socio": "42 % de locataires, forte population étudiante"
+    },
+    "loyers": [
+      {"secteur": "Vieux-Centre", "typologie": "T3 nu", "loyer_m2_median": "22 €/m²", "fourchette": "20 à 24 €/m²", "loyer_reference_majore": "23,3 €/m²", "tension": "Forte", "tendance": "hausse"},
+      {"secteur": "Vieux-Centre", "typologie": "T2 nu", "loyer_m2_median": "24 €/m²", "fourchette": "22 à 27 €/m²", "loyer_reference_majore": "25,1 €/m²", "tension": "Très forte", "tendance": "hausse"},
+      {"secteur": "Faubourgs", "typologie": "T3 nu", "loyer_m2_median": "18 €/m²", "fourchette": "16 à 21 €/m²", "loyer_reference_majore": "19,4 €/m²", "tension": "Modérée", "tendance": "stable"}
+    ],
+    "encadrement": {
+      "zone": "Zone tendue avec encadrement (arrêté préfectoral 2026) [4]",
+      "reference": "20,3 €/m² (T3 nu, Vieux-Centre)",
+      "majore": "24,4 €/m² soit ~1 210 €/mois HC pour 52 m²",
+      "complement": "140 €/mois annoncé, sans justification exceptionnelle",
+      "conforme": "Non : loyer affiché au-dessus du majoré, complément contestable"
+    },
+    "boxplot": [
+      {"label": "T2 nu (centre)", "min": 20, "q1": 22, "median": 24, "q3": 26, "max": 29},
+      {"label": "T3 nu (centre)", "min": 18, "q1": 20, "median": 22, "q3": 24, "max": 27, "bien": 24}
+    ],
+    "evolution": [
+      {"annee": 2021, "prix_m2": 20}, {"annee": 2023, "prix_m2": 21}, {"annee": 2025, "prix_m2": 22}
+    ],
+    "comparables": [
+      {"secteur": "Vieux-Centre", "surface": "50 m²", "meuble": "Non", "loyer": "1 120 €/mois CC", "loyer_m2": "21 €/m²", "date": "06/2026", "distance": "150 m"},
+      {"secteur": "Vieux-Centre", "surface": "55 m²", "meuble": "Non", "loyer": "1 210 €/mois CC", "loyer_m2": "21,5 €/m²", "date": "05/2026", "distance": "260 m"},
+      {"secteur": "Halles", "surface": "48 m²", "meuble": "Oui", "loyer": "1 280 €/mois CC", "loyer_m2": "25 €/m²", "date": "05/2026", "distance": "400 m"},
+      {"secteur": "Vieux-Centre", "surface": "53 m²", "meuble": "Non", "loyer": "1 150 €/mois CC", "loyer_m2": "20,8 €/m²", "date": "04/2026", "distance": "300 m"}
+    ],
+    "risques_marche": [
+      "Marché tendu : peu de marge de négociation sur la disponibilité",
+      "Compléments de loyer fréquents et souvent contestables",
+      "Forte rotation étudiante en septembre"
+    ],
+    "segments_privilegier": [
+      "T3 nu au loyer aligné sur le majoré",
+      "Biens rénovés avec chauffage collectif"
+    ],
+    "segments_eviter": [
+      "Loyers avec complément non justifié",
+      "Passoires E-G en rez-de-chaussée sur rue"
+    ],
+    "conclusion": {
+      "posture": "plutot_bailleur",
+      "fourchette_m2_defendable": "≤ 24,4 €/m² soit 1 210 €/mois HC (plafond majoré) pour 52 m²",
+      "kpis": [
+        {"label": "Délai de relocation", "valeur": "≈ 12 j"},
+        {"label": "Tension", "valeur": "Forte"},
+        {"label": "Écart / plafond", "valeur": "+7 %"},
+        {"label": "Évolution 3 ans", "valeur": "+6 %"}
+      ],
+      "plan_action": [
+        "Demander l'alignement du loyer sur le loyer de référence majoré [4]",
+        "Faire retirer le complément de loyer non justifié",
+        "Sécuriser Visale et l'assurance avant la visite décisive"
+      ],
+      "pouvoir_negociation": "Faible sur la disponibilité (marché tendu), mais fort sur le complément de loyer illégal",
+      "recommandation": "Bien à retenir si le loyer est ramené au majoré (1 210 €/mois CC) : à ce prix, l'emplacement et la rénovation le justifient."
+    }
+  },
+  "aide_decision": [
+    {"theme": "Loyer et encadrement", "questions": [
+      "Le loyer respecte-t-il le loyer de référence majoré en vigueur ?",
+      "Le complément de loyer est-il justifié par des caractéristiques exceptionnelles écrites au bail ?"
+    ]},
+    {"theme": "Charges et énergie", "questions": [
+      "Montant de la dernière régularisation de charges et postes couverts ?",
+      "Estimation de la facture d'énergie annuelle (DPE E) ?"
+    ]},
+    {"theme": "Bail et garanties", "questions": [
+      "Type et durée du bail, préavis, dépôt de garantie ?",
+      "Garant physique ou Visale accepté ; assurance habitation exigée ?"
+    ]}
+  ],
+  "sources": [
+    {"nom": "Annonce (LocService)", "url": "https://www.locservice.fr/annonce/123456", "detail": "Annonce consultée le 21/07/2026"},
+    {"nom": "Observatoire DPE (ADEME)", "url": "https://observatoire-dpe-audit.ademe.fr/afficher-dpe/2312E0987654B", "detail": "DPE n° 2312E0987654B"},
+    {"nom": "Observatoire local des loyers", "url": "https://www.observatoires-des-loyers.org/", "detail": "Loyers médians par typologie et secteur, 2025"},
+    {"nom": "Encadrement des loyers (préfecture)", "url": "https://www.service-public.fr/particuliers/vosdroits/F1314", "detail": "Loyers de référence, arrêté 2026"}
+  ]
+}

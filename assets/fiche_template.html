@@ -304,7 +304,7 @@
   <div class="header">
     <div class="header-top">
       <div class="header-left">
-        <div class="kicker">Fiche bien &middot; Analyse d'acquéreur</div>
+        <div class="kicker">Fiche bien &middot; Analyse {% if mode == 'location' %}de locataire{% else %}d'acquéreur{% endif %}</div>
         <div class="title">{{ bien.adresse }}</div>
         <div class="subtitle">{{ bien.type }}{% if bien.secteur %} &middot; {{ bien.secteur }}{% endif %}{% if bien.surface_m2 %} &middot; {{ bien.surface_m2 }} m²{% endif %}</div>
       </div>
@@ -349,25 +349,25 @@
   <div class="price-hero" style="margin-top:16px">
     <div class="ph-row">
       <div class="ph-cell first">
-        <div class="lab">Prix affiché</div>
-        <div class="num">{{ prix.affiche or 'nc' }}</div>
-        {% if prix.prix_m2_affiche %}<div class="sub">{{ prix.prix_m2_affiche }}</div>{% endif %}
+        <div class="lab">{{ hero.affiche_label }}</div>
+        <div class="num">{{ hero.affiche }}</div>
+        {% if hero.affiche_sub %}<div class="sub">{{ hero.affiche_sub }}</div>{% endif %}
       </div>
       <div class="ph-cell ph-target">
-        <div class="lab">Prix défendable</div>
-        <div class="num">{{ prix.valeur_defendable or 'nc' }}</div>
-        <div class="sub">valeur cible d'achat</div>
+        <div class="lab">{{ hero.cible_label }}</div>
+        <div class="num">{{ hero.cible }}</div>
+        <div class="sub">{{ hero.cible_sub }}</div>
       </div>
       <div class="ph-cell">
-        <div class="lab">Prix max</div>
-        <div class="num">{{ prix.plafond or 'nc' }}</div>
-        <div class="sub">à ne pas dépasser</div>
+        <div class="lab">{{ hero.plafond_label }}</div>
+        <div class="num">{{ hero.plafond }}</div>
+        <div class="sub">{{ hero.plafond_sub }}</div>
       </div>
     </div>
-    {% if prix.reference_marche or prix.decote %}
+    {% if hero.foot_ref or hero.foot_ecart %}
     <div class="ph-foot">
-      {% if prix.reference_marche %}<span><span class="l">Réf. marché réel (DVF)</span>{{ prix.reference_marche | sup }}</span>{% endif %}
-      {% if prix.decote %}<span><span class="l">Décote visée</span>{{ prix.decote }}</span>{% endif %}
+      {% if hero.foot_ref %}<span><span class="l">{{ hero.foot_ref_label }}</span>{{ hero.foot_ref | sup }}</span>{% endif %}
+      {% if hero.foot_ecart %}<span><span class="l">{{ hero.foot_ecart_label }}</span>{{ hero.foot_ecart }}</span>{% endif %}
     </div>
     {% endif %}
   </div>
@@ -386,8 +386,15 @@
     <div class="idc">
       <table class="kv">
         {% if bien.charges %}<tr><td class="k">Charges</td><td class="v"><span class="cl2">{{ bien.charges }}</span></td></tr>{% endif %}
+        {% if mode == 'location' %}
+        {% if bien.depot_garantie %}<tr><td class="k">Dépôt de garantie</td><td class="v"><span class="cl2">{{ bien.depot_garantie }}</span></td></tr>{% endif %}
+        {% if bien.meuble %}<tr><td class="k">Meublé</td><td class="v"><span class="cl2">{{ bien.meuble }}</span></td></tr>{% endif %}
+        {% if bien.disponibilite %}<tr><td class="k">Disponibilité</td><td class="v"><span class="cl2">{{ bien.disponibilite }}</span></td></tr>{% endif %}
+        {% if bien.honoraires %}<tr><td class="k">Honoraires</td><td class="v"><span class="cl2">{{ bien.honoraires }}</span></td></tr>{% endif %}
+        {% else %}
         {% if bien.taxe_fonciere %}<tr><td class="k">Taxe foncière</td><td class="v"><span class="cl2">{{ bien.taxe_fonciere }}</span></td></tr>{% endif %}
         {% if bien.copropriete %}<tr><td class="k">Copropriété</td><td class="v"><span class="cl2">{{ bien.copropriete }}</span></td></tr>{% endif %}
+        {% endif %}
         {% if bien.annexes %}<tr><td class="k">Annexes</td><td class="v"><span class="cl2">{{ bien.annexes }}</span></td></tr>{% endif %}
       </table>
     </div>
@@ -419,7 +426,7 @@
       {% endfor %}
     </div>
   </div>
-  {% if en_dpe in ['E','F','G'] %}<div class="note">Logement en passoire thermique ({{ en_dpe }}) : restriction de location (G interdit à la location en 2025, F en 2028, E en 2034) et coût de rénovation énergétique à provisionner.</div>{% endif %}
+  {% if en_dpe in ['E','F','G'] %}<div class="note">{% if mode == 'location' %}Passoire thermique ({{ en_dpe }}) : location progressivement interdite (G interdit depuis 2025, F en 2028, E en 2034) et facture d'énergie élevée. Vérifier la décence énergétique avant de signer.{% else %}Logement en passoire thermique ({{ en_dpe }}) : restriction de location (G interdit à la location en 2025, F en 2028, E en 2034) et coût de rénovation énergétique à provisionner.{% endif %}</div>{% endif %}
 
   {% if plan or environnement or caracteristiques %}
   <div class="part-title{% if caracteristiques and caracteristiques.cadre_label %} part-title-split{% endif %}">
@@ -690,6 +697,61 @@
   {% endif %}
   {% endif %}
 
+  {% if mode == 'location' and (bail or immeuble) %}
+  <div class="part-title">Bail et conditions</div>
+
+  {% set b = bail %}
+  {% if b %}
+  <div class="section-title" style="margin-top:2px">Conditions du bail</div>
+  <div class="id-cols">
+    <div class="idc">
+      <table class="kv">
+        {% if b.type %}<tr><td class="k">Type de bail</td><td class="v"><span class="cl2">{{ b.type }}</span></td></tr>{% endif %}
+        {% if b.duree %}<tr><td class="k">Durée</td><td class="v"><span class="cl2">{{ b.duree }}</span></td></tr>{% endif %}
+        {% if b.preavis %}<tr><td class="k">Préavis (locataire)</td><td class="v"><span class="cl2">{{ b.preavis }}</span></td></tr>{% endif %}
+        {% if b.depot %}<tr><td class="k">Dépôt de garantie</td><td class="v"><span class="cl2">{{ b.depot }}</span></td></tr>{% endif %}
+        {% if b.meuble %}<tr><td class="k">Meublé</td><td class="v"><span class="cl2">{{ b.meuble }}</span></td></tr>{% endif %}
+      </table>
+    </div>
+    <div class="idc gap"></div>
+    <div class="idc">
+      <table class="kv">
+        {% if b.charges_mode %}<tr><td class="k">Charges</td><td class="v"><span class="cl2">{{ b.charges_mode }}</span></td></tr>{% endif %}
+        {% if b.assurance %}<tr><td class="k">Assurance habitation</td><td class="v"><span class="cl2">{{ b.assurance }}</span></td></tr>{% endif %}
+        {% if b.garanties %}<tr><td class="k">Garanties / caution</td><td class="v"><span class="cl2">{{ b.garanties }}</span></td></tr>{% endif %}
+        {% if b.etat_lieux %}<tr><td class="k">État des lieux</td><td class="v"><span class="cl2">{{ b.etat_lieux }}</span></td></tr>{% endif %}
+        {% if b.disponibilite %}<tr><td class="k">Disponibilité</td><td class="v"><span class="cl2">{{ b.disponibilite }}</span></td></tr>{% endif %}
+      </table>
+    </div>
+  </div>
+  {% if b.clauses %}<div class="note" style="margin-top:6px"><b>Clauses notables :</b> {{ b.clauses | sup }}</div>{% endif %}
+  {% endif %}
+
+  {% set im = immeuble %}
+  {% if im %}
+  <div class="section-title">Immeuble et charges récupérables</div>
+  <div class="cols">
+    <div class="col" style="width:48%">
+      <table class="kv">
+        {% if im.chauffage %}<tr><td class="k">Chauffage</td><td class="v"><span class="cl2">{{ im.chauffage }}</span></td></tr>{% endif %}
+        {% if im.equipements %}<tr><td class="k">Équipements</td><td class="v"><span class="cl2">{{ im.equipements }}</span></td></tr>{% endif %}
+        {% if im.charges_recuperables %}<tr><td class="k">Charges récupérables</td><td class="v"><span class="cl2">{{ im.charges_recuperables | sup }}</span></td></tr>{% endif %}
+        {% if im.etat %}<tr><td class="k">État de l'immeuble</td><td class="v"><span class="cl2">{{ im.etat }}</span></td></tr>{% endif %}
+        {% if im.entretien %}<tr><td class="k">Entretien / gardiennage</td><td class="v"><span class="cl2">{{ im.entretien }}</span></td></tr>{% endif %}
+      </table>
+    </div>
+    <div class="col col-gap"></div>
+    <div class="col" style="width:48%">
+      {% if im.charges_svg %}
+      <div class="ct-sub">Répartition des charges récupérables</div>
+      <div class="chart-box">{{ im.charges_svg | safe }}</div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="note" style="margin-top:6px">Un locataire ne finance pas les travaux de copropriété, mais paie les charges récupérables (chauffage collectif, ascenseur, entretien, eau) régularisées annuellement.</div>
+  {% endif %}
+  {% endif %}
+
   {% if marche %}
   <div class="market">
     <div class="part-title{% if marche.tendance and marche.tendance.badge %} part-title-split{% endif %}">
@@ -717,13 +779,79 @@
           {% if marche.tendance.evolution_3_ans %}<tr><td class="k">Évolution 3 ans</td><td class="v">{{ marche.tendance.evolution_3_ans }}</td></tr>{% endif %}
           {% if marche.tendance.evolution_5_ans %}<tr><td class="k">Évolution 5 ans</td><td class="v">{{ marche.tendance.evolution_5_ans }}</td></tr>{% endif %}
           {% if marche.tendance.evolution_10_ans %}<tr><td class="k">Évolution 10 ans</td><td class="v">{{ marche.tendance.evolution_10_ans }}</td></tr>{% endif %}
-          {% if marche.tendance.volume_transactions %}<tr><td class="k">Volume de ventes</td><td class="v">{{ marche.tendance.volume_transactions }}</td></tr>{% endif %}
-          {% if marche.tendance.delai_vente %}<tr><td class="k">Délai de vente moyen</td><td class="v">{{ marche.tendance.delai_vente }}</td></tr>{% endif %}
+          {% if marche.tendance.volume_transactions %}<tr><td class="k">{% if marche.location %}Volume de locations{% else %}Volume de ventes{% endif %}</td><td class="v">{{ marche.tendance.volume_transactions }}</td></tr>{% endif %}
+          {% if marche.tendance.delai_vente %}<tr><td class="k">{% if marche.location %}Délai de relocation{% else %}Délai de vente moyen{% endif %}</td><td class="v">{{ marche.tendance.delai_vente }}</td></tr>{% endif %}
           {% if marche.tendance.dynamique %}<tr><td class="k">Dynamique récente</td><td class="v">{{ marche.tendance.dynamique }}</td></tr>{% endif %}
         </table>
       </div>
     </div>
 
+    {% if marche.location %}
+    {% if marche.loyers %}
+    <div class="section-title">Loyers de marché par typologie et secteur</div>
+    <table class="mkt">
+      <thead>
+        <tr><th>Secteur</th><th>Typologie</th><th class="num">Loyer/m² médian</th><th class="num">Fourchette</th><th class="num">Loyer majoré</th><th>Tension</th><th>Tendance</th></tr>
+      </thead>
+      <tbody>
+        {% for row in marche.loyers %}
+        <tr>
+          <td><b>{{ row.secteur }}</b></td>
+          <td>{{ row.typologie }}</td>
+          <td class="num">{{ row.loyer_m2_median | sup if row.loyer_m2_median else 'nc' }}</td>
+          <td class="num">{{ row.fourchette or 'nc' }}</td>
+          <td class="num">{{ row.loyer_reference_majore or 'nc' }}</td>
+          <td class="num">{{ row.tension or 'nc' }}</td>
+          <td>{% if row.tendance_badge %}<span class="trend {{ row.tendance_cls }}">{{ row.tendance_badge }}</span>{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="note" style="margin-top:6px">Loyers de marché (observatoires locaux des loyers, carte des loyers). En zone d'encadrement, le loyer de référence majoré est un plafond légal opposable.</div>
+    {% endif %}
+
+    {% set enc = marche.encadrement %}
+    {% if enc and (enc.zone or enc.reference or enc.majore or enc.conforme or enc.complement) %}
+    <div class="section-title">Encadrement des loyers</div>
+    <table class="kv">
+      {% if enc.zone %}<tr><td class="k">Zone d'encadrement</td><td class="v">{{ enc.zone }}</td></tr>{% endif %}
+      {% if enc.reference %}<tr><td class="k">Loyer de référence</td><td class="v">{{ enc.reference }}</td></tr>{% endif %}
+      {% if enc.majore %}<tr><td class="k">Loyer de référence majoré (plafond)</td><td class="v">{{ enc.majore }}</td></tr>{% endif %}
+      {% if enc.complement %}<tr><td class="k">Complément de loyer annoncé</td><td class="v">{{ enc.complement | sup }}</td></tr>{% endif %}
+      {% if enc.conforme %}<tr><td class="k">Conformité du loyer affiché</td><td class="v">{{ enc.conforme | sup }}</td></tr>{% endif %}
+    </table>
+    <div class="note" style="margin-top:6px">Le loyer affiché ne peut dépasser le loyer de référence majoré, sauf complément de loyer justifié par des caractéristiques exceptionnelles (et contestable devant la commission de conciliation).</div>
+    {% endif %}
+
+    {% if marche.boxplot_svg or marche.comparables or marche.evolution_svg %}
+    <div class="section-title">Analyses des loyers</div>
+    {% endif %}
+    {% if marche.boxplot_svg %}
+    <div class="ct-sub">Distribution des loyers par secteur (€/m²)</div>
+    <div class="chart-box">{{ marche.boxplot_svg | safe }}</div>
+    <div class="chart-legend">Lecture : trait vertical = médiane, boîte = quartiles Q1 à Q3, moustaches = min et max. <b>trait rouge</b> = loyer du bien étudié (si renseigné).</div>
+    {% endif %}
+    {% if marche.comparables %}
+    <div class="ct-sub">Comparables de location (annonces similaires)</div>
+    <table class="mkt">
+      <thead>
+        <tr><th>Secteur</th><th class="num">Surface</th><th>Meublé</th><th class="num">Loyer CC</th><th class="num">Loyer/m²</th><th class="num">Date</th><th>Distance</th></tr>
+      </thead>
+      <tbody>
+        {% for c in marche.comparables %}
+        <tr><td><b>{{ c.secteur }}</b></td><td class="num">{{ c.surface }}</td><td>{{ c.meuble }}</td><td class="num">{{ c.loyer }}</td><td class="num">{{ c.loyer_m2 }}</td><td class="num">{{ c.date }}</td><td>{{ c.distance }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="note" style="margin-top:6px">Annonces de location comparables (portails). Indicatives : les loyers affichés peuvent différer des loyers réellement conclus.</div>
+    {% endif %}
+    {% if marche.evolution_svg %}
+    <div class="ct-sub">Évolution des loyers dans le temps (€/m² médian)</div>
+    <div class="chart-box">{{ marche.evolution_svg | safe }}</div>
+    <div class="chart-legend">Loyer médian au m² par année, même segment (type de bien, surface).</div>
+    {% endif %}
+
+    {% else %}
     {% if marche.prix %}
     <div class="section-title">Prix réels par typologie et secteur</div>
     <table class="mkt">
@@ -809,7 +937,16 @@
     <div class="chart-box">{{ marche.evolution_svg | safe }}</div>
     <div class="chart-legend">Prix médian au m² des ventes signées (DVF) par année, sur 5 ans, aux mêmes critères que l'analyse : même type de bien, surface ±20 %, panels <b>A</b> et <b>B</b> réunis.</div>
     {% endif %}
+    {% endif %}
 
+    {% if marche.location %}
+    <div class="section-title" style="margin-top:8px">Risques de marché locatif</div>
+    {% if marche.risques_marche %}
+    <ul class="tight">
+      {% for r in marche.risques_marche %}<li>{{ r | sup }}</li>{% endfor %}
+    </ul>
+    {% else %}<div class="note">Aucun risque de marché locatif majeur relevé.</div>{% endif %}
+    {% else %}
     <div class="cols" style="margin-top:8px">
       <div class="col" style="width:48%">
         <div class="section-title">Marché locatif</div>
@@ -835,6 +972,7 @@
         {% else %}<div class="note">Aucun risque de marché majeur relevé.</div>{% endif %}
       </div>
     </div>
+    {% endif %}
 
     {% if marche.segments_privilegier or marche.segments_eviter %}
     <div class="cols" style="margin-top:8px">
@@ -901,9 +1039,30 @@
   </div>
 
   {% set c = marche.conclusion if marche else {} %}
-  {% if cout_revient_svg or radar_svg or (dvf_historique and not marche) or (marche and (c.fourchette_m2_defendable or c.recommandation or c.pouvoir_negociation or c.posture_pos is not none or c.bien_total)) %}
-  <div class="part-title">Conclusion pour l'acheteur</div>
+  {% if cout_revient_svg or cout_occupation or radar_svg or (dvf_historique and not marche) or (marche and (c.fourchette_m2_defendable or c.recommandation or c.pouvoir_negociation or c.posture_pos is not none or c.bien_total)) %}
+  <div class="part-title">Conclusion pour {% if mode == 'location' %}le locataire{% else %}l'acheteur{% endif %}</div>
 
+  {% if mode == 'location' %}
+  {% if cout_occupation or radar_svg %}
+  <div class="section-title">Coût d'occupation</div>
+  <div class="cols">
+    <div class="col" style="width:56%">
+      {% if cout_occupation and cout_occupation.svg %}
+      <div class="ct-sub">Coût annuel : loyer + charges + énergie + assurance</div>
+      <div class="chart-box eqh">{{ cout_occupation.svg | safe }}</div>
+      {% endif %}
+    </div>
+    <div class="col col-gap"></div>
+    <div class="col" style="width:40%">
+      {% if radar_svg %}
+      <div class="ct-sub">Score du bien</div>
+      <div class="chart-box eqh">{{ radar_svg | safe }}</div>
+      {% endif %}
+    </div>
+  </div>
+  {% if cout_occupation %}<div class="note" style="margin-top:5px">{% if cout_occupation.total_fmt %}Coût d'occupation : <b>{{ cout_occupation.total_fmt }}</b>{% if cout_occupation.mensuel_fmt %} ({{ cout_occupation.mensuel_fmt }}){% endif %}.{% endif %}{% if cout_occupation.taux_effort %} Taux d'effort : <b>{{ cout_occupation.taux_effort }}</b> des revenus.{% endif %}{% if cout_occupation.note %} {{ cout_occupation.note | sup }}{% endif %}</div>{% endif %}
+  {% endif %}
+  {% else %}
   {% if cout_revient_svg or radar_svg or (dvf_historique and not marche) %}
   <div class="section-title">Coût de revient et valeur</div>
   {% if cout_revient_svg or radar_svg %}
@@ -929,6 +1088,7 @@
   {{ dvf_historique_table(dvf_historique, 'ct-sub') }}
   {% endif %}
   {% endif %}
+  {% endif %}
 
   {% if marche and (c.fourchette_m2_defendable or c.recommandation or c.pouvoir_negociation or c.posture_pos is not none or c.bien_total) %}
   <div class="section-title">Synthèse et recommandation</div>
@@ -937,7 +1097,7 @@
     {% if c.posture_pos is not none %}
     <div class="posture">
       <div class="pt-track"><div class="pt-marker" style="left:{{ c.posture_pos }}%"></div></div>
-      <div class="pt-scale"><span>Favorable acheteur</span><span class="mid">Équilibré</span><span class="end">Favorable vendeur</span></div>
+      <div class="pt-scale"><span>Favorable {% if mode == 'location' %}locataire{% else %}acheteur{% endif %}</span><span class="mid">Équilibré</span><span class="end">Favorable {% if mode == 'location' %}bailleur{% else %}vendeur{% endif %}</span></div>
       {% if c.posture_label %}<div class="pt-label">{{ c.posture_label | sup }}</div>{% endif %}
     </div>
     {% endif %}
@@ -949,7 +1109,7 @@
       <div class="ctc-cell ct-target"><div class="lab">Valeur défendable pour ce bien</div><div class="num">{{ c.bien_total.total_fmt }}</div><div class="sub">{{ c.bien_total.m2_fmt }} × {{ c.bien_total.surface }} m²{% if c.bien_total.ecart_fmt %} · écart {{ c.bien_total.ecart_fmt }} / affiché{% endif %}</div></div>
     </div>
     {% elif c.fourchette_m2_defendable %}
-    <div class="price-line price-strong"><div class="lab">Fourchette de prix/m² défendable (segment ciblé)</div><div class="val">{{ c.fourchette_m2_defendable }}</div></div>
+    <div class="price-line price-strong"><div class="lab">{% if mode == 'location' %}Loyer défendable{% else %}Fourchette de prix/m² défendable (segment ciblé){% endif %}</div><div class="val">{{ c.fourchette_m2_defendable }}</div></div>
     {% endif %}
 
     {% if c.kpis %}
@@ -963,7 +1123,7 @@
     <ul class="plan">{% for a in c.plan_action[:4] %}<li>{{ a | sup }}</li>{% endfor %}</ul>
     {% endif %}
 
-    {% if c.pouvoir_negociation %}<div class="price-line" style="border-bottom:0; margin-top:6px"><div class="lab">Pouvoir de négociation de l'acheteur</div><div class="val" style="font-size:11.5px">{{ c.pouvoir_negociation | sup }}</div></div>{% endif %}
+    {% if c.pouvoir_negociation %}<div class="price-line" style="border-bottom:0; margin-top:6px"><div class="lab">Pouvoir de négociation {% if mode == 'location' %}du locataire{% else %}de l'acheteur{% endif %}</div><div class="val" style="font-size:11.5px">{{ c.pouvoir_negociation | sup }}</div></div>{% endif %}
     {% if c.recommandation %}<div class="neg-arg" style="margin-top:6px">{{ c.recommandation | sup }}</div>{% endif %}
   </div>
   {% endif %}
@@ -986,8 +1146,8 @@
   </div>
 
   {% if aide_decision %}
-  <div class="part-title">Aide à la décision : questions au vendeur</div>
-  <div class="ad-intro">À remplir lors des visites et des échanges avec le vendeur, l'agence ou le syndic. Les réponses complètent l'analyse et sécurisent la décision.</div>
+  <div class="part-title">Aide à la décision : questions {% if mode == 'location' %}au bailleur{% else %}au vendeur{% endif %}</div>
+  <div class="ad-intro">À remplir lors des visites et des échanges avec {% if mode == 'location' %}le bailleur, l'agence ou le gardien{% else %}le vendeur, l'agence ou le syndic{% endif %}. Les réponses complètent l'analyse et sécurisent la décision.</div>
   {% for grp in aide_decision %}
   <div class="ad-theme">{{ grp.theme }}</div>
   {% for q in grp.questions %}

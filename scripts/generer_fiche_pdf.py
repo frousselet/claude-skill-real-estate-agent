@@ -612,34 +612,57 @@ def process_marche(data):
     marche.setdefault("risques_marche", [])
     marche.setdefault("conclusion", {})
 
+    location = data.get("mode") == "location"
+    marche["location"] = location
+
     tendance = marche.setdefault("tendance", {})
     if isinstance(tendance, dict):
         label, cls = trend_of(tendance.get("direction"))
         tendance["badge"], tendance["cls"] = label, cls
 
-    prix = marche.get("prix", []) or []
-    for row in prix:
-        for k in ("secteur", "typologie", "prix_m2_median", "fourchette",
-                  "volume", "estimation_portail"):
-            row.setdefault(k, "")
-        row["tendance_badge"], row["tendance_cls"] = trend_of(row.get("tendance"))
-    marche["prix"] = prix
-
+    # Visuels réutilisés dans les deux modes (loyers ou prix au m²)
     marche["evolution_svg"] = build_line_svg(marche.get("evolution"))
     marche["boxplot_svg"] = build_boxplot_svg(marche.get("boxplot"))
-    marche["cible_svg"] = build_cible_svg(marche.get("cible"))
-    marche["scatter_svg"] = build_scatter_svg(marche.get("scatter"))
-    marche["histogramme_svg"] = build_histogramme_svg(marche.get("histogramme"))
 
-    comps = marche.get("comparables") or []
-    has_panels = False
-    for c in comps:
-        for k in ("secteur", "surface", "prix", "prix_m2", "date", "distance"):
-            c.setdefault(k, "")
-        c["panel_label"], c["panel_cls"] = panel_of(c.get("panel"))
-        has_panels = has_panels or bool(c["panel_label"])
-    marche["comparables"] = comps
-    marche["has_panels"] = has_panels
+    if location:
+        # Marché locatif : table des loyers, encadrement, comparables d'annonces.
+        loyers = marche.get("loyers", []) or []
+        for row in loyers:
+            for k in ("secteur", "typologie", "loyer_m2_median", "fourchette",
+                      "loyer_reference_majore", "tension"):
+                row.setdefault(k, "")
+            row["tendance_badge"], row["tendance_cls"] = trend_of(row.get("tendance"))
+        marche["loyers"] = loyers
+        marche.setdefault("encadrement", {})
+        comps = marche.get("comparables") or []
+        for c in comps:
+            for k in ("secteur", "surface", "loyer", "loyer_m2", "meuble", "date", "distance"):
+                c.setdefault(k, "")
+        marche["comparables"] = comps
+        # Analyses spécifiques DVF : sans objet en location
+        marche["prix"] = []
+        marche["cible_svg"] = marche["scatter_svg"] = marche["histogramme_svg"] = ""
+        marche["has_panels"] = False
+    else:
+        prix = marche.get("prix", []) or []
+        for row in prix:
+            for k in ("secteur", "typologie", "prix_m2_median", "fourchette",
+                      "volume", "estimation_portail"):
+                row.setdefault(k, "")
+            row["tendance_badge"], row["tendance_cls"] = trend_of(row.get("tendance"))
+        marche["prix"] = prix
+        marche["cible_svg"] = build_cible_svg(marche.get("cible"))
+        marche["scatter_svg"] = build_scatter_svg(marche.get("scatter"))
+        marche["histogramme_svg"] = build_histogramme_svg(marche.get("histogramme"))
+        comps = marche.get("comparables") or []
+        has_panels = False
+        for c in comps:
+            for k in ("secteur", "surface", "prix", "prix_m2", "date", "distance"):
+                c.setdefault(k, "")
+            c["panel_label"], c["panel_cls"] = panel_of(c.get("panel"))
+            has_panels = has_panels or bool(c["panel_label"])
+        marche["comparables"] = comps
+        marche["has_panels"] = has_panels
 
     data["marche"] = marche
     return data
@@ -692,22 +715,27 @@ def process_conclusion(data):
     marche = data.get("marche")
     if not marche:
         return data
+    location = data.get("mode") == "location"
     c = marche.setdefault("conclusion", {})
     c.setdefault("kpis", [])
     c.setdefault("plan_action", [])
 
-    # Posture de marché : mot-clé ou nombre 0 (acheteur) à 100 (vendeur)
+    # Posture de marché : mot-clé ou nombre 0 (acheteur/locataire) à 100 (vendeur/bailleur)
     p = c.get("posture")
     if isinstance(p, (int, float)):
         c["posture_pos"] = round(max(4.0, min(96.0, float(p))), 1)
         c["posture_label"] = c.get("posture_label", "")
     else:
-        pos, deflabel = POSTURE.get(str(p or "").strip().lower(), (None, ""))
+        table = POSTURE_LOC if location else POSTURE
+        pos, deflabel = table.get(str(p or "").strip().lower(), (None, ""))
         c["posture_pos"] = pos
         c["posture_label"] = c.get("posture_label") or deflabel
 
-    # Prix total défendable pour ce bien = fourchette €/m² × surface
+    # Prix total défendable pour ce bien = fourchette €/m² × surface (achat seul ;
+    # en location on s'appuie sur le loyer défendable en texte).
     c["bien_total"] = None
+    if location:
+        return data
     try:
         mn = float(c["defendable_m2_min"])
         mx = float(c["defendable_m2_max"])
@@ -1277,6 +1305,10 @@ def process_copropriete(data):
     Le bloc est volontairement tolérant : une copropriété sans documents rend
     une version dégradée (identité sommaire + checklist des manquants) plutôt que
     de disparaître, car l'absence d'information est elle-même un signal."""
+    # En location, la copropriété est remplacée par « Bail » et « Immeuble ».
+    if data.get("mode") == "location":
+        data["copropriete"] = None
+        return data
     copro = data.get("copropriete")
     if not copro:
         data["copropriete"] = None
@@ -1341,17 +1373,120 @@ def process_copropriete(data):
     return data
 
 
+# Posture du marché locatif (curseur favorable locataire -> favorable bailleur)
+POSTURE_LOC = {
+    "locataire":         (12.0, "Marché très favorable au locataire"),
+    "plutot_locataire":  (30.0, "Marché plutôt favorable au locataire"),
+    "equilibre":         (50.0, "Marché équilibré"),
+    "plutot_bailleur":   (70.0, "Marché plutôt favorable au bailleur"),
+    "bailleur":          (88.0, "Marché favorable au bailleur"),
+}
+
+
+def build_hero(data, location):
+    """Bandeau des trois valeurs (identique en forme pour achat et location).
+    Achat : prix affiché / prix défendable / prix max. Location : loyer affiché /
+    loyer de marché / plafond légal (loyer majoré de l'encadrement)."""
+    if location:
+        lo = data.get("loyer") or {}
+        return {
+            "affiche": lo.get("affiche") or "nc", "affiche_sub": lo.get("loyer_m2") or "",
+            "affiche_label": "Loyer affiché",
+            "cible": lo.get("marche") or "nc", "cible_label": "Loyer de marché",
+            "cible_sub": "loyer juste estimé",
+            "plafond": lo.get("plafond") or "nc", "plafond_label": "Plafond légal",
+            "plafond_sub": "loyer majoré (encadrement)",
+            "foot_ref_label": "Réf. loyers (observatoire)", "foot_ref": lo.get("reference_marche"),
+            "foot_ecart_label": "Écart / plafond", "foot_ecart": lo.get("ecart"),
+        }
+    pr = data.get("prix") or {}
+    return {
+        "affiche": pr.get("affiche") or "nc", "affiche_sub": pr.get("prix_m2_affiche") or "",
+        "affiche_label": "Prix affiché",
+        "cible": pr.get("valeur_defendable") or "nc", "cible_label": "Prix défendable",
+        "cible_sub": "valeur cible d'achat",
+        "plafond": pr.get("plafond") or "nc", "plafond_label": "Prix max",
+        "plafond_sub": "à ne pas dépasser",
+        "foot_ref_label": "Réf. marché réel (DVF)", "foot_ref": pr.get("reference_marche"),
+        "foot_ecart_label": "Décote visée", "foot_ecart": pr.get("decote"),
+    }
+
+
+def process_bail(data):
+    """Bloc « Bail et conditions » (mode location) : type de bail, dépôt, préavis,
+    charges, garanties. Simple grille clé/valeur, aucun calcul."""
+    if data.get("mode") != "location":
+        data["bail"] = None
+        return data
+    data["bail"] = data.get("bail") or None
+    return data
+
+
+def process_immeuble(data):
+    """Mini-bloc « Immeuble et charges » (mode location) : ce qui concerne le
+    locataire (chauffage, équipements, charges récupérables, état). Réutilise la
+    répartition des charges en barres."""
+    if data.get("mode") != "location":
+        data["immeuble"] = None
+        return data
+    imm = data.get("immeuble")
+    if not imm:
+        data["immeuble"] = None
+        return data
+    imm["charges_svg"] = build_charges_svg(imm.get("postes"))
+    data["immeuble"] = imm
+    return data
+
+
+def process_cout_occupation(data):
+    """Coût d'occupation annuel (mode location) : loyer + charges + énergie estimée
+    + assurance, en barres, avec total, mensualité et taux d'effort éventuel.
+    C'est l'équivalent locataire du coût de revient."""
+    if data.get("mode") != "location":
+        data["cout_occupation"] = None
+        return data
+    co = data.get("cout_occupation")
+    if not co:
+        data["cout_occupation"] = None
+        return data
+    postes = co.get("postes") or []
+    if not postes:
+        for key, label in (("loyer", "Loyer"), ("charges", "Charges"),
+                           ("energie", "Énergie estimée"), ("assurance", "Assurance")):
+            v = _optnum(co, key)
+            if v:
+                postes.append({"poste": label, "montant": v})
+    co["postes"] = postes
+    total = sum(v for v in (_optnum(p, "montant") for p in postes) if v)
+    co["total_fmt"] = (_fmt_eur(total) + " €/an") if total else ""
+    co["mensuel_fmt"] = (_fmt_eur(total / 12) + " €/mois") if total else ""
+    rev = _optnum(co, "revenus_mensuels")
+    if rev and total:
+        co["taux_effort"] = f"{round((total / 12) / rev * 100)} %"
+    co["svg"] = build_charges_svg(postes)
+    data["cout_occupation"] = co
+    return data
+
+
 def process(data):
     """Complète et normalise les données avant rendu."""
+    mode = str(data.get("mode", "achat")).strip().lower()
+    if mode not in ("achat", "location"):
+        mode = "achat"
+    data["mode"] = mode
+    location = mode == "location"
+
     data.setdefault("meta", {})
     data["meta"].setdefault("date", "")
     data["meta"].setdefault(
         "auteur",
-        "Agent Immobilier, conseiller d'acquéreur sans conflit d'intérêt",
+        "Agent Immobilier, conseiller de locataire sans conflit d'intérêt" if location
+        else "Agent Immobilier, conseiller d'acquéreur sans conflit d'intérêt",
     )
     data.setdefault("bien", {})
     normalize_energy(data["bien"])
     data.setdefault("prix", {})
+    data.setdefault("loyer", {})
     data.setdefault("negociation", {})
     data.setdefault("vigilance", [])
     data.setdefault("sources", [])
@@ -1359,6 +1494,8 @@ def process(data):
     data.setdefault("notes_page", True)
     data.setdefault(
         "avertissement",
+        "Analyse indépendante d'aide à la décision. Ni expertise judiciaire, ni "
+        "conseil juridique. La décision et le loyer relèvent du locataire." if location else
         "Analyse indépendante d'aide à la décision. Ni expertise judiciaire, "
         "ni conseil en investissement, ni avis juridique. La décision et le prix "
         "relèvent de l'acquéreur.",
@@ -1383,6 +1520,9 @@ def process(data):
     else:
         pos = {"vert": 12.0, "orange": 50.0, "rouge": 86.0}.get(feu, 50.0)
     verdict["pos"] = round(max(5.0, min(95.0, pos)), 1)
+
+    # Bandeau des trois valeurs : prix (achat) ou loyer (location)
+    data["hero"] = build_hero(data, location)
 
     data.setdefault("points_forts", [])
     data.setdefault("points_faibles", [])
@@ -1412,7 +1552,10 @@ def process(data):
     process_environnement(data)
     process_caracteristiques(data)
     process_copropriete(data)
+    process_bail(data)
+    process_immeuble(data)
     process_analyse(data)
+    process_cout_occupation(data)
     process_marche(data)
     process_conclusion(data)
     process_sources(data)
