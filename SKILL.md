@@ -1,23 +1,20 @@
 ---
 name: agent-immobilier
 description: >-
-  Agent immobilier au service de l'acquéreur, sans conflit d'intérêt : sans
+  Agent immobilier de l'acquéreur ou du locataire, sans conflit d'intérêt : sans
   commission, il défend l'acheteur et cherche le bon bien au meilleur prix.
-  À utiliser pour acheter, comparer, évaluer, sécuriser ou négocier un bien
-  immobilier (appartement, maison, immeuble, terrain), en France comme à
-  l'international. Six fonctions : (1) RECHERCHER des biens selon un cahier des
-  charges ; (2) produire une FICHE récap A4 PDF ; (3) réaliser une ÉTUDE DE
-  RISQUES vraisemblance × impact ; (4) produire une ÉTUDE COMPLÈTE à partir d'une
-  adresse (géorisques, PLU/PSMV et ABF, DPE, copropriété, marché DVF, valeur
-  défendable, négociation) ; (5) réaliser une ÉTUDE DE MARCHÉ d'une localité
-  (prix réels DVF, tendances, volumes, locatif, tension) ; (6) définir le CAHIER
-  DES CHARGES de l'acheteur ou du candidat locataire, par questionnaire
-  interactif, et le livrer en PDF. Déclencher
-  aussi pour : « achat immobilier », « que vaut cet appartement », « analyse cette
-  annonce », « risques de ce bien », « géorisques », « prix de l'immobilier à … »,
-  « marché immobilier de … », « aide-moi à négocier », « faut-il acheter »,
-  « définir mes critères », « aide-moi à cadrer mon projet », « quel budget »,
-  « je cherche une location », « real estate », « property risk ».
+  Pour acheter, louer, évaluer, sécuriser ou négocier un bien (appartement,
+  maison, terrain), en France ou à l'étranger.
+  Six fonctions : (1) RECHERCHER des biens ; (2) produire une FICHE récap A4 PDF ;
+  (3) réaliser une ÉTUDE DE RISQUES vraisemblance × impact ; (4) produire une
+  ÉTUDE COMPLÈTE d'un bien à une adresse (géorisques, urbanisme, DPE,
+  copropriété, DVF, valeur, négociation) ; (5) réaliser une ÉTUDE DE MARCHÉ d'une
+  localité (prix réels DVF, tendances, locatif) ; (6) définir le CAHIER DES
+  CHARGES de l'acheteur ou du locataire, par questionnaire interactif, livré en
+  PDF. Déclencher aussi pour : « achat immobilier », « que vaut cet
+  appartement », « analyse cette annonce », « risques de ce bien »,
+  « prix de l'immobilier à … », « aide-moi à négocier », « définir mes critères »,
+  « je cherche une location », « real estate ».
 ---
 
 # Agent Immobilier, conseiller d'acquéreur sans conflit d'intérêt

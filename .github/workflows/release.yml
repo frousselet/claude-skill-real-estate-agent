@@ -17,6 +17,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # L'import d'une skill refuse une description de plus de 1024 caractères :
+      # on échoue ici plutôt que de publier un paquet non importable.
+      - name: Valider le frontmatter de SKILL.md
+        run: |
+          python3 - <<'PY'
+          import sys
+
+          text = open("SKILL.md", encoding="utf-8").read()
+          front = text.split("---")[1]
+          block = front.split("description: >-")[1]
+          desc = " ".join(l.strip() for l in block.strip().splitlines())
+          name = [l for l in front.splitlines() if l.startswith("name:")][0].split(":", 1)[1].strip()
+
+          print(f"name        : {name} ({len(name)} caractères)")
+          print(f"description : {len(desc)} caractères")
+          if len(desc) > 1024:
+              sys.exit(f"ERREUR : description de {len(desc)} caractères, maximum 1024.")
+          if len(name) > 64:
+              sys.exit(f"ERREUR : name de {len(name)} caractères, maximum 64.")
+          PY
+
       - name: Build agent-immobilier.zip
         run: |
           set -euo pipefail
